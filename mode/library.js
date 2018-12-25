@@ -80,14 +80,6 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        }
 	        // 应该是这里是制作列表的地方
 	        var createNode=function(name){
-	        	/*
-	            ui.background=ui.create.div('.background');
-				ui.background.style.backgroundSize="cover";
-				ui.background.style.backgroundPosition='50% 50%';
-				ui.background.setBackgroundImage('image/background/library.jpg');
-				*/
-
-
 				var info=lib.brawl[name];
 	            var node=ui.create.div('.dialogbutton.menubutton.large',info.name,packnode,clickCapt);
 	            node.style.transition='all 0s';
@@ -104,7 +96,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	            }
 	            var intro;
 	            if(Array.isArray(info.intro)){
-	                intro='<ul style="text-align:left;margin-top:0;width:450px">';
+	                intro='<ul style="text-align:left;margin-top:0">';
 	                if(modeinfo){
 	                    intro+='<li>'+modeinfo;
 	                }
@@ -199,9 +191,9 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	    		name:'请读这里',
 	    		mode:'',
 	    		intro:['欢迎来到东方流星夜！',
-	    				'本游戏是一套以三国杀为原型，东方project为主题的二次创作非商业化桌游游戏',
-	    				'本游戏的程序化，是基于无名杀1.9.36版的大型魔改版mod。',
-	    				'对游戏的不解，',
+	    				'东方流星夜是一套以三国杀为原型，东方project为主题的二次创作非商业化桌游游戏。',
+	    				'而流星夜的程序化，也就是你现在所在的游戏，是基于无名杀1.9.36版的大型魔改版mod。',
+	    				'对游戏的不解，在我这里是有大量的信息的：先读一下规则，模式介绍，如果还有不懂的，在更多资源里可以找到更多的帮助哟。',
 	    				'',
 	    				'<u>程序使用须知：</u>',
 	    				'1. 使用刷新键（f5）可以重置游戏。',
@@ -216,21 +208,24 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        	},
 	    	},
 	    	updatelog:{
-	    		name:'更新注释',
+	    		name:'更新事宜',
 	    		mode:'',
-	    		intro:['请点我→<a href = "https://github.com/BlackAndWhiteScallion/Night-of-Shooting-Stars-Extensions/archive/master.zip">更新链接</a>',
+	    		intro:['更新下载链接→<a href = "https://github.com/BlackAndWhiteScallion/Night-of-Shooting-Stars-Extensions/archive/master.zip">国外镜像下载</a> <a href = "https://coding.net/u/BWS/p/NOSS-Extensions/git/archive/master">国内镜像下载</a>',
 	    				'下载完毕后，在浏览器的默认下载文件夹里可以找到，然后解压到流星夜所在的文件夹里，并全部覆盖就OK啦。',
+	    				'安卓手机端更新所需要拖到的文件夹在：android/data/com.widget.noname1',
+	    				'ios端更新所需要拖到的文件夹在：documents（itunes—应用—文件共享）',
+	    				'覆盖完毕后，记得重启流星夜app！',
 	    				'',
 	    				'<u>更新注释：</u>',
-	    				'更新了一堆bug（懒得列出来了）',
+	    				'异变身份明置效果改为“令一名角色摸一张牌。”',
 	    				'',
 	    				'<u>特殊事项：</u>',
 	    				'没有名字的角色没有技能',
-	    				'帕秋莉的符卡没有技能',
+	    				'帕秋莉的符卡没有效果',
 	    				'莉莉卡没有符卡以外的技能',
 	    				'皆杀异变牌没有“无视胜利条件”的效果',
 	    				'蓝白胖次没有效果',
-	    				'妹红的符卡没有技能',
+	    				'妹红的符卡没有效果',
 	    				'',
 	    				'<u>已知bug列表：</u>',
 	    				'紫妈对所有卡都会使用【梦界】',
@@ -245,9 +240,21 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        	name:'规则帮助',
 	        	mode:'',
 	        	intro:[
-	        		'规则简略可以在<a href="game/guide.pdf">这里</a>读到',
+	        		'规则图文介绍可以在<a href="game/guide.pdf">这里</a>读到',
 	        		'详细的资源可以在<a href="http://liuxingye.666forum.com/f1-forum">魔法店仓库里</a>和<a href = "https://jq.qq.com/?_wv=1027&k=570nlJG">官方QQ群</a>里找到',
-	        		'游戏内的资料正在制作中',
+	        		'',
+	        		'《东方流星夜！》的新系统：',
+	        		'<u>灵力值</u>:（角色下的绿色星星，或者蓝圆圈）',
+	        		'游戏的核心系统，各种消耗和启动符卡都需要用。',
+	        		'玩家的<u>攻击范围</u>等于灵力值；<u>灵击伤害</u>指对灵力值造成的伤害。',
+	        		'<u>强化</u>：持有“强化：描述”的牌通过消耗标注量的灵力可以强化，结算时追加描述里的效果',
+	        		'<u>追加效果</u>：这牌有追加的效果。使用追加效果不算使用牌。',
+	        		'<u>符卡技</u>：游戏的核心技能系统。',
+	        		'符卡技在玩家回合开始时，灵力大于标注量时，通过消耗标注量的灵力启动。',
+	        		'启动后，玩家持有符卡技描述中的技能，并且<u>不能获得灵力</u>，直到符卡结束。',
+	        		'<u>符卡结束时机</u>：1.当前回合结束；2. 灵力值变化为0',
+	        		'<u>符卡标签</u>：<br><u><永续></u>符卡结束时机1改为你的下个回合开始时；<br><u><瞬发></u>你可以在需要使用符卡描述技能时，发动符卡并立即使用（正常发动条件生效）;',
+	        		'<u><限定></u>一局游戏只能启动一次；<br><u><终语></u>在决死状态可以启动（正常发动条件生效）；<br><u><极意></u>删除符卡结束时机1，符卡结束时，立即坠机',
 	        		],
 	        	showcase:function(init){
 
@@ -257,8 +264,23 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        	name:'游戏模式',
 	        	mode:'',
 	        	intro:[
+	        		'规则图文介绍可以在<a href="game/guide.pdf">这里</a>读到',
 	        		'模式介绍全部可以在<a href="http://liuxingye.666forum.com/f5-forum">魔法店仓库里</a>和<a href = "https://jq.qq.com/?_wv=1027&k=570nlJG">官方QQ群</a>里找到',
-	        		'游戏内的资料正在制作中',
+	        		'<u><b>异变模式：</u></b> 游戏人数：2~8人，推荐人数为7人',
+	        		'黑幕与异变身份为一方；自机身份为一方，且与黑幕为对立阵营；每个路人身份玩家为单独一方',
+	        		'游戏开始时，每名玩家的身份暗置，随机玩家执行第一个回合',
+	        		'每名玩家可以在出牌阶段明置自己的身份；身份明置时，根据身份执行效果：',
+	        		'黑幕：获得一张异变牌并明置',
+	        		'异变：令一名角色摸一张牌',
+	        		'自机：令一名其他角色选择一项：弃置一张牌，或明置身份',
+	        		'路人：获得一张异变牌并暗置；可以在出牌阶段明置异变牌',
+	        		'<u>胜利条件：</u>',
+	        		'黑幕：击坠所有自机',
+	        		'异变：黑幕获得胜利',
+	        		'自机：击坠黑幕',
+	        		'路人：无',
+	        		'特殊的，游戏结束时，存活的路人玩家不算游戏失败',
+	        		'<u>异变牌：</u>任何持有异变牌的玩家可以通过异变牌的效果获得胜利；异变牌只有明置才有效果；异变胜利时，所有与其同阵营的玩家也获得胜利',
 	        		],
 	        	showcase:function(init){
 
@@ -385,7 +407,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	                '官方百度贴吧：<a href="https://tieba.baidu.com/f?kw=%CE%ED%D3%EA%BC%D2%B5%C4%C4%A7%B7%A8%B5%EA">雾雨家的魔法店吧</a>',
 	                '官方资源库兼论坛：<a href="http://liuxingye.666forum.com">雾雨魔法店的仓库</a>',
 	                '官方QQ群：<a href = "https://jq.qq.com/?_wv=1027&k=570nlJG">东方流星夜总会</a>',
-	                '无论是聊天，想反映问题，还是想提出建议，都可以到以上任意一个地方去发表意见，我们会看到并尊重你的每一个意见。',
+	                '无论是聊天，看漫画，反映问题，还是想提出建议，都可以到以上任意一个地方去发表意见，我们会看到并尊重你的每一个意见。',
 	            ],
 	        	showcase:function(init){
 					var node=this;
