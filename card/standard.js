@@ -83,7 +83,15 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 					event._result={bool:false};
 				}
 				else{
-					var next=target.chooseToRespond({name:'shan'});
+					// 把闪从对杀打出变成了使用
+					//var next=target.chooseToRespond({name:'shan'});
+					var next = target.chooseToUse({
+						filterCard:function(card,player){
+							if(card.name!='shan') return false;
+							var mod=game.checkMod(card,player,'unchanged','cardEnabled',player.get('s'));
+							if(mod!='unchanged') return mod;
+							return true;
+						},});
 					next.set('ai',function(){
 						var target=_status.event.player;
 						var evt=_status.event.getParent();
@@ -194,8 +202,16 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		shan:{
 			audio:true,
 			fullskin:true,
+			notarget:true,
 			type:'basic',
 			subtype:'defense',
+			content:function(){
+				/*
+				event.trigger('shaMiss');
+					event.responded=result;
+				event.result='wuxied';	// 效果无效（抵消）
+				*/
+			},
 			ai:{
 				basic:{
 					useful:[7,2],
@@ -2397,6 +2413,14 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 					if(cards.contains(card.name)) return false;
 				},
 				cardUsable:function(card,player){
+					var players=game.filterPlayer();
+					var cards = [];
+					for(var i=0;i<players.length;i++){
+						if (players[i].storage._lingbi2) cards = cards.concat(players[i].storage._lingbi2);
+					}
+					if(cards.contains(card.name)) return false;
+				},
+				cardRespondable:function(card, player){
 					var players=game.filterPlayer();
 					var cards = [];
 					for(var i=0;i<players.length;i++){

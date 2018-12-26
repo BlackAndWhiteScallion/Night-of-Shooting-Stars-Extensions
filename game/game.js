@@ -21243,16 +21243,19 @@
                     if(!player.noPhaseDelay&&lib.config.show_phase_prompt){
                         player.popup('回合结束');
                     }
-                    // 结束阶段，如果角色牌是背面朝上的，就翻过去。
-                    if (player.isTurnedOver()){
-                        for(var i=0;i<player.skills.length;i++){
-                            if (lib.skill[player.skills[i]].spell){
-                                var info = lib.skill[player.skills[i]];
-                                if (player.hasSkill(info.spell[0])){
-                                    if (!info.roundi && !info.infinite){
-                                        player.turnOver();
+                    // 结束阶段，如果有角色是背面朝上的，就翻过去。
+                    var players = game.filterPlayer();
+                    for (var j = 0; j < players.length; j ++) {
+                        if (players[j].isTurnedOver()){
+                            for(var i=0;i<players[j].skills.length;i++){
+                                if (lib.skill[players[j].skills[i]].spell){
+                                    var info = lib.skill[players[j].skills[i]];
+                                    if (players[j].hasSkill(info.spell[0])){
+                                        if (!info.roundi && !info.infinite){
+                                            players[j].turnOver();
+                                        }
+                            //          break;
                                     }
-                        //          break;
                                 }
                             }
                         }
@@ -21394,7 +21397,7 @@
                         return;
                     }
                     event.acted.push(player);
-                    var str=get.translation(trigger.player.name)+'濒死，是否帮助？';
+                    var str=get.translation(trigger.player.name)+'决死，是否帮助？';
                     var str2='当前体力：'+trigger.player.hp;
                     if(lib.config.tao_enemy&&event.dying.side!=player.side&&lib.config.mode!='guozhan'&&!event.dying.hasSkillTag('revertsave')){
                         event._result={bool:false}
@@ -34384,7 +34387,7 @@
                                 });
                             }
                             else{
-                                lib.init.js('https://cdn.jsdelivr.net/gh/BlackAndWhiteScallion/Night-of-Shooting-Stars-Extensions@48810f8/catalog.js',null,loaded,function(){
+                                lib.init.js('https://cdn.jsdelivr.net/gh/BlackAndWhiteScallion/Night-of-Shooting-Stars-Extensions@93c2c7a/catalog.js',null,loaded,function(){
                                 //lib.init.js(extensionURL.replace(/raw\.githubusercontent\.com/,'rawgit.com')+'catalog.js',null,loaded,function(){
                                     delete window.extension;
                                     loading.innerHTML='连接失败';
@@ -40082,7 +40085,7 @@
                     clearTimeout(this._longpresstimeout);
                 }
                 if(lib.config.longpress_info){
-                    this._longpresstimeout=setTimeout(ui.click.longpresscallback,500);
+                    this._longpresstimeout=setTimeout(ui.click.longpresscallback,200);
                 }
                 this._longpressevent=e;
                 if(_status.longpressing&&_status.longpressing!=this){
