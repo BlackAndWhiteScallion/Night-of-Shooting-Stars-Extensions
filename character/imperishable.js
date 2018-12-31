@@ -160,6 +160,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                          audio:2,
                          cost:3,
                          spell:['richuguo1','richuguo2'],
+                         roundi:true,
                          trigger:{player:'phaseBeginStart'},
                          init:function(player){
                               player.storage.richuguo=true;
@@ -331,6 +332,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                       audio:2,
                       cost:2,
                       spell:['mengxiang1'],
+                      roundi:true,
                       trigger:{player:['phaseBegin']},
                       filter:function(event,player){
                           return player.lili > lib.skill.mengxiang.cost;
@@ -434,6 +436,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                           player.loselili(lib.skill.businiao.cost);
                           player.turnOver();
                       },
+                      check:false,
                   },
                   businiao_die:{
                     audio:'businiao',
@@ -449,6 +452,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                           player.loselili(lib.skill.businiao.cost);
                           player.turnOver();
                       },
+                      check:true,
                   },
                   businiao2:{
                     init:function(){
