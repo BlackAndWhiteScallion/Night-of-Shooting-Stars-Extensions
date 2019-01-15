@@ -677,7 +677,7 @@
                                     me.style.height='22px';
                                 }
                                 me.style.borderRadius='2px';
-                                var list=['re_caocao','re_liubei','sp_zhangjiao','sunquan'];
+                                var list=['reimu','remilia','yuyuko','kaguya'];
                                 for(var i=0;i<4;i++){
                                     var player=ui.create.div('.fakeplayer',node);
                                     ui.create.div('.avatar',player).setBackground(list.randomRemove(),'character');
@@ -2884,7 +2884,7 @@
                     },
                     show_history:{
                         name:'出牌记录栏',
-                        init:'left',
+                        init:'off',
                         intro:'在屏幕左侧或右侧显示出牌记录',
                         unfrequent:true,
                         item:{
@@ -5479,6 +5479,25 @@
                     },
                 }
             },
+            stg:{
+                name:'闯关',
+                config:{
+                    free_choose:{
+                        name:'自由选将',
+                        init:true,
+                        frequent:true,
+                        onclick:function(bool){
+                            game.saveConfig('free_choose',bool,this._link.config.mode);
+                            if(!_status.event.getParent().showConfig&&!_status.event.showConfig) return;
+                            if(!ui.cheat2&&get.config('free_choose')) ui.create.cheat2();
+                            else if(ui.cheat2&&!get.config('free_choose')){
+                                ui.cheat2.close();
+                                delete ui.cheat2;
+                            }
+                        }
+                    },
+                }
+            },
             chess:{
                 name:'战棋',
                 config:{
@@ -5653,71 +5672,6 @@
                     },
                 }
             },
-            tafang:{
-                name:'塔防',
-                config:{
-                    tafang_turn:{
-                        name:'游戏胜利',
-                        init:'10',
-                        frequent:true,
-                        item:{
-                            '10':'十回合',
-                            '20':'二十回合',
-                            '30':'三十回合',
-                            '1000':'无限',
-                        }
-                    },
-                    // tafang_size:{
-                    //  name:'战场大小',
-                    //  init:'9',
-                    //  frequent:true,
-                    //  item:{
-                    //      '6':'小',
-                    //      '9':'中',
-                    //      '12':'大',
-                    //  }
-                    // },
-                    tafang_difficulty:{
-                        name:'战斗难度',
-                        init:'2',
-                        frequent:true,
-                        item:{
-                            '1':'简单',
-                            '2':'普通',
-                            '3':'困难',
-                        }
-                    },
-                    show_range:{
-                        name:'显示卡牌范围',
-                        init:true,
-                    },
-                    show_distance:{
-                        name:'显示距离',
-                        init:true,
-                    },
-                    ban_weak:{
-                        name:'屏蔽弱将',
-                        init:true,
-                        restart:true,
-                    },
-                    ban_strong:{
-                        name:'屏蔽强将',
-                        init:false,
-                        restart:true,
-                    },
-                    chessscroll_speed:{
-                        name:'边缘滚动速度',
-                        intro:'鼠标移至屏幕边缘时自动滚屏',
-                        init:'20',
-                        item:{
-                            '0':'不滚动',
-                            '10':'10格/秒',
-                            '20':'20格/秒',
-                            '30':'30格/秒',
-                        }
-                    },
-                }
-            },
             brawl:{
                 name:'场景',
                 config:{
@@ -5728,6 +5682,11 @@
                     },
                     tongjiangmoshi:{
                         name:'同将模式',
+                        init:true,
+                        frequent:true
+                    },
+                    practise:{
+                        name:'对战练习',
                         init:true,
                         frequent:true
                     },
@@ -9229,7 +9188,7 @@
             equip1:'武器',
             equip2:'防具',
             equip3:'道具',
-            equip4:'攻击马',
+            equip4:'宝具',
             equip5:'宝物',
             zero:'零',
             one:'一',
@@ -10937,14 +10896,9 @@
                             event.addToAI=true;
                         }
                     }
-                    // 这里是丢牌！
-                    // 这里也应该想个办法加个设置。
                     player.lose(event.card1);
                     target.lose(event.card2);
-                    if (lib.config.compare_discard){
-                        player.draw();
-                        target.draw();    
-                    }
+
                     "step 5"
                     game.broadcast(function(){
                         ui.arena.classList.add('thrownhighlight');
@@ -10995,6 +10949,11 @@
                         },1000);
                     },str);
                     game.delay(2);
+                    // 这里是拼点完摸牌。
+                    if (lib.config.compare_discard){
+                        player.draw();
+                        target.draw();    
+                    }
                     "step 7"
                     if(typeof event.target.ai.shown=='number'&&event.target.ai.shown<=0.85&&event.addToAI){
                         event.target.ai.shown+=0.1;
@@ -11698,7 +11657,7 @@
                             directh=false;
                         }
                         else if(event.position[i]=='j'&&target.countCards('j')){
-                            event.dialog.addText('判定区');
+                            event.dialog.addText('技能牌');
                             event.dialog.add(target.getCards('j'));
                             directh=false;
                         }
@@ -11823,7 +11782,7 @@
  						else if(event.position[i]=='j'){
 							var js=target.getDiscardableCards(player,'j');
 							if(js.length){
-	                            event.dialog.addText('判定区');
+	                            event.dialog.addText('技能牌');
 	                            event.dialog.add(js);
 	                            directh=false;
 	                        }
@@ -11973,7 +11932,7 @@
 						else if(event.position[i]=='j'){
 							var js=target.getGainableCards(player,'j');
 							if(js.length){
-								event.dialog.addText('判定区');
+								event.dialog.addText('技能牌');
 								event.dialog.add(js);
 								directh=false;
 							}
@@ -13318,10 +13277,10 @@
                                 event.loseEquip=true;
                                 player.removeEquipTrigger(cards[num]);
                             } else {
-                                var info=get.info(cards[num]);
-                                if(info.skills){
-                                    for(var i=0;i<info.skills.length;i++){
-                                        player.removeSkill(info.skills[i]);
+                                var info1=get.info(cards[num]);
+                                if(info1.skills){
+                                    for(var i=0;i<info1.skills.length;i++){
+                                        player.removeSkill(info1.skills[i]);
                                     }
                                 }
                             }
@@ -13675,6 +13634,7 @@
                 changelili:function(){
                     player.lili+=num;
                     if(player.lili>player.maxlili) player.lili=player.maxlili;
+                    if(player.lili<0) player.lili = 0;
                     player.update();    // 看来所有变更的地方都要update啊，这……但愿不要每个update都要改参数。
                     if(event.popup!==false){
                         player.$damagepop(num,'water'); // 这里改变的是颜色
@@ -13811,6 +13771,10 @@
                                     game.playAudio('die',player.name.slice(player.name.indexOf('_')+1));
                                 });
                                 */
+                                var translation = get.translation(player.name+ '_die');
+                                if (translation != player.name + '_die'){
+                                    player.say(translation);
+                                }             
                             }
                             game.playAudio('effect','die_female');
                         }
@@ -13979,7 +13943,7 @@
                         cards[0].discard();
                     }
                     else{
-                        // 然后插入判定区node里去
+                        // 然后插入技能牌node里去
                         cards[0].style.transform='';
                         cards[0].classList.add('drawinghidden');
                         player.node.judges.insertBefore(cards[0],player.node.judges.firstChild);
@@ -14120,7 +14084,6 @@
                     if(!get.owner(event.result.card)) event.position.appendChild(event.result.card);
                 },
                 turnOver:function(){
-                    game.log(player,'翻面');
                     // 不仅是翻面的UI还是代表翻面了的东西？？？
                     // 看来只能去layout把翻面的动画改成正常的并且去掉翻面的翻译了……
                     player.classList.toggle('turnedover');
@@ -14129,6 +14092,7 @@
                         if(lib.config.background_audio){
                             game.playAudio('effect','spell');
                         }
+                        game.log(player,'启动符卡！');
                         player.node.turnedover.setBackgroundImage('theme/spell.gif');
                         player.node.turnedover.style.backgroundSize='123px 123px';
                         player.node.turnedover.style.opacity=0.4;
@@ -14139,6 +14103,7 @@
                         player.node.turnedover.setBackgroundImage('');
                         player.node.turnedover.style.opacity=0;
                         ui.refresh(player);
+                        game.log(player,'符卡结束');
                     }
                     // 到这里结束
                     game.broadcast(function(player){
@@ -15288,7 +15253,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                     }
                     return cards;
                 },
-getDiscardableCards:function(player,arg1,arg2){
+                getDiscardableCards:function(player,arg1,arg2){
 					var cards=this.getCards(arg1,arg2);
 					for(var i=0;i<cards.length;i++){
 						if(!lib.filter.canBeDiscarded(cards[i],player,this)){
@@ -15669,7 +15634,7 @@ getDiscardableCards:function(player,arg1,arg2){
                         if ((this.identity == 'zhu' && lib.config.musicchange != 'off') 
                             || (this.identity == 'nei' && lib.config.musicchange == 'luren')){
                             lib.backgroundmusicURL = ui.backgroundMusic.src;
-                            ui.backgroundMusic.src = 'audio/background/'+card.name+'.mp3';
+                            ui.backgroundMusic.src = lib.assetURL+'audio/background/'+card.name+'.mp3';
                             lib.config.background_music = card.name;
                         }
                         if ((this.identity == 'zhu' && lib.config.backgroundchange != 'off') 
@@ -17549,6 +17514,7 @@ getDiscardableCards:function(player,arg1,arg2){
                 },
                 skip:function(name){
                     this.skipList.add(name);
+                    game.log(get.translation(this)+'跳过了'+get.translation(name));
                 },
                 wait:function(callback){
                     if(lib.node){
@@ -18749,7 +18715,7 @@ getDiscardableCards:function(player,arg1,arg2){
                 },
                 getAttackRange:function(){
                     var player=this;
-                    var range=0;
+                    var range=-player.lili;
                     range=game.checkMod(player,player,range,'globalFrom',player);
                     range=game.checkMod(player,player,range,'attackFrom',player);
                     var equips=player.getCards('e');
@@ -18763,7 +18729,7 @@ getDiscardableCards:function(player,arg1,arg2){
                             range+=info.attackFrom;
                         }
                     }
-                    return (1-range);
+                    return (0-range);
                 },
                 getGlobalFrom:function(){
                     var player=this;
@@ -21066,7 +21032,15 @@ game.broadcast(function(player,str,nature,avatar){
                         this.node.info.innerHTML=info.modinfo;
                     }
                     else{
-                        this.node.info.innerHTML=get.translation(card[0])+'<span> </span>'+card[1];
+                        var num;
+                        switch(card[1]){
+                            case 1:num='A';break;
+                            case 11:num='J';break;
+                            case 12:num='Q';break;
+                            case 13:num='K';break;
+                            default:num = card[1];
+                        }
+                        this.node.info.innerHTML=get.translation(card[0])+'<span> </span>'+num;
 					}
                     if(info.addinfo){
                         if(!this.node.addinfo){
@@ -21105,7 +21079,15 @@ game.broadcast(function(player,str,nature,avatar){
                         }
                     }
                     this.node.name.style.fontSize = '13px';
-                    this.node.name2.innerHTML=get.translation(card[0])+card[1]+' '+name;
+                    var num;
+                        switch(card[1]){
+                            case 1:num='A';break;
+                            case 11:num='J';break;
+                            case 12:num='Q';break;
+                            case 13:num='K';break;
+                            default:num = card[1];
+                        }
+                    this.node.name2.innerHTML=get.translation(card[0])+num+' '+name;
                     this.suit=card[0];
                     this.number=parseInt(card[1])||0;
                     this.name=card[2];
@@ -22543,7 +22525,7 @@ game.broadcast(function(player,str,nature,avatar){
                     game.modeSwapPlayer(player);
                 },
             },
-dualside:{
+            dualside:{
 				subSkill:{
 					turn:{
 						trigger:{player:['turnOverAfter','dieBefore']},
@@ -22719,7 +22701,7 @@ dualside:{
             },
             mingzhi:{
                 intro:{
-                    content:'cards'
+                    content:'cards',
                 },
             },
             mad:{
@@ -22801,6 +22783,17 @@ dualside:{
                         }
                     }
                 },
+                ai:{
+                    effect:{
+                        player:function(card,player,target,current){
+                          if (get.bonus(card) < 0){
+                            if (player.lili < 2) return -1;
+                            if (player.isTurnedOver() && player.lili < 3) return -2;
+                          } 
+                          return ; 
+                        },
+                    },
+                },
             },
             _enhance:{
                 popup:false,
@@ -22818,7 +22811,8 @@ dualside:{
                     }
                 },
                 check:function(event,player){
-                    if (player.lili > 2) return false;
+                    if (player.hasSkill('bamiao')) return true;
+                    if (player.lili <= 2) return false;
                     var card = event.card;
                     if(card.name == 'guohe'){
                         if (!event.targets[0].getCards('ej').length) return false;
@@ -22830,13 +22824,29 @@ dualside:{
                     } else if (card.name == 'danmakucraze'){
                         return player.countCards('h') < player.hp;
                     } else if (card.name == 'caifang'){
+                        if (get.mode()!='identity') return false;
                         return (event.targets[0].identityShown != true);
+                    }
+                },
+                ai:{
+                    effect:{
+                        target:function(card,player,target,current){
+                            if(player.lili == 0 &&get.tag(card,'damage')){
+                                return 'zeroplayertarget';
+                            }
+                        },
+                        player:function(card,player,target,current){
+                            if(card.source == 0 &&get.tag(card,'damage')){
+                                return 'zeroplayertarget';
+                            }
+                        },
                     }
                 },
             },
             _enhanceend:{
                 trigger:{player:'useCardAfter'},
                 forced:true,
+                popup:false,
                 content:function(){
                     if (player.storage._enhance){
                         player.storage._enhance = 0;
@@ -22936,11 +22946,13 @@ dualside:{
                             for (var j = 0; j < info.spell.length; j ++){
                                 if (!player.isTurnedOver()){
                                     player.removeSkill(info.spell[j]);
+                                    player.addSkillTrigger(player.skills[i]);
                                     if (info.infinite){
                                         player.die();
                                     }
                                 } else {
                                     player.addSkill(info.spell[j]);
+                                    player.removeSkillTrigger(player.skills[i]);
                                 }
                             }
                         }
@@ -24728,6 +24740,7 @@ dualside:{
                     else{
                         audioname=audioinfo;
                         if(lib.skill[audioinfo]){
+                            info=get.info(audioinfo);
                             audioinfo=lib.skill[audioinfo].audio;
                         }
                     }
@@ -27650,7 +27663,7 @@ smoothAvatar:function(player,vice){
 			if(ui.time3){
 				clearInterval(ui.time3.interval);
 			}
-            lib.config.background_music = lib.backgroundmusicURL;
+            if (lib.backgroundmusicURL) lib.config.background_music = lib.backgroundmusicURL;
             if(game.layout=='long2'&&!game.chess){
                 ui.arena.classList.add('choose-character');
                 ui.me.hide();
@@ -41045,6 +41058,67 @@ smoothAvatar:function(player,vice){
                     }
                 }
                 else{
+                    var nodes=[];
+                    _status.clickingidentity=[this.parentNode,nodes];
+                    var num=1;
+                    var dy=30;
+                    if(get.is.phoneLayout()){
+                        dy=40;
+                    }
+                    for(var i in list){
+                        if(this.firstChild.innerHTML!=list[i]){
+                            var node=ui.create.div('.identity.hidden.pointerdiv',this.parentNode,ui.click.identity2);
+                            ui.create.div(node).innerHTML=list[i];
+                            node.dataset.color=i;
+                            ui.refresh(node);
+                            node.show();
+                            var transstr='translateY('+((num++)*dy)+'px)';
+                            if(get.is.phoneLayout()){
+                                transstr+=' scale(1.3)';
+                            }
+                            if(get.is.newLayout()&&this.parentNode.classList.contains('linked')){
+                                transstr+=' rotate(90deg)';
+                            }
+                            node.style.transform=transstr;
+                            nodes.push(node);
+                        }
+                    }
+                }
+            },
+            /*
+            identity:function(e){
+                if(_status.dragged) return;
+                _status.clicked=true;
+                if(!game.getIdentityList) return;
+                if(_status.video) return;
+                if(this.parentNode.forceShown) return;
+                if(_status.clickingidentity){
+                    for(var i=0;i<_status.clickingidentity[1].length;i++){
+                        _status.clickingidentity[1][i].delete();
+                        _status.clickingidentity[1][i].style.transform='';
+                    }
+                    if(_status.clickingidentity[0]==this.parentNode){
+                        delete _status.clickingidentity;
+                        return;
+                    }
+                }
+                var list=game.getIdentityList(this.parentNode);
+                if(!list) return;
+                if(lib.config.mark_identity_style=='click'){
+                    var list2=[];
+                    for(var i in list){
+                        list2.push(i);
+                    }
+                    list2.push(list2[0]);
+                    for(var i=0;i<list2.length;i++){
+                        if(this.firstChild.innerHTML==list[list2[i]]){
+                            this.firstChild.innerHTML=list[list2[i+1]];
+                            this.dataset.color=list2[i+1];
+                            break;
+                        }
+                    }
+                }
+                else{
                     				if(get.mode()=='guozhan'){
 						list={wei:'魏',shu:'蜀',wu:'吴',qun:'群'};
 					}
@@ -41133,6 +41207,7 @@ smoothAvatar:function(player,vice){
 					// }
                 }
             },
+            */
             identity2:function(){
                 if(_status.clickingidentity){
                     _status.clicked=true;
@@ -45890,7 +45965,15 @@ smoothAvatar:function(player,vice){
 							str2+='（'+get.translation(str)+'）';
 						}
 						else{
-							str2+='【'+get.translation(str.suit)+str.number+'】';
+                            var num;
+                            switch(str.number){
+                                case 1:num='A';break;
+                                case 11:num='J';break;
+                                case 12:num='Q';break;
+                                case 13:num='K';break;
+                                default:num = str.number;
+                            }
+							str2+='【'+get.translation(str.suit)+num+'】';
 							// var len=str2.length-1;
 							// str2=str2.slice(0,len)+'<span style="letter-spacing: -2px">'+str2[len]+'·</span>'+get.translation(str.suit)+str.number;
 						}
@@ -47828,8 +47911,10 @@ smoothAvatar:function(player,vice){
             return get.attitude(_status.event.player,to);
         },
     };
+    // AI在这里哟
     var ai={
         basic:{
+            // 按键选择
             chooseButton:function(check){
                 var event=_status.event;
                 var i,j,range,buttons,buttons2;
@@ -47877,14 +47962,22 @@ smoothAvatar:function(player,vice){
                     }
                 }
             },
+            // 卡牌选择（那个check就是技能和卡牌下面的check:function）
             chooseCard:function(check){
                 var event=_status.event;
-                if(event.filterCard==undefined) return (check()>0);
+                // 如果目前的使用事件没有限制的话，check收益大于0的就扔出去
+                // 在这里设置灵力问题应该就OK了？没法在这里做到检测是否有灵力啊……
+                if(event.filterCard==undefined){
+                    return (check()>0);
+                }
+                // 如果是有限制的话
                 var i,j,range,cards,cards2,skills,check,effect;
                 var ok=false,forced=event.forced;
                 var iwhile=100;
                 while(iwhile--){
+                    // range 是event需要选择的卡牌数量
                     range=get.select(event.selectCard);
+                    // 如果已选择的卡数量>=须选择的卡数量，按确认
                     if(ui.selected.cards.length>=range[0]){
                         ok=true;
                     }

@@ -4,6 +4,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 	name:'standard',
 	connect:true,
 	card:{
+		// 这前面几个都是给AI用的函数，检测收益用的
 		damage:{
 			ai:{
 				result:{
@@ -39,7 +40,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		thunderdamage:{
 			ai:{
 				result:{
-					target:-1.5
+					target:-1
 				},
 				tag:{
 					damage:1,
@@ -60,6 +61,8 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				}
 			}
 		},
+		// 到这里为止，都是给AI用的
+
 		// 这里是杀的代码！
 		// 还外带了所有杀有关时机的发动……真是
 		sha:{
@@ -312,13 +315,10 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			enable:true,
 			enhance:1,
 			selectTarget:1,
-			postAi:function(targets){
-				return targets.length==1&&targets[0].num('j');
-			},
+			range:{attack:1},
 			filterTarget:function(card,player,target){
 				if(player==target) return false;
-				return (target.num('hej')>0)
-				&& get.distance(player,target,'attack')<=1;
+				return (target.num('hej')>0);
 			},
 			content:function(){
 				if (target.num('hej')){
@@ -371,11 +371,12 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'disrupt',
 			enable:true,
 			selectTarget:1,
+			range:{attack:1},
 			postAi:function(targets){
 				return targets.length==1&&targets[0].num('j');
 			},
 			filterTarget:function(card,player,target){
-				return (target.num('hej') != 0) && get.distance(player,target,'attack')<=1;
+				return (target.num('hej') != 0);
 
 			},
 			content:function(){
@@ -391,40 +392,20 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 					}
 				},
 				basic:{
-					order:7.5,
+					order:3,
 					useful:4,
-					value:9
+					value:7
 				},
 				result:{
 					target:function(player,target){
-						if(ai.get.attitude(player,target)<=0) return (target.num('he')>0)?-1.5:1.5;
-						var js=target.get('j');
-						if(js.length){
-							var jj=js[0].viewAs?{name:js[0].viewAs}:js[0];
-							if(jj.name=='shunshou') return 3;
-							if(js.length==1&&ai.get.effect(target,jj,target,player)>=0){
-								return -1.5;
-							}
-							return 3;
-						}
+						if(ai.get.attitude(player,target)<=0) return (target.num('hej')>0)?-1.5:1;
 						return -1.5;
 					},
 					player:function(player,target){
-						if(ai.get.attitude(player,target)<0&&!target.num('he')){
+						if(ai.get.attitude(player,target)<0&&!target.num('hej')){
 							return 0;
 						}
-						if(ai.get.attitude(player,target)>1){
-							var js=target.get('j');
-							if(js.length){
-								var jj=js[0].viewAs?{name:js[0].viewAs}:js[0];
-								if(jj.name=='shunshou') return 1;
-								if(js.length==1&&ai.get.effect(target,jj,target,player)>=0){
-									return 0;
-								}
-								return 1;
-							}
-							return 0;
-						}
+						if (!target.storage._mubiao) return 0.5;
 						return 1;
 					}
 				},
@@ -507,10 +488,10 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			content:function(){
 				if (player.storage._enhance){
 					for(var i=0;i<player.storage._enhance;i++){
-    					player.gain(ui.skillPile.childNodes[0],'draw2');
+    					target.gain(ui.skillPile.childNodes[0],'draw2');
     				}
 				}
-				player.draw(2);
+				target.draw(2);
 			},
 			ai:{
 				basic:{
@@ -635,7 +616,6 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				}
 			}
 		},
-		// 还没弄完的突击采访
 		caifang:{
 			audio:true,
 			fullskin:true,
@@ -650,15 +630,15 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				"step 0"
 				var controls=[];
 				if (player.storage.enhance){
-					controls.push('被'+get.translation(player)+'观看手牌并明置身份');
+					controls.push('展示手牌并明置身份');
 				} else {
 					if(target.identityShown != true && get.mode()=='identity') controls.push('明置身份');	
-					controls.push('被'+get.translation(player)+'观看手牌');				
+					controls.push('展示手牌');				
 				}
 				target.chooseControl(controls,function(event,player){
-					if (controls.contains('被'+get.translation(player)+'观看手牌并明置身份')) return '被'+get.translation(player)+'观看手牌并明置身份';
+					if (controls.contains('展示手牌并明置身份')) return '展示手牌并明置身份';
 					if(controls.contains('明置身份')) return '明置身份';
-					return '被'+get.translation(player)+'观看手牌';
+					return '展示手牌';
 				});
 				"step 1"
 				if(result.control){
@@ -667,7 +647,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 						target.showCards(target.get('h'));
 						player.draw();
 					}
-					if(result.control!='被'+get.translation(player)+'观看手牌') {
+					if(result.control!='展示手牌') {
 						if (target.identityShown != true && get.mode()=='identity') target.useSkill('_tanpai');
 					}
 				}
@@ -679,9 +659,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				},
 				result:{
 					target:function(player,target){
-						if (!target.identityShown) return 2;
-						if(ai.get.attitude(player,target)<=0) return (target.num('h'))?-1.5:1.5;
-						return 1;
+						if (!target.identityShown) return -1;
+						if(ai.get.attitude(player,target)<=0) return (target.num('h'))?-1.5:-0.5;
+						return -get.attitude(player,target);
 					}
 				},
 				tag:{
@@ -715,10 +695,14 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				basic:{
 					order:7.2,
 					useful:4,
-					value:9.2
+					value:5
 				},
 				result:{
-					target:2,
+					target:function(player,target){
+						if (player.lili > 2) return 1;
+						if (player.countCards('h',{name:'sha'}) < 2) return 0;
+						return 1.5;
+					},
 				},
 				tag:{
 					draw:0.5
@@ -774,13 +758,44 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				target.chooseToDiscard(true,'hej');
 				// 洗牌堆放到技能那边吧
 			},
+			contentAfter:function(){
+				var cards = [];
+				for(var i=0;i<ui.discardPile.childNodes.length;i++){
+                    var currentcard=ui.discardPile.childNodes[i];
+                    currentcard.vanishtag.length=0;
+                    if(get.info(currentcard).vanish||currentcard.storage.vanish){
+                        currentcard.remove();
+                        continue;
+                    }
+                    if (currentcard.name != 'simen') cards.push(currentcard);
+                }
+                cards.randomSort();
+                for(var i = 0; i < ui.cardPile.childNodes.length;i++){
+                	ui.discardPile.appendChild(ui.cardPile.childNodes[i]);
+                }
+                for(var i=0;i<cards.length;i++){
+                    ui.cardPile.appendChild(cards[i]);
+                }
+                game.log("死境之门：交换弃牌堆和牌堆");
+			},
 			ai:{
 				basic:{
 					order:1,
-					useful:[2,0],
-					value:[2,0],
+					useful:[3,1],
+					value:[3,1],
 				},
-				result:{player:0},
+				result:{
+					target:function(player,target){
+						var nh=target.countCards('hej');
+						if(nh==0) return 0;
+						if(nh==1) return -1.7
+						return -1.5;
+					},
+				},
+				tag:{
+					multitarget:1,
+					multineg:1,
+				}
 			},
 		},
 		// 幻想之门
@@ -866,8 +881,10 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			filterTarget:function(card,player,target){
 				return true;
 			},
+			contentBefore:function(){
+				player.$skill('冰域之宴');
+			},
 			content:function(){
-				target.addSkill('bingyu1');
 				if (target == player) target.addSkill('bingyu2');
 			},
 			contentAfter:function(){
@@ -913,24 +930,13 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				},
 				result:{
 					target:function(player,target){
-						if (target.maxHp - target.hp) return -10;
+						if (target.maxHp == target.hp) return 0;
 						var es=target.get('e');
 						var nh=target.num('h');
 						var noe=(es.length==0||target.hasSkillTag('noe'));
-						var noe2=(es.length==1&&es[0].name=='baiyin'&&target.hp<target.maxHp);
 						var noh=(nh==0||target.hasSkillTag('noh'));
 						if(noh&&noe) return 0;
-						if(noh&&noe2) return 0.01;
-						if(ai.get.attitude(player,target)<=0) return (target.num('he'))?-1.5:1.5;
-						var js=target.get('j');
-						if(js.length){
-							var jj=js[0].viewAs?{name:js[0].viewAs}:js[0];
-							if(jj.name=='guohe') return 3;
-							if(js.length==1&&ai.get.effect(target,jj,target,player)>=0){
-								return -1.5;
-							}
-							return 2;
-						}
+						if(ai.get.attitude(player,target)<=0) return (target.num('hej'))?-1.5:1.5;
 						return -1.5;
 					},
 				},
@@ -949,7 +955,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				return true;
 			},
 			content:function(){
-				target.addSkill('lingbi1');
+				
 			},
 			ai:{
 				basic:{
@@ -1029,7 +1035,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'equip5',
 			ai:{
 				basic:{
-					equipValue:8
+					equipValue:4
 				}
 			},
 			skills:['saiqian_skill','saiqian_skill3']
@@ -1040,7 +1046,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'equip2',
 			ai:{
 				basic:{
-					equipValue:8
+					equipValue:6
 				}
 			},
 			skills:['yinyangyu_skill_1','yinyangyu_skill_2']
@@ -1062,7 +1068,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'equip1',
 			ai:{
 				basic:{
-					equipValue:2
+					equipValue:3
 				}
 			},
 			skills:['bailou_skill']
@@ -1073,7 +1079,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'equip1',
 			ai:{
 				basic:{
-					equipValue:2
+					equipValue:7
 				}
 			},
 			skills:['laevatein_skill']
@@ -1084,7 +1090,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'equip1',
 			ai:{
 				basic:{
-					equipValue:2
+					equipValue:4
 				}
 			},
 			skills:['windfan_skill']
@@ -1095,7 +1101,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'equip1',
 			ai:{
 				basic:{
-					equipValue:2
+					equipValue:3
 				}
 			},
 			skills:['gungnir_skill']
@@ -1128,7 +1134,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'equip1',
 			ai:{
 				basic:{
-					equipValue:2
+					equipValue:4
 				}
 			},
 			skills:['deathfan_skill']
@@ -1150,7 +1156,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'equip1',
 			ai:{
 				basic:{
-					equipValue:2
+					equipValue:4
 				}
 			},
 			skills:['zhiyuu_skill']
@@ -1161,7 +1167,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'equip3',
 			ai:{
 				basic:{
-					equipValue:2
+					equipValue:4
 				}
 			},
 			skills:['book_skill']
@@ -1185,11 +1191,12 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 					basic:{
 						order:1,
 						useful:[3,1],
-						value:0
+						value:2,
+						equipValue:0
 					},
 					result:{
 						target:function(player,target){
-							return target != player && -get.attitude(_status.event.player,target);
+							return -get.attitude(_status.event.player,target);
 						}
 					},
 					tag:{
@@ -1236,7 +1243,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'equip3',
 			ai:{
 				basic:{
-					equipValue:2
+					equipValue:6
 				}
 			},
 			skills:['lunadial_skill']
@@ -1247,7 +1254,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'equip1',
 			ai:{
 				basic:{
-					equipValue:2
+					equipValue:3
 				}
 			},
 			skills:['hakkero_skill']
@@ -1258,7 +1265,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'equip2',
 			ai:{
 				basic:{
-					equipValue:2
+					equipValue:7.5
 				}
 			},
 			skills:['lantern_skill']
@@ -1269,7 +1276,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'equip2',
 			ai:{
 				basic:{
-					equipValue:2
+					equipValue:7
 				}
 			},
 			skills:['hourai_skill']
@@ -1280,7 +1287,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'equip5',
 			ai:{
 				basic:{
-					equipValue:2
+					equipValue:5
 				}
 			},
 			skills:['stone_skill']
@@ -1319,9 +1326,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			},
 			ai:{
 				expose:0.3,
-				order:10,
+				order:2,
 				result:{
-					target:5
+					target:1
 				}
 			}
 		},
@@ -1446,7 +1453,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			audio:true,
 			trigger:{player:'shaBegin'},
 			check:function(event,player){
-				return ai.get.attitude(player,event.target)<=0;
+				return ai.get.attitude(player,event.target)<=0 && event.target.countCards('h') > 2;
 			},
 			content:function(){
 				"step 0"
@@ -1455,7 +1462,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
     					controls.push('lose_lili');
     				}
     				player.chooseControl(controls).ai=function(){
-    					if(player.lili > 2){
+    					if(player.lili > 3){
     						return 'lose_lili';
     					}
     					else{
@@ -1502,16 +1509,6 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 						return player.num('h')<=player.hp?1:0;
 					}
 				},
-				effect:function(card,player){
-					if(get.tag(card,'damage')){
-						if(player.hasSkill('jueqing')) return [1,1];
-						return 1.2;
-					}
-					if(get.tag(card,'loseHp')){
-						if(player.hp<=1) return;
-						return [0,0];
-					}
-				}
 			}
 		},
 		deathfan_skill:{
@@ -1694,6 +1691,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				player.loselili();
 				target.addSkill('lunadial2');
 			},
+
 		},
 		lunadial2:{
 			trigger:{global:'phaseAfter'},
@@ -1738,7 +1736,6 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			},
 		},
 		hakkero_skill:{
-			audio:3,
 			enable:'phaseUse',
 			filter:function(event,player){
 				// 这段是检测次数限制的
@@ -1799,7 +1796,6 @@ game.import('card',function(lib,game,ui,get,ai,_status){
     		filter:function(event,player){
     			return (player.num('e',{name:'stone'}) > 0);
     		},
-    		audio:2,
     		usable:1,
 			chooseButton:{
   				dialog:function(event,player){
@@ -1878,15 +1874,24 @@ game.import('card',function(lib,game,ui,get,ai,_status){
     					return '将两张牌（包括贤者之石）当作'+get.translation(links[0][2])+'使用';
     				}
     			},
+    			ai:{
+					order:6,
+					result:{
+						player:function(player){
+							return 1;
+						}
+					},
+					threaten:1,
+				}
 		},
 		pantsu_skill:{
 			alter:true,
 			mod:{
-				canBeDiscarded:function(card){
-					if(get.is.altered('pantsu_skill')&&card.name!='pantsu') return false;
+				canBeDiscarded:function(card,player,target,event){
+					if(get.is.altered('pantsu_skill')&&card.name!='pantsu'&&_status.currentPhase!=player) return false;
 				},
-				cardDiscardable:function(card){
-					if(get.is.altered('pantsu_skill')&&card.name!='pantsu') return false;
+				cardDiscardable:function(card,player,target,event){
+					if(get.is.altered('pantsu_skill')&&card.name!='pantsu'&&_status.currentPhase!=player) return false;
 				}
 			},
 		},
@@ -1925,6 +1930,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
     		}
 		},
 		bingyu2:{
+			global:'bingyu1',
 			trigger:{player:'phaseBegin'},
 			forced:true,
 			content:function(){
@@ -2220,6 +2226,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		_simen:{
 			trigger:{player:'discardAfter'},
 			forced:true,
+			skillAnimation:true,
 			filter:function(event,player){
     			for(var i=0;i<event.cards.length;i++){
     				if(event.cards[i].name == 'simen'){
@@ -2239,35 +2246,6 @@ game.import('card',function(lib,game,ui,get,ai,_status){
     					}
     				}
     			}
-			},
-		},
-		// 死门翻牌堆效果
-		_simen2:{
-			trigger:{player:'useCardAfter'},
-			forced:true,
-			filter:function(event,player){
-    			return (event.card.name=='simen');
-    		},
-			content:function(){
-				var cards = [];
-				for(i=0;i<ui.discardPile.childNodes.length;i++){
-                    var currentcard=ui.discardPile.childNodes[i];
-                    currentcard.vanishtag.length=0;
-                    if(get.info(currentcard).vanish||currentcard.storage.vanish){
-                        currentcard.remove();
-                        continue;
-                    }
-                    cards.push(currentcard);
-                }
-                cards.randomSort();
-                for(var i = 0; i < ui.cardPile.childNodes.length;i++){
-                	ui.discardPile.appendChild(ui.cardPile.childNodes[i]);
-                }
-                for(var i=0;i<cards.length;i++){
-                    ui.cardPile.appendChild(cards[i]);
-                }
-                game.log("死境之门：交换弃牌堆和牌堆");
-				//ui.discardPile.appendChild(ui.drawPile);
 			},
 		},
 		// 天国翻牌堆效果
@@ -2296,8 +2274,8 @@ game.import('card',function(lib,game,ui,get,ai,_status){
             },
 		},
 		_tianguo2:{
+			skillAnimation:true,
 			trigger:{player:'drawAfter'},
-			frequent:false,
 			filter:function(event,player){
 				if (event.result.length) {
 					for(var i=0;i<event.result.length;i++){
@@ -2325,7 +2303,12 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 							return (target.hp<target.maxHp)?2:0;
 						}
 					},
+					tag:{
+						recover:0.5,
+						multitarget:1
+					}
 				},
+			prompt:'是否发动【天国之阶】：摸到后，可以令所有角色回复1点体力？',
 		},
 		// 派对当潜行
 		_jingxia:{
@@ -2365,8 +2348,8 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			},
 		},
 		_zuiye:{
+			skillAnimation:true,
     		trigger:{source:'damageBefore'},
-    		frequent:false,
     		filter:function(event,player){
     			return player.countCards('h',{name:'zuiye'})>0&&event.nature != 'thunder';
     		},
@@ -2379,6 +2362,10 @@ game.import('card',function(lib,game,ui,get,ai,_status){
     				}
     			}
     		},
+    		prompt:'是否发动【罪业边狱】：将罪业边狱交给对方，令伤害+1',
+			check:function(event, player){
+				return -get.attitude(player, event.player);
+			},
 		},
 		huazhi_skill:{
 			trigger:{global:'phaseEnd'},
@@ -2428,9 +2415,10 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		},
 		// 准备阶段扔掉
 		lingbi2:{
+			global:'lingbi1',
 			trigger:{player:'phaseBegin'},
 			forced:true,
-			filter:function(){
+			filter:function(event,player){
 				if (!player.storage._lingbi2) return false;
 				return player.storage._lingbi2.length > 0;
 			},
@@ -2458,6 +2446,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		},
 		// 令避发动时声明卡牌
 		_lingbi2:{
+			skillAnimation:true,
 			trigger:{player:'useCard'},
 			forced:true,
 			init:function(player){
@@ -2506,15 +2495,21 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			},
 		},
 		_huanxiang:{
-			trigger:{global:'gameStart'},
+			skillAnimation:true,
+			trigger:{global:'gameDrawAfter'},
 			filter:function(event,player){
-				return player.countCards('huanxiang','h') > 0;
+				return player.countCards('h',{name:'huanxiang'}) > 0;
 			},
 			content:function(){
+				game.log('幻想之门：游戏开始时，令所有角色摸一张牌');
 				for (var i = 0; i < game.filterPlayer().length; i ++){
 					game.filterPlayer()[i].draw();
 				}
-			}
+			},
+			check:function(event,player){
+				return true;
+			},
+			prompt:'是否发动【幻想之门】：游戏开始时，可以令所有角色摸一张牌',
 		},
 		danmaku_skill:{
 			mod:{
@@ -2555,10 +2550,10 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		juedou_info:'出牌阶段，对一名其他角色使用。由其开始，其与你轮流打出一张【轰！】，直到其中一方未打出【轰！】为止。未打出【轰！】的一方受到另一方对其造成的1点弹幕伤害。',
 		juedou_bg:'斗',
 		shunshou:'顺手牵羊',
-		shunshou_info:'出牌阶段，对攻击范围的一名角色使用：获得其区域内的一张牌，然后若你本回合没有对其使用过牌，你消耗1点灵力。',
+		shunshou_info:'出牌阶段，对攻击范围内的一名角色使用：获得其区域内的一张牌，然后若你本回合没有对其使用过牌，你消耗1点灵力。',
 		guohe:'疾风骤雨',
 		guohe_bg:'拆',
-		guohe_info:'出牌阶段，对一名其他角色使用；弃置其区域内的一张牌。</br><u>强化(1)：再弃置一张装备或技能牌。<u>',
+		guohe_info:'出牌阶段，对攻击范围内的一名其他角色使用；弃置其区域内的一张牌。</br><u>强化(1)：再弃置一张装备或技能牌。<u>',
 		wuxie:'请你住口！',
 		wuxie_bg:'滚',
 		wuxie_info:'一名角色或一张牌成为法术牌的目标后，对此牌使用。抵消此牌对一名角色产生的效果',
@@ -2644,21 +2639,23 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		stone_info:'你可以将两张牌(包括此牌)当作一种法术牌使用。',
 		stone_skill:'贤者之石',
 		simen:'死境之门',
+		_simen:'死境之门',
 		simen_info:'出牌阶段，对所有其他角色使用：目标各弃置一张牌；全弃置完后，交换牌堆和弃牌堆。</br> <u>追加效果：此牌因弃置进入弃牌堆后，所有角色失去1点体力。</u>',
 		huanxiang:'幻想之门',
+		_huanxiang:'幻想之门',
 		huanxiang_info:'出牌阶段，对所有角色使用：目标各摸一张牌，一张技能牌，获得1点灵力。</br> <u>追加效果：游戏开始时，你可以展示此牌，所有角色摸一张牌。</u>',
 		tianguo:'天国之阶',
 		_tianguo2:'天国之阶',
 		_tianguo2_info:'展示天国之阶，令所有角色回复1点体力',
 		tianguo_info:'出牌阶段，对所有角色使用：将弃牌堆洗入牌堆，然后目标各摸一张牌。</br> <u>追加效果：你摸到此牌时，可以展示之，所有角色回复1点体力。</u>',
 		lingbi:'令避之间',
-		lingbi_info:'准备阶段，对所有角色使用：你声明一张牌，目标角色不能使用该牌，直到你的回合开始。</br> <u>追加效果：此牌可以当作【请你住口！】使用。</u>',
+		lingbi_info:'准备阶段，对所有角色使用：你声明一张牌，目标角色不能使用该牌，直到你的回合开始，或你坠机时。</br> <u>追加效果：此牌可以当作【请你住口！】使用。</u>',
 		lingbi2:'令避之间2',
 		lingbi2_info:'',
 		lingbi1:'令避之间',
 		_lingbi:'令避之间',
 		_lingbi_info:'将【令避之间】当【请你住口！】使用',
-		_lingbi2:'不能使用的牌',
+		_lingbi2:'令避之间',
 		_lingbi2_bg:'避',
 		lingbi1_info:'不能使用标记里的牌',
 		zuiye:'罪业边狱',
@@ -2670,9 +2667,10 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		huazhi_skill:'花之祝福',
 		huazhi_skill_info:'结束阶段，你摸X张牌（X为其本回合造成的伤害点数）。',
 		bingyu:'冰域之宴',
+		_bingyu:'冰域之宴',
 		bingyu1:'冰域之宴',
 		bingyu1_bg:'冰',
-		bingyu_info:'准备阶段，对所有角色使用：目标不能造成伤害，手牌上限视为无限，直到你的回合开始。</br> <u>追加效果：若此牌在你区域内明置，你视为持有【急冻】。</u>',
+		bingyu_info:'准备阶段，对所有角色使用：目标不能造成伤害，手牌上限视为无限，直到你的回合开始，或你坠机时。</br> <u>追加效果：若此牌在你区域内明置，你视为持有【急冻】。</u>',
 		jingxia:'惊吓派对',
 		_jingxia:'惊吓派对',
 		jingxia_bg:'潜',
