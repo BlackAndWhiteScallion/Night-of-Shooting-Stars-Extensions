@@ -754,6 +754,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				return target!=player;
 			},
 			reverseOrder:true,
+			contentBefore:function(){
+				player.$skill('死境之门',null,null,true);
+			},
 			content:function(){
 				target.chooseToDiscard(true,'hej');
 				// 洗牌堆放到技能那边吧
@@ -777,6 +780,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
                     ui.cardPile.appendChild(cards[i]);
                 }
                 game.log("死境之门：交换弃牌堆和牌堆");
+                if(ui.cardPileNumber) ui.cardPileNumber.innerHTML=game.roundNumber+'轮 剩余牌: '+ui.cardPile.childNodes.length;
 			},
 			ai:{
 				basic:{
@@ -807,6 +811,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			selectTarget:-1,
 			filterTarget:function(card,player,target){
 				return true;
+			},
+			contentBefore:function(){
+				player.$skill('幻想之门',null,null,true);
 			},
 			content:function(){
 				target.draw();
@@ -846,6 +853,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			filterTarget:function(card,player,target){
 				return true;
 			},
+			contentBefore:function(){
+				player.$skill('天国之阶',null,null,true);
+			},
 			content:function(){
 				target.draw();
 			},
@@ -882,7 +892,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				return true;
 			},
 			contentBefore:function(){
-				player.$skill('冰域之宴');
+				player.$skill('冰域之宴',null,null,true);
 			},
 			content:function(){
 				if (target == player) target.addSkill('bingyu2');
@@ -984,6 +994,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				return target==player;
 			},	
 			content:function(){
+				player.$skill('花之祝福',null,null,true);
 				player.addSkill('huazhi_skill');
 				if (player.lili == 0) player.gainlili(2);
 			},
@@ -1172,6 +1183,17 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			},
 			skills:['book_skill']
 		},
+		houraiyuzhi:{
+			fullskin:true,
+			type:'equip',
+			subtype:'equip5',
+			ai:{
+				basic:{
+					equipValue:4
+				}
+			},
+			skills:['houraiyuzhi_skill']
+		},
 		frog:{
 			fullskin:true,
 			type:'equip',
@@ -1328,7 +1350,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				expose:0.3,
 				order:2,
 				result:{
-					target:1
+					target:0.1
 				}
 			}
 		},
@@ -1347,7 +1369,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				check:function(card){return 3-get.value(card)}
 		},
 		louguan_skill:{
-			trigger:{player:'useCardtoBegin'},
+			trigger:{player:'useCardtoBefore'},
 			forced:true,
 			priority:10,
 			filter:function(event){
@@ -1369,7 +1391,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		},
 		yinyangyu_skill_1:{
 			audio:2,
-			enable:['chooseToRespond'],
+			enable:['chooseToRespond','chooseToUse'],
 			filterCard:function(card){
 				return get.color(card)=='red';
 			},
@@ -1644,6 +1666,64 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				return true;
 			},
 		},
+		houraiyuzhi_skill:{
+			audio:2,
+			enable:'phaseUse',
+			usable:1,
+			discard:false,
+			lose:false,
+			filterCard:function(card){
+				return true;
+			},
+			prepare:function(cards,player,targets){
+				player.showCards(cards);
+				player.storage.houraiyuzhi = cards[0];
+			},
+			content:function(){
+				'step 0'
+				player.chooseControl('花色','点数').set('ai',function(){
+						return '点数';
+					}).set('prompt','想要更改哪一样？');
+				'step 1'
+				if (result.control){
+					var list = [];
+					event.control = result.control;
+					if (result.control == '花色'){
+						list = ['heart', 'spade', 'diamond', 'club'];
+					} else if (result.control == '点数'){
+						list = ['A', 2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K'];
+					}
+					player.chooseControl(list).set('prompt','想要改成什么？');
+				}
+				'step 2'
+				if (result.control){
+					if (event.control == '花色'){
+						player.storage.houraiyuzhisuit = result.control;
+					} else if (event.control == '点数'){
+						var num = result.control;
+						switch(num){
+                            case 'A':num=1;break;
+                            case 'J':num=11;break;
+                            case 'Q':num=12;break;
+                            case 'K':num=13;break;
+                            default:num=num;
+                        }
+                        player.storage.houraiyuzhinumber = result.control;
+					}
+					player.addTempSkill('houraiyuzhi_skill2');
+				}
+			},
+		},
+		houraiyuzhi_skill2:{
+			mod:{
+				suit:function(card,suit){
+					if(card == player.storage.houraiyuzhi && player.storage.houraiyuzhisuit) return player.storage.houraiyuzhisuit;
+				},
+				number:function(card,number){
+					if(card == player.storage.houraiyuzhi && player.storage.houraiyuzhinumber) return player.storage.houraiyuzhinumber;
+				},
+			},
+		},
 		magatama_skill:{
 			audio:2,
 			enable:'phaseUse',
@@ -1771,10 +1851,10 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		},
 		hourai_skill:{
 			audio:2,
-			trigger:{target:'shaBefore'},
+			trigger:{target:'useCardToBefore'},
 			filter:function(event,player){
-				//return event.card.subtype == 'attack';
-				return event.card.name == 'sha';
+				return event.card.subtype == 'attack';
+				//return event.card.name == 'sha';
 			},
 			content:function(){
 				var cards = player.getCards('e');
@@ -1892,7 +1972,13 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				},
 				cardDiscardable:function(card,player,target,event){
 					if(get.is.altered('pantsu_skill')&&card.name!='pantsu'&&_status.currentPhase!=player) return false;
-				}
+				},
+				cardGainable:function(card,player,target,event){
+					if(get.is.altered('pantsu_skill')&&card.name!='pantsu'&&_status.currentPhase!=player) return false;
+				},
+				canBeGained:function(card,player,target,event){
+					if(get.is.altered('pantsu_skill')&&card.name!='pantsu'&&_status.currentPhase!=player) return false;
+				},
 			},
 		},
 		bingyu1:{
@@ -2271,6 +2357,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
                     ui.cardPile.appendChild(cards[i]);
                 }
                 game.log("天国之阶：弃牌堆加入牌堆");
+                if(ui.cardPileNumber) ui.cardPileNumber.innerHTML=game.roundNumber+'轮 剩余牌: '+ui.cardPile.childNodes.length;
             },
 		},
 		_tianguo2:{
@@ -2564,7 +2651,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		penglaiyao_info:'结束阶段，你失去2点灵力。',
 		*/
 		pantsu:'蓝白胖次',
-		pantsu_info:'锁定技，其他角色不能弃置或获得你的此牌以外的牌。',
+		pantsu_info:'锁定技，其他角色不能弃置或获得你的【蓝白胖次】以外的牌。',
 		laevatein:'莱瓦丁',
 		laevatein_info:'锁定技，出牌阶段，你对每名角色使用的第一张【轰！】不算次数。',
 		gungnir:'冈格尼尔',
@@ -2573,9 +2660,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		throw_gungir:'贯穿他，冈格尼尔！',
 		gungnir_info:'你使用【轰！】指定目标后，可以弃置此牌，或消耗2点灵力，令目标不能对该【轰！】使用牌。',
 		louguan:'楼观剑',
-		louguan_info:'锁定技，你使用【轰！】指定目标后，该角色的装备技能无效，直到该牌结算完毕。',
+		louguan_info:'锁定技，你使用【轰！】指定目标时，该角色的装备技能无效，直到该牌结算完毕。',
 		ibuki:'伊吹瓢',
-		ibuki_skill:'伊吹瓢',
+		ibuki_skill:'吨吨吨',
 		ibuki_info:'一回合一次，出牌阶段，你可以弃置一张攻击牌，然后获得1点灵力。',
 		deathfan:'凤蝶纹扇',
 		deathfan_skill:'扇子咬他！',
@@ -2593,7 +2680,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		yinyangyu_skill_2:'阴阳玉（轰！）',
 		yinyangyu_info:'你可以将一张红色牌当做【没中】使用/打出; 你可以将一张黑色牌当做【轰！】使用/打出',
 		zhiyuu:'净颇梨之镜',
-		zhiyuu_skill:'净颇梨之镜',
+		zhiyuu_skill:'亮胖次！',
 		zhiyuu_info:'一回合一次，出牌阶段，你可以令一名角色展示一张手牌；然后你可以弃置一张与展示的牌相同花色的手牌，对其造成1点灵击伤害。',
 		mirror:'八咫镜',
 		mirror_skill:'八咫镜',
@@ -2608,14 +2695,15 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		bailou_info:'锁定技，你使用攻击牌造成弹幕伤害后，对受伤角色造成1点灵击伤害。',
 		book:'魔导书',
 		book_skill:'魔导书',
-		book_info:'锁定技，准备阶段，你获得1点灵力。',
-		yuzhi:'蓬莱玉枝',
-		yuzhi:'准备阶段，你可以观看牌堆顶的一张牌，然后可以弃置之。',
+		book_info:'结束阶段，你可以消耗1点灵力，摸一张技能牌。',
+		houraiyuzhi:'蓬莱玉枝',
+		houraiyuzhi_skill:'给牌镀闪',
+		houraiyuzhi_info:'一回合一次，出牌阶段，你可以展示一张牌，并声明一种花色或点数；该牌该项视为与声明的相同，直到回合结束。',
 		hourai:'替身人形',
 		hourai_skill:'替身人形',
 		hourai_info:'你成为攻击牌的目标后，可以收回装备区中的此牌，令该牌对你无效。',
 		frog:'冰镇青蛙',
-		frog_info:'你可以将此牌置入一名其他角色的装备区（可以替换），令一名其他角色消耗1点灵力；你可以将此牌当作【轰！】使用。',
+		frog_info:'你可以将此牌置入一名其他角色的装备区（可以替换），对其造成1点灵击伤害；你可以将此牌当作【轰！】使用。',
 		frog_skill:'吃我一青蛙！',
 		/*
 		magatama:'八咫琼勾玉',
@@ -2623,7 +2711,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		magatama_info:'一回合一次，出牌阶段，你可以观看一名角色的手牌。',
 		*/
 		lunadial:'月时针',
-		lunadial_skill:'月时针',
+		lunadial_skill:'The World',
 		lunadial_info:'一回合一次，出牌阶段，你可以消耗1点灵力，然后令一名其他角色不能使用或打出手牌，直到结束阶段。',
 		/*
 		kusanagi:'草薙剑',
@@ -2631,7 +2719,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		kusanagi_info:'你使用【轰！】指定目标后，若你的灵力大于目标，可以弃置其一张牌。',
 		*/
 		hakkero:'八卦炉',
-		hakkero_skill:'八卦炉',
+		hakkero_skill:'轰过去！',
 		hakkero_info:'出牌阶段，你可以消耗1点灵力，视为使用一张【轰！】',
 		lantern:'人魂灯',
 		lantern_info:'锁定技，你成为【轰！】的目标后，若来源在你攻击范围内，与其拼点；若你赢，令该【轰！】对你无效。',
@@ -2744,9 +2832,10 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		["spade",3,'guohe'],
 		["spade",4,'guohe'],
 		["spade",10,'guohe'],
-		["spade",12,'guohe'],
+		["diamond",12,'guohe'],
 		["club",3,'guohe'],
 		["club",4,'guohe'],
+		["spade",8,'guohe'],
 		["spade",9,'frog',""],
 		["spade",11,'wuxie'],
 		["spade",12,'wuxie'],
@@ -2761,7 +2850,6 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		["club",11,'caifang'],
 		["diamond",1,'deathfan'],
 		["spade",1,'windfan',"",1],
-		["club",1,'wuxie'],
 		["heart",1,'lunadial',""],
 		["spade",2,'ibuki',"",1],
 		["club",2,'hourai',"",-1],
@@ -2772,12 +2860,11 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		["club",5,'lantern',"",-1],
 		["club",6,'bailou',"",-1],
 		["spade",6,'louguan',"",1],
-		["spade",8,'guohe'],
 		["club",8,'mirror'],
 		["club",9,'frog',""],
 		["spade",11,'book',"",1],
 		["spade",7,'stone'],
-		["heart",12,'yuzhi',"",1],
+		["heart",12,'houraiyuzhi',"",1],
 		["spade",13,'book',"",1],
 		["heart",13,'laevatein',"",1],
 		["diamond",13,'gungnir',"",1],
