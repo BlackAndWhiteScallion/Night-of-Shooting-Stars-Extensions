@@ -313,7 +313,7 @@
                     },
                     game_speed:{
                         name:'游戏速度',
-                        init:'mid',
+                        init:'slow',
                         item:{
                             vslow:'慢',
                             slow:'较慢',
@@ -3636,6 +3636,7 @@
                         name:'重新下载游戏',
                         onclick:function(){
                             var node=this;
+                            // 看这个设置，这里好像少写了个！……
                             if(node._clearing){
                                 localStorage.removeItem('noname_inited');
                                 game.reload();
@@ -4439,7 +4440,7 @@
                     },
                     ai_strategy:{
                         name:'内奸策略',
-                        init:'ai_strategy_1',
+                        init:'ai_strategy_4',
                         item:{
                             ai_strategy_1:'均衡',
                             ai_strategy_2:'偏反',
@@ -9207,7 +9208,8 @@
             _lianhuan2:'连环',
             qianxing:'潜行',
             mianyi:'免疫',
-            fengyin:'封印',
+            fengyin:'沉默',
+            unequip:'封印',
 
             pause:'暂停',
             config:'选项',
@@ -11633,7 +11635,8 @@
                             event.dialog.addText('手牌区');
                             var hs=target.getCards('h');
                             hs.randomSort();
-                            if(event.visible||target.isUnderControl(true)){
+                            // invisible是米斯蒂亚的专用变量：无视持有者是谁都会屏蔽掉手牌
+                            if((event.visible||target.isUnderControl(true)) && !event.invisible){
                                 event.dialog.add(hs);
                                 directh=false;
                             } else{
@@ -11648,6 +11651,7 @@
                                     directh=false;
                                 } else {
                                     event.dialog.add([hs,'blank']);
+                                    if (event.invisible) directh = false;
                                 }
                             }
                         }
@@ -12378,6 +12382,7 @@
                             }
                         },event.id);
                     };
+                    // 这个是制作游戏记录的
                     if(get.type(card)!='equip'){
                         var str='';
                         if(targets.length){
@@ -12411,6 +12416,8 @@
                             game.logv(player,[card,cards],targets);
                         }
                     }
+                    // 这个是计次数的
+                    // ……靠…………直接不计次数不就好了吗…………
                     if(event.addCount!=false){
                         if(player.stat[player.stat.length-1].card[card.name]==undefined){
                             player.stat[player.stat.length-1].card[card.name]=1;
@@ -12437,6 +12444,7 @@
                         }
                     }
                     "step 1"
+                    // 这个是“卡牌使用前的效果的”
                     var info=get.info(card);
                     if(info.contentBefore){
                         var next=game.createEvent(card.name+'ContentBefore');
@@ -12457,6 +12465,7 @@
 						next.type='precard';
                     }
                     "step 2"
+                    // 然后这里是执行正经效果的（如果目标已经死了就什么都不发生）
                     if(targets[num]&&targets[num].isDead()) return;
                     if(targets[num]&&targets[num].isOut()) return;
                     if(targets[num]&&targets[num].removed) return;
@@ -12523,6 +12532,7 @@
                             game.delayx(0.5);
                         }
                     }
+                    // 如果没有被取消，就结算下一个目标
                     "step 3"
                     if(!get.info(event.card).multitarget&&num<targets.length-1&&!event.cancelled){
                         event.num++;
@@ -14655,7 +14665,7 @@
                     // 浮空时间。原数值：2000毫秒
                     setTimeout(function(){
                         dialog.delete();
-                    },3500);
+                    },2500);
                     var info=[get.translation(this.name)||this.nickname,str];
                     lib.chatHistory.push(info);
                     if(_status.addChatEntry){
@@ -16026,7 +16036,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                     next._args=Array.from(arguments);
                     return next;
                 },
-     				chooseUseTarget:function(card,prompt,includecard){
+     			chooseUseTarget:function(card,prompt,includecard){
 					// not online-ready
 					if(typeof card=='string'){
 						card={name:card};
@@ -16292,6 +16302,9 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                         }
                         else if(arguments[i]=='visible'){
                             next.visible=true;
+                        }
+                        else if (arguments[i] == 'invisible'){
+                            next.invisible=true;
                         }
                         else if(typeof arguments[i]=='function'){
                             if(next.ai) next.filterButton=arguments[i];
@@ -18201,14 +18214,14 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                             }
                         }
                     }
-					if(info.hookTrigger){
-						if(!this._hookTrigger){
-							this._hookTrigger=[];
-						}
-						this._hookTrigger.add(skill);
-					}
-					return this;
-				},
+                    if(info.hookTrigger){
+                        if(!this._hookTrigger){
+                            this._hookTrigger=[];
+                        }
+                        this._hookTrigger.add(skill);
+                    }
+                    return this;
+                },
 				addSkillLog:function(skill){
 					this.addSkill(skill);
 					this.popup(skill);
@@ -20258,12 +20271,15 @@ throwDice:function(num){
 							_status.discarded.remove(card);
 						}
                     }
+                    /*
                     var info=get.info(card);
                     if(info.skills){
                         for(var i=0;i<info.skills.length;i++){
                             player.addSkillTrigger(info.skills[i]);
                         }
                     }
+                    */
+                    player.addEquipTrigger()
                     return player;
                 },
                 $gain:function(card,log,init){
@@ -21344,7 +21360,6 @@ game.broadcast(function(player,str,nature,avatar){
                 finish:function(){
                     this.finished=true;
                 },
-
                 cancel:function(){
                     this.untrigger.call(this,arguments);
                     this.finish();
@@ -22453,30 +22468,14 @@ game.broadcast(function(player,str,nature,avatar){
             zhu:{},
             zhuSkill:{},
             unequip:{
-                filter:function(event,player){
-                    return player.num('e') > 0;
-                },
+                mark:true,
                 init:function(player){
-                    var es=player.getCards('e');
-                    for(var j=0;j<es.length;j++){
-                        var info=get.info(es[j]);
-                        if(info.skills){
-                            for(var i=0;i<info.skills.length;i++){
-                                player.removeSkillTrigger(info.skills[i]);
-                            }
-                        }
-                    }
+                    player.removeEquipTrigger();
+                    player.update();
                 },
                 onremove:function(player){
-                    var es=player.getCards('e');
-                    for(var j=0;j<es.length;j++){
-                        var info=get.info(es[j]);
-                        if(info.skills){
-                            for(var i=0;i<info.skills.length;i++){
-                                player.addSkillTrigger(info.skills[i]);
-                            }
-                        }
-                    }
+                    player.addEquipTrigger();
+                    player.update();
                 },
                 ai:{unequip:true}
             },
@@ -22798,7 +22797,7 @@ game.broadcast(function(player,str,nature,avatar){
             _enhance:{
                 popup:false,
                 trigger:{player:'useCard'},
-                filter:function(event){
+                filter:function(event, player){
                     return (lib.card[event.card.name].enhance && !(event.player.lili < lib.card[event.card.name].enhance));
                 },
                 content:function(){
@@ -22848,7 +22847,7 @@ game.broadcast(function(player,str,nature,avatar){
                 forced:true,
                 popup:false,
                 content:function(){
-                    if (player.storage._enhance){
+                    if (player.storage._enhance && lib.card[trigger.card.name].enhance){
                         player.storage._enhance = 0;
                     }
                 },
@@ -24321,6 +24320,7 @@ game.broadcast(function(player,str,nature,avatar){
                 list[i].remove();
             }
         },
+        // 这是联机时使用的座位分配
         randomMapOL:function(type){
             if(type=='hidden'){
                 ui.arena.classList.add('playerhidden');
@@ -30114,6 +30114,7 @@ smoothAvatar:function(player,vice){
                         }
                         if(typeof equipValue=='function') return equipValue(card,player)-value;
                         if(typeof equipValue!='number') equipValue=0;
+                        if(player.countCards('e') < player.maxequip) return equipValue;
                         return equipValue-value;
                     }
                     card.ai.result.target=(function(name){
@@ -37431,7 +37432,7 @@ smoothAvatar:function(player,vice){
                         var norow2=function(){
                             var node=currentrow1;
                             if(!node) return false;
-                            return node.innerHTML=='横置'||node.innerHTML=='翻面'||node.innerHTML=='换人'||node.innerHTML=='复活';
+                            return node.innerHTML=='横置'||node.innerHTML=='符卡'||node.innerHTML=='换人'||node.innerHTML=='复活';
                         };
                         var checkCheat=function(){
                             if(norow2()){
@@ -39436,7 +39437,6 @@ smoothAvatar:function(player,vice){
                 }
 
                 ui.gameinfo=ui.create.div('#time',ui.window);
-
                 ui.arenalog=ui.create.div('#arenalog',ui.arena);
                 if(lib.config.show_log=='off'){
                     ui.arenalog.style.display='none';
@@ -39671,6 +39671,40 @@ smoothAvatar:function(player,vice){
                         _status.identityShown=true;
                     }
                 },true);
+
+                ui.incidents=ui.create.system('场上异变',null,true);
+                lib.setPopped(ui.incidents,function(){
+                    var uiintro=ui.create.dialog('hidden');
+
+                    uiintro.add('场上异变');
+                    var table=ui.create.div('.bosschongzheng');
+
+                    var tr,td,added=false;
+                    for(var i=0;i<game.filterPlayer().length;i++){
+                        if (game.filterPlayer()[i].storage._tanpai){
+                            added=true;
+                            tr=ui.create.div(table);
+                            td=ui.create.div(tr);
+                            td.innerHTML=get.translation(game.filterPlayer()[i]);
+                            tr=ui.create.div(table);
+                            td=ui.create.div(tr);
+                            //td.innerHTML=get.translation(game.filterPlayer()[i].storage._tanpai[0].name+'_info');
+                            td.innerHTML=get.translation(game.filterPlayer()[i].storage._tanpai[0]);
+                        }
+                    }
+
+                    if(!added){
+                        uiintro.add('<div class="text center">无明置异变</div>');
+                        uiintro.add(ui.create.div('.placeholder.slim'))
+                    }
+                    else{
+                        uiintro.add(table);
+                    }
+
+                    return uiintro;
+                }, 200);
+                if (lib.config.mode != 'identity') ui.incidents.style.display = 'none';
+
                 if(!lib.config.show_playerids||!game.showIdentity){
                     ui.playerids.style.display='none';
                 }
@@ -45712,7 +45746,7 @@ smoothAvatar:function(player,vice){
                     game.shuffleNumber++;
                     var cards=[],i;
                     for(var i=0;i<lib.onwash.length;i++){
-                        					if(lib.onwash[i]()=='remove'){
+                        if(lib.onwash[i]()=='remove'){
 							lib.onwash.splice(i--,1);
 						}
 					}
@@ -47862,6 +47896,7 @@ smoothAvatar:function(player,vice){
             else if(nature=='thunder'){
                 name='thunderdamage';
             }
+            if (player.lili == 0) return 0;
             var eff=get.effect(target,{name:name},player,viewer);
             if(eff>0&&target.hujia>0) return 0;
             return eff;

@@ -49,7 +49,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         if (players[i] == player) players.remove(players[i]);
                         else if (!(!players[i].storage.shuang && players[i].storage._mubiao)) players.remove(players[i]);
                     }
-                    player.chooseTarget([players.num,players.num],('霜降：是否对这些角色各造成1点灵击伤害'),function(card,player,target){
+                    player.chooseTarget(players.num,('霜降：是否对这些角色各造成1点灵击伤害'),function(card,player,target){
                             return players.contains(target);
                           }).set('ai',function(target){
                               return -get.attitude(_status.event.player,target);
@@ -594,7 +594,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     }
                 },
                 ai:{
-                    order:1,
+                    order:5,
                     result:{
                         player:function(player,target){
                             return 1;
@@ -682,6 +682,14 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     },
                     prompt:function(links,player){
                         return '将一张【轰！】当作'+get.translation(links[0][2])+'使用';
+                    },
+                    ai:{
+                    order:6,
+                        result:{
+                            player:function(player){
+                                return 0.5;
+                            }
+                        },
                     }
                 },
                 ai:{
@@ -916,6 +924,13 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         for (var j = 0; j < result.targets.length; j ++) trigger.targets.push(result.targets[j]);
                     }
                 },
+                ai:{
+                    effect:{
+                        target:function(card,player,target,current){
+                            if(card.name == 'sha'&&player!=target) return 'zeroplayertarget';
+                        },
+                    }
+                }
             },
             mingguan:{
                 global:['mingguan_viewAs'],
@@ -942,7 +957,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     }
                 },
                 ai:{
-                    order:1,
+                    order:5,
                     result:{
                         player:function(player,target){
                             return 1;
@@ -1051,7 +1066,219 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     return get.attitude(player,event.target)>0 && event.target.hp < player;
                 },
             },
-            
+            mingjian:{
+                audio:2,
+                global:['mingjian3'],
+                group:'mingjian2',
+                enable:'phaseUse',
+                usable:1,
+                filter:function(event,player){
+                    return player.getCards('h');
+                },
+                content:function(event,player){
+                    'step 0'
+                    player.chooseCard(get.prompt('mingjian'),'h',function(card){
+                        if (player.storage.mingzhi) return !player.storage.mingzhi.contains(card);
+                        else return true;
+                    }).set('ai',function(card){
+                        return 1;
+                    });
+                    'step 1'
+                    if (result.bool){
+                        if (!player.storage.mingzhi) player.storage.mingzhi = [result.cards[0]];
+                        else player.storage.mingzhi.push(result.cards[0]);
+                        player.markSkill('mingzhi');
+                        player.syncStorage('mingzhi');   
+                    }
+                },
+                ai:{
+                    order:10,
+                    result:{
+                        player:function(player,target){
+                            return 1;
+                        }
+                    }
+                }
+            },
+            mingjian2:{
+                audio:2,
+                enable:'phaseUse',
+                filterCard:true,
+                selectCard:1,
+                usable:1,
+                discard:false,
+                prepare:'give',
+                filterTarget:function(card,player,target){
+                    return player!=target;
+                },
+                check:function(card){
+                    return 10-get.value(card);
+                },
+                content:function(){
+                    target.gain(cards,player);
+                    if (!target.storage.mingzhi) target.storage.mingzhi = [cards[0]];
+                    else target.storage.mingzhi.push(cards[0]);
+                    target.markSkill('mingzhi');
+                    target.syncStorage('mingzhi');
+                },
+                ai:{
+                    order:function(skill,player){
+                        return 1;
+                    },
+                    result:{
+                        target:function(player,target){
+                            var nh=target.countCards('h');
+                            var np=player.countCards('h');
+                            if(player.hp==player.maxHp||player.countCards('h')<=1){
+                                if(nh>=np-1&&np<=player.hp) return 0;
+                            }
+                            return Math.max(1,5-nh);
+                        }
+                    },
+                    effect:{
+                        target:function(card,player,target){
+                            if(player==target&&get.type(card)=='equip'){
+                                if(player.countCards('e',{subtype:get.subtype(card)})){
+                                    var players=game.filterPlayer();
+                                    for(var i=0;i<players.length;i++){
+                                        if(players[i]!=player&&get.attitude(player,players[i])>0){
+                                            return 0.1;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                }
+            },
+            mingjian3:{
+                direct:true,
+                trigger:{global:['equipAfter','gainAfter','loseEnd']},
+                filter:function(event,player){
+                    return event.player == player || event.player.hasSkill('mingjian') && event.player != player;
+                },
+                onremove:function(player){
+                    var target = game.findPlayer(function(current){
+                        return current.hasSkill('mingjian') && current!=player;
+                    });
+                },
+                content:function(){
+                    var target = game.findPlayer(function(current){
+                        return current.hasSkill('mingjian') && current!=player;
+                    });
+                    if (target){
+                        if (trigger.name == 'equip'){
+                            var info=get.info(trigger.card);
+                            if (trigger.player == target && player.storage.mingzhi){
+                                if(info.skills){
+                                    for(var j=0;j<info.skills.length;j++){
+                                        player.addSkill(info.skills[j]);
+                                    }
+                                }
+                            } else if (trigger.player == player && player.storage.mingzhi){
+                                if(info.skills){
+                                    for(var j=0;j<info.skills.length;j++){
+                                        target.addSkill(info.skills[j]);
+                                    }
+                                }
+                            }
+                        } else if (trigger.name == 'gain'){
+                            if (player.storage.mingzhi && trigger.player == player && player != target){
+                                var es=target.getCards('e');
+                                for(var j=0;j<es.length;j++){
+                                   var info=get.info(es[j]);
+                                   if(info.skills){
+                                        for(var h=0;h<info.skills.length;h++){
+                                            player.addSkill(info.skills[h]);
+                                        }
+                                    }
+                                }
+                                var ef=player.getCards('e');
+                                for(var j=0;j<ef.length;j++){
+                                   var info=get.info(ef[j]);
+                                   if(info.skills){
+                                        for(var h=0;h<info.skills.length;h++){
+                                            target.addSkill(info.skills[h]);
+                                        }
+                                    }
+                                }
+                            }
+                        } else if (trigger.name == 'lose'){
+                            for (var i = 0; i < trigger.cards.length; i ++){
+                                if (trigger.cards[i].original == 'h' && trigger.player == player && !player.storage.mingzhi){
+                                    var es=target.getCards('e');
+                                    for(var j=0;j<es.length;j++){
+                                       var info=get.info(es[j]);
+                                       if(info.skills){
+                                            for(var h=0;h<info.skills.length;h++){
+                                                player.removeSkill(info.skills[h]);
+                                            }
+                                        }
+                                    }
+                                    var ef=player.getCards('e');
+                                    for(var j=0;j<ef.length;j++){
+                                       var info=get.info(ef[j]);
+                                       if(info.skills){
+                                            for(var h=0;h<info.skills.length;h++){
+                                                target.removeSkill(info.skills[h]);
+                                            }
+                                        }
+                                    }
+                                } else if (trigger.cards[i].original == 'e'){
+                                    var info=get.info(trigger.cards[i]);
+                                    if (trigger.player == player && player.storage.mingzhi){
+                                        if(info.skills){
+                                            for(var j=0;j<info.skills.length;j++){
+                                                player.removeSkill(info.skills[j]);
+                                            }
+                                        }
+                                    } else if (trigger.player == target && player.storage.mingzhi){
+                                        if(info.skills){
+                                            for(var j=0;j<info.skills.length;j++){
+                                                target.removeSkill(info.skills[j]);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            },
+            huanzou:{
+                audio:2,
+                group:'huanzou2',
+                trigger:{global:['useCardBefore','respondBefore']},
+                filter:function(event,player){
+                    if (!event.player.storage.mingzhi) return false;
+                    if (event.target == event.player && get.type(event.card) == 'equip') return false;
+                    return event.player.storage.mingzhi.contains(event.card);
+                },
+                content:function(){
+                    trigger.player.draw();
+                },
+                check:function(event,player){
+                    return get.attitude(player,event.player) > 0;
+                },
+            },
+            huanzou2:{
+                audio:'huanzou',
+                trigger:{global:'discardBefore'},
+                filter:function(event,player){
+                    if(_status.currentPhase==event.player){
+                        for(var i=0;i<event.cards.length;i++){
+                            if(event.cards[i].original == 'e' || event.cards[i].original == 'j' || event.player.storage.mingzhi && event.player.storage.mingzhi.contains(event.cards[i])) return true;
+                        }
+                    }
+                    return false;
+                },
+                content:function(){
+                    trigger.player.draw();
+                },
+                check:function(event,player){
+                    return get.attitude(player,event.player) > 0;
+                },
+            },
             yishan:{
                 audio:2,
                 direct:true,
@@ -1608,7 +1835,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     if (get.subtype(card) == 'attack' || get.subtype(card) == 'disrupt') return get.attitude(player,event.player) < 0;
                     if (get.type(card) == 'equip' || get.subtype(card) == 'support') return get.attitude(player,event.player) > 0;
                     */
-                    if (player.canUse(card,event.player)) return get.effect(event.player,{name:card.name},_status.event.player);
+                    if (player.canUse(card,event.player)) return get.effect(event.player,{name:card.name},player);
                     return false;
                 },
                 content:function(){
@@ -1845,7 +2072,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 audio:2,
                 cost:4,
                 spell:['mengjing2'],
-                trigger:{player:'phaseBegin'},
+                trigger:{player:'phaseBeginStart'},
                 filter:function(event,player){
                     return player.lili > lib.skill.mengjing.cost;
                 },
@@ -1859,6 +2086,32 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             },
             mengjing2:{
                 // 紫妈还没完成呢
+                forced:true,
+                roundi:true,
+                trigger:{player:'phaseBegin'},
+                content:function(){
+                    player.chooseTarget([1,1],get.prompt('mengjing'),function(card,player,target){
+                        return target != player;
+                    },true).set('ai',function(target){
+                        return get.attitude(_status.event.player,target);
+                    });
+                    'step 1'
+                    if (result.bool){
+                        player.logSkill('mengjing',result.targets);
+                        var players = game.filterPlayer();
+                        players.remove(result.targets[0]);
+                        players.remove(player);
+                        for (var i = 0; i < players.length; i ++){
+                            players[i].addSkill('chuwai');
+                        }
+                    }
+                },
+                onremove:function(player){
+                    var players = game.filterPlayer();
+                    for (var i = 0; i < players.length; i ++){
+                        players[i].removeSkill('chuwai');
+                    }
+                },
             },
         },
 		translate:{
@@ -1873,7 +2126,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             baofengxue_audio1:'这是我新的符卡！',
             baofengxue_audio2:'感受一下自然的力量吧！',
             baofengxue_info:'符卡技（2）你使用一张牌时，可以令其他角色不能使用/打出与之相同花色的牌，直到结束阶段；【霜降】中的“一名”视为“所有”',
-            letty_die:'冬天可不会就这么结束哟。',
+            letty_die:'冬天可不会就这么结束的哟。',
             chen:'橙',
             mingdong:'鸣动',
             mingdong2:'鸣动',
@@ -1940,15 +2193,16 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             kuangxiang_audio2:'ヽ(ﾟ∀ﾟ*)ﾉ━━━ｩ♪',
             kuangxiang_info:'一回合一次，灵力值不大于你的一名角色成为【轰！】的目标时，你可以重铸你与其各一张牌；然后，若目标不包括你，将目标转移给你。',
             merlin_die:'°(°ˊДˋ°) °',
-            //lyrica:'莉莉卡',
+            lyrica:'莉莉卡',
             mingjian:'冥键',
+            mingjian2:'冥键（给别人）',
             mingjian_audio1:'（🎹）',
-            mingjian_audio2:'',
+            mingjian_audio2:'钢琴可是乐器之王哟~',
             mingjian_info:'一回合各一次，出牌阶段，你可以明置一张手牌，或将一张牌交给一名其他角色并明置；你视为拥有所有有明置手牌的其他角色的装备技能；有明置手牌的其他角色视为拥有你的装备技能。',
             huanzou:'幻奏',
             huanzou_audio1:'这是献给你的幻奏曲。',
             huanzou_audio2:'不客气哟。',
-            huanzou_info:'一名角色因使用，打出，替换，或自己弃置而失去一张明置牌后，你可以令其摸一张牌。',
+            huanzou_info:'一名角色因使用，打出，或在自己回合内弃置而失去一张明置牌时，你可以令其摸一张牌。',
             hezou:'棱镜协奏曲',
             hezou_2:'棱镜协奏曲',
             hezou_skill:'棱镜协奏曲',
@@ -2017,7 +2271,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             pileTop:'牌堆顶',
             pileBottom:'牌堆底',
             huanjing_audio1:'来，见识一下隙间的尽头吧？',
-            huanjing_audio2:'我猜下面的应该不是【决斗】来着？',
+            huanjing_audio2:'下面的应该不是【决斗】来着？',
             mengjie:'梦界',
             mengjie_info:'出牌阶段开始时，或你成为攻击牌的目标后，你可以观看牌堆底的三张牌，并可以将其中任意张置于牌堆顶；若此时为回合外，你可以摸一张牌。',
             mengjie_audio1:'呼呼呼呼呼——',
