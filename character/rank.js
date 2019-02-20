@@ -1,0 +1,29 @@
+window.noname_character_rank={
+    s:[
+        'swd_muyun',
+    ],
+    ap:[
+        'ow_zhaliya',
+    ],
+    a:[
+        'gw_kanbi',
+    ],
+    am:[
+        'dongyun',
+    ],
+    bp:[
+        'gw_qigaiwang',
+    ],
+    b:[
+        'pangde',
+    ],
+    bm:[
+        'yanwen',
+    ],
+    c:[
+        'yujin',
+    ],
+    d:[
+        'old_huaxiong',
+    ],
+};

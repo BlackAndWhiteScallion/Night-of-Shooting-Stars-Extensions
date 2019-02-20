@@ -8,8 +8,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			meribel:['female','0',3,['xijian','rumeng'],[],[],'1'],
 		},
 		characterIntro:{
-            renko:'从幻想乡外界进来的女高中生，秘封俱乐部成员之一。为了通过世界的缝隙而穿越去其他世界而行动着。<b>画师：An2a</b>',
-            meribel:'从幻想乡外界进来的女高中生，秘封俱乐部成员之一。似乎能够看见和感觉到世界的缝隙？<b>画师：An2a</b>',
+            renko:'从幻想乡外界进来的女高中生，秘封俱乐部成员之一。为了通过世界的缝隙而穿越去其他世界而行动着。<br><b>画师：An2a</b>',
+            meribel:'从幻想乡外界进来的女高中生，秘封俱乐部成员之一。似乎能够看见和感觉到世界的缝隙？<br><b>画师：An2a</b>',
 		},       
 		perfectPair:{
 		},
@@ -42,12 +42,11 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             		for (var i = 1; i <= trigger.num; i ++){
             			if (ui.cardPile.childNodes.length == 0){
 							var card = get.cards(1);
-                            ui.cardPile.insertBefore(card,ui.cardPile.firstChild);
+                            //ui.cardPile.insertBefore(card,ui.cardPile.firstChild);
             			}
             			cards.push(ui.cardPile.childNodes[ui.cardPile.childNodes.length-i]);
             		}
-            		player.gain(cards);
-            		player.$draw(cards,'nobroadcast');
+            		player.gain(cards, 'draw2');
             	},
             },
             sihuan:{
@@ -61,8 +60,10 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             	filterCard:function(){
             		return true;
             	},
-            	prompt:'弃置一张牌发动【似幻】？',
+                position:'hej',
+            	prompt:'选择一张牌发动【似幻】？',
             	discard:false,
+                lose:false,
             	content:function(){
             		'step 0'
             		var list = [];
@@ -239,7 +240,10 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             		player.maxlili -= 4;
             		player.update();
             		player.removeSkill('rumeng');
-            	}
+            	},
+                check:function(event,player){
+                    return player.hp < 2;
+                },
             },
             dshift:{
             	audio:1,
@@ -268,7 +272,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
         	xingdu:'星读',
         	xingdu_info:'准备阶段，你可以观看牌堆顶的两张牌，然后你可以令你的摸牌改为从牌堆底摸，直到回合结束；选择完成后，摸一张牌。',
         	xingdu_audio1:'嗯……好像是这个方向？',
-        	xingdu_audio2:'哎哎哎，不太对吧？',
+        	xingdu_audio2:'哎哎哎，为什么是这两张？',
         	sihuan:'似幻',
         	sihuan_info:'你的第一个准备阶段，须视为使用一张目标数为2的【幻想之门】；出牌阶段，你可以弃置一张牌并选择一项，一回合每项限一次： 1. 灵力值视为５，直到回合结束；2. 弃置一名有异变牌的角色一张牌；3. 摸一张技能牌和一张【灵涌】；4. 将之交给一名符卡发动中的角色。',
         	sihuan_audio1:'啊，我来试试这个！',
@@ -278,7 +282,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
         	xijian:'隙见',
         	xijian_info:'结束阶段，你可以观看牌堆底的一张牌，然后选择一项：将之交给一名角色，或使用之。',
         	xijian_audio1:'这里好像……',
-        	xijian_audio2:'应该就是这里了吧。',
+        	xijian_audio2:'啊，原来是这张啊。',
         	xijian_audio3:'啊，谢谢你梅莉！',
         	rumeng:'如梦',
         	rumeng_info:'你的第一个准备阶段，须视为使用一张目标数为2的【幻想之门】；你以此技能以外的效果获得灵力时，增加1点灵力上限并获得1点灵力（上限至多为5）；你可以扣减4点灵力上限，然后无视消耗发动【梦境与现实的诅咒】；符卡结束时，失去此技能。',

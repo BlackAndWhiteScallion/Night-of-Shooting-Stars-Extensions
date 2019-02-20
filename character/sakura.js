@@ -256,6 +256,9 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     if(result.bool){
                         player.logSkill('shihuo',result.targets);
                         result.targets[0].gainlili();
+                        if (result.targets[0].name == 'ran'){
+                            game.trySkillAudio('shihuo',result.targets[0],true,3);
+                        }
                     }
                 },
             },
@@ -303,7 +306,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             },
             shuanggui3:{
                 audio:2,
-                trigger:{global:'loselili'},
+                trigger:{global:'loseliliBefore'},
                 forced:true,
                 filter:function(event,player){
                     return event.player.hasSkill('shuanggui4');
@@ -1043,17 +1046,17 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 audio:2,
                 trigger:{global:'shaBefore'},
                 filter:function(event,player){
-                    if (event.target == player) return player.countCards('he') > 1;
-                    if (player.countCards('he') < 1 || event.target.countCards('he') < 1) return false; 
+                    if (event.target == player) return player.countCards('hej') > 1;
+                    if (player.countCards('hej') < 1 || event.target.countCards('hej') < 1) return false; 
                     return player.lili >= event.target.lili;
                 },
                 content:function(){
                     'step 0'
-                    player.discardPlayerCard(trigger.target,'he',true);
+                    player.discardPlayerCard(trigger.target,'hej',true);
                     'step 1'
                     if (result.bool){
                         trigger.target.draw();
-                        player.discardPlayerCard(player,'he',true);
+                        player.discardPlayerCard(player,'hej',true);
                     }
                     'step 2'
                     if (result.bool){
@@ -1124,6 +1127,12 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     else target.storage.mingzhi.push(cards[0]);
                     target.markSkill('mingzhi');
                     target.syncStorage('mingzhi');
+                    if (target.name == 'merlin'){
+                        game.trySkillAudio('mingjian',player,true,4);
+                    }
+                    if (target.name == 'lunasa'){
+                        game.trySkillAudio('mingjian',player,true,3);
+                    }
                 },
                 ai:{
                     order:function(skill,player){
@@ -1305,6 +1314,9 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         result.targets[0].draw();
                         if(lib.config.background_audio){
                             game.playAudio('effect','slash');
+                        }
+                        if (result.targets[0].name == 'yuyuko'){
+                            game.trySkillAudio('yishan',player,true,3);
                         }
                         player.useCard({name:'sha'},result.targets[0],false);
                     }
@@ -1499,27 +1511,77 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             },
             fanhundie:{
                 audio:1,
-                cost:0,
+                cost:1,
                 spell:['fanhundie2'],
-                trigger:{player:['phaseBegin','dying']},
+                trigger:{player:'phaseBegin'},
                 filter:function(event,player){
-                    return player.lili-1 > player.maxHp-player.hp;
+                    return player.lili > lib.skill.fanhundie.cost;
                 },
                 content:function(){
-                    player.loselili(player.maxHp-player.hp+1);
+                    player.loselili(lib.skill.fanhundie.cost);
                     player.turnOver();
                 },
+                check:function(event,player){
+                    return player.maxHp-player.hp >= 2;
+                },
+            },
+            fanhundie_die:{
+                audio:1,
+                cost:1,
+                enable:'chooseToUse',
+                spell:['fanhundie2'],
+              filter:function(event,player){
+                 if(event.type!='dying') return false;
+                 if(player!=event.dying) return false;
+                 return player.lili > lib.skill.fanhundie.cost;
+              },
+              content:function(){
+                  player.loselili(lib.skill.fanhundie.cost);
+                  player.turnOver();
+              },
+              check:function(){
+                return true;
+              },
+              ai:{
+                order:1,
+                  skillTagFilter:function(player){
+                    if(player.hp>0) return false;
+                  },
+                  save:true,
+                  result:{
+                    player:function(player){
+                      if(player.hp==0) return 10;
+                      if(player.hp<=2&&player.countCards('he')<=1) return 10;
+                      return 0;
+                    }
+                  },
+                  threaten:function(player,target){
+                    return 0.6;
+                  }
+              },
             },
             fanhundie2:{
                 audio:2,
-                enable:'chooseToUse',
-                usable:1,
+                trigger:{global:'phaseEnd'},
+                init:function(player){
+                      player.nodying=true;
+                      if (player.hp <= 0) player.hp=0;
+                      player.update();
+                    },
+                    onremove:function(player){
+                      delete player.nodying;
+                      if (player.hp <= 0) {
+                        player.hp=0;
+                        player.dying({});
+                      }
+                      player.update();
+                    },
                 filter:function(event,player){
                     return (event.type == 'dying' && player == event.dying) || (_status.currentPhase==player);
                 },
                 content:function(){
                     "step 0"
-                    event.num=1+player.maxHp-player.hp;
+                    event.num=player.maxHp-player.hp;
                     "step 1"
                     player.chooseTarget(get.prompt('fanhundie'),[1,1],function(card,player,target){
                         return target.countCards('hej')>0;
@@ -1538,8 +1600,9 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         event.target.discard(result.links);
                         if (event.target.getCards('h').contains(result.links[0]) && num == 1) event.target.loseHp();
                     }
-                    if(event.num>1){
+                    if(event.num>1 && player.lili > 1){
                         event.num--;
+                        player.loselili();
                         event.goto(1);
                     }
                 },
@@ -1565,7 +1628,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         for (var i in lib.card){
                             if(lib.card[i].mode&&lib.card[i].mode.contains(lib.config.mode)==false) continue;
                             if(lib.card[i].forbid&&lib.card[i].forbid.contains(lib.config.mode)) continue;
-                            if(lib.card[i].type == 'trick' && event.filterCard({name:i},player,event)){
+                            if(lib.card[i].type == 'trick'){
                                 list.add(i);
                             }
                         }
@@ -1573,6 +1636,10 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                             list[i]=[get.type(list[i]),'',list[i]];
                         }
                         return ui.create.dialog([list,'vcard']);
+                    },
+                    filter:function(button,player){
+                        return _status.event.getParent().filterCard({name:button.link[2]},player);
+                        //return lib.filter.filterCard({name:button.link[2]},player,_status.event.getParent()) && !player.storage.muqi.contains(button.link[2]);
                     },
                     check:function(button){
                         var player=_status.event.player;
@@ -1708,6 +1775,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     return true;
                 },
                 selectCard:1,
+                position:'hej',
                 check:function(card){
                     return 5-get.useful(card);
                 },
@@ -1746,9 +1814,12 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             },
             shiqu2:{
                 mark:true,
-                intro:'可以与蓝py',
-                trigger:{player:'loselili'},
+                intro:{
+                    content:'可以与蓝py',
+                },
+                trigger:{player:'loseliliBefore'},
                 filter:function(event,player){
+                    if (event.getParent().name == 'shiqu2') return false;
                     var players = game.filterPlayer();
                     for (var i = 0; i < players.length; i ++){
                         if (players[i].hasSkill('shiqu2') && players[i] != player) return true;
@@ -1760,7 +1831,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     player.chooseTarget(get.prompt('shiqu'),1,function(card,player,target){
                             return target != player && target.hasSkill('shiqu2');
                         }).set('ai',function(target){
-                            return get.attitude(_status.event.player,target);
+                            return get.attitude(_status.event.player,target) && target.lili > _status.event.player.lili;
                         });
                     'step 1'
                     if (result.bool && result.targets.length){
@@ -1769,6 +1840,9 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         result.targets[0].addTempSkill('shiqu2',{player:'phaseBegin'});
                         trigger.cancel();
                     }
+                },
+                check:function(event,player){
+                    return true;
                 },
             },
             tianhugongzhu:{
@@ -1815,7 +1889,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             },
             tianhugongzhu_2:{
                 audio:2,
-                trigger:{player:'loselili'},
+                trigger:{player:'loseliliBefore'},
                 forced:true,
                 filter:function(event,player){
                     return player.hp > event.num;
@@ -1883,9 +1957,9 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     for (var i = 3; i > 0; i--){
                         if (ui.cardPile.childNodes.length == 0){
                             var card = get.cards(1);
-                            ui.cardPile.insertBefore(card,ui.cardPile.firstChild);
+                            //ui.cardPile.insertBefore(card,ui.cardPile.firstChild);
                         }
-                        cards.push(ui.cardPile.childNodes[ui.cardPile.childNodes.length-i]);
+                        cards.push(ui.cardPile.childNodes[ui.cardPile.childNodes.length-1]);
                     }
                     event.cards=cards; 
                     var switchToAuto=function(){
@@ -2122,7 +2196,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             letty:'蕾蒂',
             shuangjiang:'霜降',
             shuangjiang_info:'结束阶段，你可以对本回合成为过牌的目标，且没有使用/打出过牌的所有角色造成1点灵击伤害。',
-            shuangjiang_audio1:'下次，记得穿厚一些哟。',
+            shuangjiang_audio1:'冬天来了！……阿嚏！',
             shuangjiang_audio2:'怎么，这就觉得太冷了吗？',
             baofengxue:'暴风雪之眼',
             baofengxue2:'暴风雪之眼',
@@ -2130,7 +2204,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             baofengxue_audio1:'这是我新的符卡！',
             baofengxue_audio2:'感受一下自然的力量吧！',
             baofengxue_info:'符卡技（2）你使用一张牌时，可以令其他角色不能使用/打出与之相同花色的牌，直到结束阶段；【霜降】中的“一名”视为“所有”',
-            letty_die:'冬天可不会就这么结束的哟。',
+            letty_die:'（擦鼻涕）这种天气算哪门子的冬天啊。',
             chen:'橙',
             mingdong:'鸣动',
             mingdong2:'鸣动',
@@ -2142,6 +2216,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             shihuo_info:'一回合一次，你获得1点灵力值后，可以令一名角色获得1点灵力值。',
             shihuo_audio1:'喵呜~',
             shihuo_audio2:'喵帕斯！……喵？',
+            shihuo_audio3:'橙也渐渐懂事起来了啊www',
             shuanggui:'青鬼赤鬼',
             shuanggui_audio1:'鬼符「青鬼赤鬼」!',
             shuanggui_audio2:'不要因为我是猫就小看我了喵！',
@@ -2154,8 +2229,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             huanfa_audio1:'表演正在准备中，请稍微片刻。',
             huanfa_audio2:'嗯？已经等不及了么？',
             mocai:'魔彩',
-            mocai_audio1:'帮她一把吧，上海。',
-            mocai_audio2:'别让她倒了，蓬莱。',
+            mocai_audio1:'上海，该开始表演啦。',
+            mocai_audio2:'哎，蓬莱把【没中】拿哪儿去了？',
             mocai_info:'你攻击范围内的一名角色成为攻击牌的目标后，你可以选择一项：将一张“手办”置于其区域内；或弃置一张“手办”，观看技能牌堆顶的三张牌，并将其中一张交给目标。',
             hanghourai:'上吊的蓬莱人形',
             hanghourai_audio1:'诅咒「上吊的蓬莱人偶」!',
@@ -2164,7 +2239,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             hanghourai1_audio1:'你只不过是一名演员而已。',
             hanghourai2_audio2:'一切都是我的掌控之中。',
             hanghourai_info:'符卡技（2）<永续> 符卡发动时，你可以将任意张手牌扣置为“手办”，并摸等量牌；一名角色的结束阶段，你可以交给其一张“手办”；若其可以使用该牌，你令其使用之，目标由你指定。',
-            alice_die:'',
+            alice_die:'谢谢大家观赏。',
             lilywhite:'莉莉白',
             chunxiao:'春晓',
             chunxiao_info:'准备阶段，若你的灵力值不小于体力值，你可以令所有角色各摸一张牌，然后各弃置与其最近的一名角色一张牌。',
@@ -2184,7 +2259,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             zhenhun:'镇魂',
             zhenhun_info:'一名角色的结束阶段，你可以选择一项：1. 获得其本回合因弃置而进入弃牌堆的一张牌，并明置之；2. 交给一名其一张明置牌。',
             zhenhun_audio1:'这是献给你的镇魂曲。',
-            zhenhun_audio2:'……别这样看我啦，我不会一把大火烧死你的。掉所有人血？……那就不保证了。',
+            zhenhun_audio2:'……别这样看我啦，我不会一把大火烧死你的。<br> 至于掉所有人血的话……',
             lunasa_die:'呜咕咕咕咕……',
             merlin:'梅露兰',
             mingguan:'冥管',
@@ -2202,11 +2277,14 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             mingjian2:'冥键（给别人）',
             mingjian_audio1:'（🎹）',
             mingjian_audio2:'钢琴可是乐器之王哟~',
+            mingjian_audio3:'大姐，我不会演奏这个曲子，帮下忙呗~',
+            mingjian_audio4:'二姐，那个人欺负我，可以揍她吗~',
             mingjian_info:'一回合各一次，出牌阶段，你可以明置一张手牌，或将一张牌交给一名其他角色并明置；你视为拥有所有有明置手牌的其他角色的装备技能；有明置手牌的其他角色视为拥有你的装备技能。',
             huanzou:'幻奏',
             huanzou_audio1:'这是献给你的幻奏曲。',
             huanzou_audio2:'不客气哟。',
             huanzou_info:'一名角色因使用，打出，或在自己回合内弃置而失去一张明置牌时，你可以令其摸一张牌。',
+            lyrica_die:'下次我带姐姐一起来！',
             hezou:'棱镜协奏曲',
             hezou_2:'棱镜协奏曲',
             hezou_skill:'棱镜协奏曲',
@@ -2222,6 +2300,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             yishan_info:'一回合一次，你使用【轰！】结算完毕后，你可以令一名角色摸一张牌，视为对其使用一张无视装备的【轰！】。',
             yishan_audio1:'一刀两断！',
             yishan_audio2:'斩！',
+            yishan_audio3:'幽幽子大人！不是叫您不要吃那个了吗！',
             yinhuashan:'六根清静斩',
             yinhuashan2:'六根清静斩',
             yinhuashan_info:'符卡技（1）你使用【轰！】指定目标时，可以消耗1点灵力，并选择一项：额外指定一名目标角色，或重置【一闪】。',
@@ -2253,22 +2332,25 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             fanhundie:'反魂蝶',
             fanhundie_audio1:'应该能不体会自身悲惨的境遇就度过每一日吧 如果是在那个没有出家风俗的世界的话',
             fanhundie2:'反魂蝶',
-            fanhundie_info:'符卡技（X）<终语> 一回合一次，出牌阶段，你可以弃置一名角色的一张牌；你可以重复此流程至多X次（X为你已受伤值+1）；其以此法失去最后的手牌时，其失去1点体力',
+            fanhundie_info:'符卡技（1）<终语>你不会坠机；当前回合的结束阶段，你可以：弃置一名角色的一张牌，其以此法失去最后的手牌后，其失去1点体力；然后你须消耗1点灵力并重复此流程，直到灵力为1，或重复第X次（X为你已受伤值）。',
             yuyuko_die:'啊——那就这样了吧。',
             ran:'蓝',
             jiubian:'九变',
             jiubian2:'九变',
             jiubian_info:'你可以将一张法术牌当作【葱】，或将一张【葱】当作一种法术牌使用；你以此法使用牌指定目标时，可以指定一名角色，将目标或来源改为其。',
-            jiubian_audio1:'别问我为什么一只猴子比我多63变。',
-            jiubian_audio2:'算数是什么时候的事情了，能别提了吗……',
+            jiubian_backup_audio1:'别问我为什么一只猴子比我多63变。',
+            jiubian_backup_audio2:'算数是什么时候的事情了，能别提了吗……',
             jiubian2_audio1:'别担心，我来助你一尾之力。',
-            jiubian2_audio2:'',
+            jiubian2_audio2:'没事没事，我在呢（摸摸）。',
             shiqu:'式取',
             shiqu_info:'一回合一次，出牌阶段，你可以重铸一张牌；若该牌有灵力，你可以令一名角色获得等量的灵力；若如此做，直到你的准备阶段：你或其需要消耗灵力时，可以改为由对方消耗灵力。',
             shiqu_audio1:'先说清楚，这可不是什么结婚宣言啊？',
             shiqu_audio2:'是谁把我们妖狐的印象污染成了容易暴走的理性蒸发的疯怪啊……',
+            shiqu2:'式取',
+            shiqu2_bg:'式',
             tianhugongzhu:'天狐公主 -illusion-',
             tianhugongzhu_info:'符卡技（3）<永续>准备阶段，你指定一名其他角色，与其各回复1点体力；该角色需要消耗灵力时，可以改为失去等量的体力值。',
+            ran_die:'紫大人不会放过你的！',
             yukari:'紫',
             huanjing:'幻境',
             huanjing_info:'一名角色的准备阶段，你可以弃置一张牌，然后展示牌堆底的牌；若为攻击牌或法术牌，将之对其使用；若为装备牌，将之置于其装备区内；否则，弃置之。',
@@ -2282,6 +2364,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             mengjie_audio2:'嗯？说好的要尊重老人呢？',
             mengjing:'梦境与现实的诅咒',
             mengjing_info:'符卡技（4）<永续>准备阶段，你指定一名其他角色；你与其以外的所有角色视为不在游戏内；所有角色的胜利条件无效。',
+            yukari_die:'刚睡醒真的没劲……继续回去睡了……',
         },
 	};
 });

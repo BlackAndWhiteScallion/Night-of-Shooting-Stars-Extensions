@@ -11,11 +11,11 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                   eiki:['female','1',4,['huiwu','caijue','shenpan']],
 		},
 		characterIntro:{
-			            lilyblack:'似乎就是莉莉白换了身衣服？',
-                  medicine:'全名梅蒂欣·梅兰可莉。被人类抛弃，受铃兰之毒多年后妖怪化的人偶。',
-                  yuuka:'全名风间幽香。太阳花园之主。虽然只是种花的，但是实际战力是顶尖级别，还是战狂性格。不过最近比较满足于种花和养老。',
-                  komachi:'全名小野塚小町。负责将死者灵魂带入冥界的，冥河上摆渡的死神。虽然是至关重要的工作，但是因为太懒怠工疑似弄出了异变来。',
-                  eiki:'全名四季映姬。幻想乡的裁判长/阎魔王。负责判断死者灵魂是转生还是进入地狱永劫不复。职业病非常非常非常严重。',
+			            lilyblack:'似乎就是莉莉白换了身衣服？<br><b>画师：Cloudy.R</b>',
+                  medicine:'全名梅蒂欣·梅兰可莉。被人类抛弃，受铃兰之毒多年后妖怪化的人偶。<br><b>画师：はるとき</b>',
+                  yuuka:'全名风间幽香。太阳花园之主。虽然只是种花的，但是实际战力是顶尖级别，还是战狂性格。不过最近比较满足于种花和养老。<br><b>画师：萩原</b>',
+                  komachi:'全名小野塚小町。负责将死者灵魂带入冥界的，冥河上摆渡的死神。虽然是至关重要的工作，但是因为太懒怠工疑似弄出了异变来。<br><b>画师：MAY☆嵐（G.H）</b>',
+                  eiki:'全名四季映姬。幻想乡的裁判长/阎魔王。负责判断死者灵魂是转生还是进入地狱永劫不复。职业病非常非常非常严重。<br><b>画师：DomotoLain</b>',
 		},       
 		perfectPair:{
 		},
@@ -35,7 +35,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                           event.players=game.filterPlayer();
                           player.line(event.players,'black');
                           "step 1"
-                          event.current.chooseTarget([1,1],true,get.prompt('chunmian'),function(card,player,target){
+                          event.current.chooseTarget([1,1],true,'弃置你上家或下家一张牌',function(card,player,target){
                               if(player==target) return false;
                               if(get.distance(player,target)<=1) return true;
                               if(game.hasPlayer(function(current){
@@ -600,15 +600,15 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                   huayuan_2:'毒气花园',
                   medicine_die:'哎，下次得多带点毒来。',
                   yuuka:'幽香',
-            	zanghua:'葬花',
+            	    zanghua:'葬花',
                   zanghua_audio1:'花儿们好像对你很感兴趣呢。',
                   zanghua_audio2:'呵呵。',
-            	zanghua_info:'出牌阶段，你可以与一名其他角色拼点；赢的角色视为对输的角色使用了一张【决斗】；若平局，或其体力值小于你，此技能无效，直到结束阶段。',
-            	xiaofeng:'啸风弄月',
+            	     zanghua_info:'出牌阶段，你可以与一名其他角色拼点；赢的角色视为对输的角色使用了一张【决斗】；若平局，或其体力值小于你，此技能无效，直到结束阶段。',
+            	   xiaofeng:'啸风弄月',
                   xiaofeng_audio1:'幻想「花鸟风月，啸风弄月」。',
                   xiaofeng_audio2:'那么，你死后的灵魂会长出什么花来呢？',
-            	xiaofeng_info:'符卡技（4）<u>若你的体力为1，符卡消耗-2。</u>准备阶段，你视为使用一张【花之祝福】；你的攻击范围无限；你造成伤害时，令该伤害+1；你的牌点数均视为Q。',
-            	yuuka_die:'嗯，我承认你还是挺强的呢。',
+            	   xiaofeng_info:'符卡技（4）<u>若你的体力为1，符卡消耗-2。</u>准备阶段，你视为使用一张【花之祝福】；你的攻击范围无限；你造成伤害时，令该伤害+1；你的牌点数均视为Q。',
+            	     yuuka_die:'嗯，我承认你还是挺强的呢。',
                   komachi:'小町',
                   guihang:'归航',
                   guihang_audio1:'给我过来！',
@@ -625,9 +625,13 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 huiwu_info:'锁定技，一名角色的回合结束时，其须重铸一张牌；若其本回合造成过伤害，该牌由你指定。',
                 caijue:'裁决',
                 caijue_info:'准备阶段，你可以展示一名角色的手牌：弃置其中所有攻击牌，然后你消耗等量灵力（不够耗至1）， 对其造成消耗量的灵击伤害；若其中没有攻击牌，【裁决】无效，直到你受到弹幕伤害后。',
+                caijue_audio1:'突击检查可是很重要的。如果事先警告检查的话，只会造成临时抱佛脚的情况来。虽然可以简单看得出来，但是终究是对长久懒散的习惯没有任何补成的——因此，只有多多突击检查，并且每一次都要加大力度，要让你从心底里惧怕，才能促进你平常的生活习惯。',
+                caijue_audio2:'要赎罪，要改过自新，并不是三分钟热度所能够做到的。因此，如果想要好好的改正，需要有强硬的人时常督促和警告，甚至严训和惩罚都是有必要的。不，我并不是为了你好——地狱只是有些人数溢出了而已。',
                 shenpan:'最终审判',
                 shenpan_info:'符卡技（X）<限定>（X 为体力值）符卡发动时，你视为使用一张【令避之间】；结束阶段，你对场上体力最高的角色造成１点弹幕伤害，然后对灵力，手牌数，和击坠角色数重复此流程。',
-               eiki_die:'打倒我也是没有任何意义的。',
+                shenpan_audio1:'审判「Last Judgement」——',
+                shenpan_audio2:'虽然我本来希望不会走到这一步，但是——你们，完全的没救了！',
+                eiki_die:'打倒我也是没有任何意义的。',
             },
       };
 });

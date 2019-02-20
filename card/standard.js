@@ -8,7 +8,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		damage:{
 			ai:{
 				result:{
-					target:-1.5
+					target:-1
 				},
 				tag:{
 					damage:1
@@ -68,7 +68,6 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		sha:{
 			audio:true,
 			fullskin:true,
-			nature:['thunder','fire'],
 			type:'basic',
 			subtype:'attack',
 			enable:true,
@@ -368,9 +367,17 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			},
 			filterTarget:function(card,player,target){
 				return (target.num('hej') != 0);
-
 			},
 			content:function(){
+				if (player.name == 'marisa'){
+					game.trySkillAudio('liuxing_shun',player,true,Math.ceil(2*Math.random()));
+					if (target.name == 'alice'){
+						game.trySkillAudio('liuxing_shun', target, true, 3);
+					}
+					if (target.name == 'patchouli'){
+						game.trySkillAudio('liuxing_shun', target, true, 4);
+					}
+				}
 				if(target.num('hej')){
 					player.gainPlayerCard('hej',target,true);
 				}
@@ -422,6 +429,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				target.draw();
 				target.chooseCardTarget({
 					selectCard:1,
+					position:'hej',
 					filterTarget:function(card,player,target){
 						return player != target;
 					},
@@ -477,6 +485,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			},
 			modTarget:true,
 			content:function(){
+				if (target.name == 'cirno') target.say('我是最强的！');
 				if (player.storage._enhance){
 					for(var i=0;i<player.storage._enhance;i++){
     					target.gain(ui.skillPile.childNodes[0],'draw2');
@@ -619,6 +628,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			},
 			content:function(){
 				"step 0"
+				if (player.name == 'aya') player.say('啊呀呀，今天你的胖次是什么颜色的呢？');
 				var controls=[];
 				if (player.storage.enhance){
 					controls.push('展示手牌并明置身份');
@@ -756,7 +766,6 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				var cards = [];
 				for(var i=0;i<ui.discardPile.childNodes.length;i++){
                     var currentcard=ui.discardPile.childNodes[i];
-                    currentcard.vanishtag.length=0;
                     if(get.info(currentcard).vanish||currentcard.storage.vanish){
                         currentcard.remove();
                         continue;
@@ -764,8 +773,12 @@ game.import('card',function(lib,game,ui,get,ai,_status){
                     if (currentcard.name != 'simen') cards.push(currentcard);
                 }
                 cards.randomSort();
+                var deckcards = [];
                 for(var i = 0; i < ui.cardPile.childNodes.length;i++){
-                	ui.discardPile.appendChild(ui.cardPile.childNodes[i]);
+                	deckcards.push(ui.cardPile.childNodes[i]);
+                }
+                for (var i = 0; i < deckcards.length; i ++){
+                	ui.discardPile.appendChild(deckcards[i]);
                 }
                 for(var i=0;i<cards.length;i++){
                     ui.cardPile.appendChild(cards[i]);
@@ -981,9 +994,11 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			fullskin:true,
 			type:'jinji',
 			enable:true,
+			selectTarget:-1,
 			filterTarget:function(card,player,target){
 				return target==player;
-			},	
+			},
+			modTarget:true,
 			content:function(){
 				player.$skill('花之祝福',null,null,true);
 				player.addSkill('huazhi_skill');
@@ -1138,6 +1153,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			fullskin:true,
 			type:'equip',
 			subtype:'equip5',
+			onLose:function(){
+				player.say('我的胖次！变态！');
+			},
 			ai:{
 				basic:{
 					equipValue:2
@@ -1375,14 +1393,16 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				check:function(card){return 3-get.value(card)}
 		},
 		louguan_skill:{
-			trigger:{player:'useCardtoBefore'},
+			trigger:{player:'useCard'},
 			forced:true,
 			priority:10,
 			filter:function(event){
 				return event.card.name=='sha';
 			},
 			content:function(){
-				trigger.target.addTempSkill('unequip', 'useCardAfter');
+				for (var i = 0; i < trigger.targets.length; i ++){
+					trigger.targets[i].addTempSkill('unequip', 'useCardAfter');
+				}
 			},
 		},
 		bailou_skill:{
@@ -1405,7 +1425,8 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			viewAsFilter:function(player){
 				if(!player.num('he',{color:'red'})) return false;
 			},
-			prompt:'将一张红色手牌当闪打出',
+			position:'he',
+			prompt:'将一张红色牌当没中使用或打出',
 			check:function(){return 1},
 			ai:{
 				respondShan:true,
@@ -1430,7 +1451,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			viewAsFilter:function(player){
 				if(!player.num('he',{color:'black'})) return false;
 			},
-			prompt:'将一张黑色牌当杀使用或打出',
+			prompt:'将一张黑色牌当轰！使用或打出',
 			check:function(card){return 4-ai.get.value(card)},
 			ai:{
 				skillTagFilter:function(player){
@@ -1889,7 +1910,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			audio:2,
 			trigger:{target:'useCardToBefore'},
 			filter:function(event,player){
-				return event.card.subtype == 'attack';
+				return get.subtype(event.card) == 'attack';
 				//return event.card.name == 'sha';
 			},
 			content:function(){
@@ -2004,16 +2025,16 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			alter:true,
 			mod:{
 				canBeDiscarded:function(card,player,target,event){
-					if(get.is.altered('pantsu_skill')&&card.name!='pantsu'&&_status.currentPhase!=player) return false;
+					if(get.is.altered('pantsu_skill')&&card.name!='pantsu'&& target != "phaseDiscard") return false;
 				},
 				cardDiscardable:function(card,player,target,event){
-					if(get.is.altered('pantsu_skill')&&card.name!='pantsu'&&_status.currentPhase!=player) return false;
+					if(get.is.altered('pantsu_skill')&&card.name!='pantsu'&& target != "phaseDiscard") return false;
 				},
 				cardGainable:function(card,player,target,event){
-					if(get.is.altered('pantsu_skill')&&card.name!='pantsu'&&_status.currentPhase!=player) return false;
+					if(get.is.altered('pantsu_skill')&&card.name!='pantsu'&& target != "phaseDiscard") return false;
 				},
 				canBeGained:function(card,player,target,event){
-					if(get.is.altered('pantsu_skill')&&card.name!='pantsu'&&_status.currentPhase!=player) return false;
+					if(get.is.altered('pantsu_skill')&&card.name!='pantsu'&& target != "phaseDiscard") return false;
 				},
 			},
 		},
@@ -2592,7 +2613,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 						list.add(i);
 					}
     			}
-				player.chooseButton(['选择不让使用打出的牌',[list,'vcard']]).set('filterButton',function(button){
+				player.chooseButton(['选择不让使用打出的牌',[list,'vcard']], true).set('filterButton',function(button){
     					return true;
     				}).set('ai',function(button){
     					var rand=_status.event.rand*2;
@@ -2646,12 +2667,13 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			direct:true,
 			trigger:{player:'phaseBegin'},
 			filter:function(event,player){
+				if (player.hasSkill('kedan')) return true;
 				return player.countCards('h',{name:'bingyu'}) > 0|| player.countCards('h',{name:'lingbi'}) > 0;
 			},
 			content:function(){
 				player.chooseToUse(function(card){
 						return card.name == 'lingbi' || card.name == 'bingyu';
-					},'可以使用一张牌');
+					},'你有可以在准备阶段使用的牌，是否使用？');
 			},
 		},
 	},
@@ -2687,7 +2709,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		penglaiyao_info:'结束阶段，你失去2点灵力。',
 		*/
 		pantsu:'蓝白胖次',
-		pantsu_info:'锁定技，其他角色不能弃置或获得你的【蓝白胖次】以外的牌。',
+		pantsu_info:'锁定技，你的弃牌阶段外，你的【蓝白胖次】以外的牌不能被弃置或获得。',
 		laevatein:'莱瓦丁',
 		laevatein_info:'锁定技，出牌阶段，你对每名角色使用的第一张【轰！】不算次数。',
 		gungnir:'冈格尼尔',

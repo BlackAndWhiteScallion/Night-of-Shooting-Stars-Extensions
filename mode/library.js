@@ -6,13 +6,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        syncMenu:true,
 	    },
 	    start:function(){
-			ui.auto.hide();
-			if(lib.config.background_music!='music_off'){
-                ui.backgroundMusic.src=lib.assetURL+'audio/background/library.mp3';
-            }
-            var today = new Date();
-            if(today.getMonth() == 3) ui.backgroundMusic.src=lib.assetURL+'audio/background/signature.mp3';
-			
+			ui.auto.hide();			
 	        if(!lib.storage.scene){
 	            lib.storage.scene={};
 	        }
@@ -29,12 +23,12 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	            game.save('stage',lib.storage.stage);
 	        }
 	        var dialog=ui.create.dialog('hidden');
-	        dialog.classList.add('fixed');
+	        //dialog.classList.add('fixed');
 	        dialog.classList.add('scroll1');
 	        dialog.classList.add('scroll2');
 	        dialog.classList.add('fullwidth');
 	        dialog.classList.add('fullheight');
-	        dialog.classList.add('noupdate');
+	        //dialog.classList.add('noupdate');
 	        dialog.classList.add('character');
 	        dialog.contentContainer.style.overflow='visible';
 	        dialog.style.overflow='hidden';
@@ -160,6 +154,87 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        start.style.zIndex=3;
 	        start.style.transition='all 0s';
 	        start.hide();
+	        game.addScene=function(name,clear){
+	            var scene=lib.storage.scene[name];
+	            var brawl={
+	                name:name,
+	                intro:scene.intro,
+	            };
+	            for(var i in lib.brawl.scene.template){
+	                brawl[i]=get.copy(lib.brawl.scene.template[i]);
+	            }
+	            if(!scene.gameDraw){
+	                brawl.content.noGameDraw=true;
+	            }
+	            brawl.content.scene=scene;
+	            lib.brawl['scene_'+name]=brawl;
+	            var node=createNode('scene_'+name);
+	            if(clear){
+	                game.addSceneClear();
+	                clickCapt.call(node);
+	                _status.sceneChanged=true;
+	            }
+	        };
+	        game.addStage=function(name,clear){
+	            var stage=lib.storage.stage[name];
+	            var brawl={
+	                name:name,
+	                intro:stage.intro,
+	                content:{}
+	            };
+	            for(var i in lib.brawl.stage.template){
+	                brawl[i]=get.copy(lib.brawl.stage.template[i]);
+	            }
+	            brawl.content.stage=stage;
+	            lib.brawl['stage_'+name]=brawl;
+	            var node=createNode('stage_'+name);
+	            if(clear){
+	                game.addStageClear();
+	                clickCapt.call(node);
+	            }
+	        }
+	        game.removeScene=function(name){
+	            delete lib.storage.scene[name];
+	            game.save('scene',lib.storage.scene);
+	            _status.sceneChanged=true;
+	            for(var i=0;i<packnode.childElementCount;i++){
+	                if(packnode.childNodes[i].link=='scene_'+name){
+	                    if(packnode.childNodes[i].classList.contains('active')){
+	                        for(var j=0;j<packnode.childElementCount;j++){
+	                            if(packnode.childNodes[j].link=='scene'){
+	                                clickCapt.call(packnode.childNodes[j]);
+	                            }
+	                        }
+	                    }
+	                    packnode.childNodes[i].remove();
+	                    break;
+	                }
+	            }
+	        }
+	        game.removeStage=function(name){
+	            delete lib.storage.stage[name];
+	            game.save('stage',lib.storage.stage);
+	            for(var i=0;i<packnode.childElementCount;i++){
+	                if(packnode.childNodes[i].link=='stage_'+name){
+	                    if(packnode.childNodes[i].classList.contains('active')){
+	                        for(var j=0;j<packnode.childElementCount;j++){
+	                            if(get.is.empty(lib.storage.scene)){
+	                                if(packnode.childNodes[j].link=='scene'){
+	                                    clickCapt.call(packnode.childNodes[j]);
+	                                }
+	                            }
+	                            else{
+	                                if(packnode.childNodes[j].link=='stage'){
+	                                    clickCapt.call(packnode.childNodes[j]);
+	                                }
+	                            }
+	                        }
+	                    }
+	                    packnode.childNodes[i].remove();
+	                    break;
+	                }
+	            }
+	        }
 	        var sceneNode;
 	        for(var i in lib.brawl){
 	            if(get.config(i)===false) continue;
@@ -175,6 +250,12 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	                clickCapt.call(sceneNode);
 	            }
 	        }
+	        for(var i in lib.storage.scene){
+	            game.addScene(i);
+	        }
+	        for(var i in lib.storage.stage){
+	            game.addStage(i);
+	        }
 	        if(!lib.storage.currentBrawl){
 	            clickCapt.call(packnode.firstChild);
 	        }
@@ -184,11 +265,28 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	            game.save('directStage');
 	            clickStart(directStage);
 	        }
+	        if(lib.config.background_music!='music_off'){
+	        	lib.config.background_music = 'library';
+                ui.backgroundMusic.src=lib.assetURL+'audio/background/library.mp3';
+                ui.backgroundMusic.currentTime = 0;
+            }
+            var today = new Date();
+            if(today.getMonth() == 3){
+            	lib.config.background_music = 'signature';
+            	ui.backgroundMusic.src=lib.assetURL+'audio/background/signature.mp3';
+	        }
 	        lib.init.onfree();
 	    },
 	    brawl:{
+	    	new:{
+	    		name:'写在前面',
+	    		mode:'',
+	    		intro:['','','','','','','',''],
+	    		showcase:function(init){
+	    		},
+	    	},
 	    	help:{
-	    		name:'请读这里',
+	    		name:'使用须知',
 	    		mode:'',
 	    		intro:['欢迎来到东方流星夜！',
 	    				'东方流星夜是一套以三国杀为原型，东方project为主题的二次创作非商业化桌游游戏。',
@@ -217,14 +315,9 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	    				'覆盖完毕后，记得重启流星夜app！',
 	    				'',
 	    				'<u>更新注释：</u>',
-	    				'最后的更新冲刺了！',
-	    				'',
-	    				'<u>特殊事项：</u>',
-	    				'没有名字的角色没有技能',
-	    				'皆杀异变牌没有“无视胜利条件”的效果',
-	    				'',
+	    				'<br>',
 	    				'<u>已知bug列表：</u>',
-	    				'强化牌时使用住口会导致强化效果不生效',
+	    				'永琳，紫妈，梅莉，还有莉格露观看牌堆时有时候会因不明原因卡住，暂停再取消暂停就行了',
 	    				],
 	    		showcase:function(init){
 	    			
@@ -283,37 +376,35 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        characterview:{
 	            name:'角色牌',
 	            mode:'',
-	            intro:'关闭，打开，和查看角色简介在左上角的选项/角色进行。',
+	            intro:'关闭，打开，查看角色简介，和切换角色皮肤在左上角的选项/角色进行。（在游戏中双击角色也可以查看角色简介和切换角色皮肤哟。）',
 	            showcase:function(init){
-	            	var i;
-	            	var list=[];
-	            	for(i in lib.character){
-						list.push(i);
-					}
-	            	var dialog=ui.create.dialog('hidden');
-					dialog.style.left = "0px";
-					dialog.style.top = "0px";
-					dialog.style.width = "100%";
-					dialog.style.height = "100%";
-					dialog.add([list,'character'],false);
-					var buttons=ui.create.buttons(list,'character');
-					/*
-                    for(var i=0;i<buttons.length;i++){
-                    	/*
-                        buttons[i].classList.add('noclick');
-                        buttons[i].listen(banCharacter);
-                        buttons[i].node.hp.style.transition='all 0s';
-                        buttons[i].node.hp._innerHTML=buttons[i].node.hp.innerHTML;
-						if(mode!='mode_banned'){
-							buttons[i].updateBanned=updateBanned;
+	            	if (init){
+		            	var i;
+		            	var list=[];
+		            	for(i in lib.character){
+							list.push(i);
 						}
-						
-						ui.click.charactercard(buttons[i].node.name,buttons[i]);
-                    }
-                    dialog.add(buttons);
-					*/
-					this.appendChild(dialog);
-					dialog.noopen=true;
+		            	var dialog=ui.create.dialog('hidden');
+						dialog.style.left = "0px";
+						dialog.style.top = "0px";
+						dialog.style.width = "100%";
+						dialog.style.height = "100%";
+						dialog.add([list,'character'],false);
+						/*
+						var buttons=ui.create.buttons(list,'character');
+	                    for(var i=0;i<buttons.length;i++){
+	                        buttons[i].classList.add('noclick');
+	                        //buttons[i].listen(banCharacter);
+	                        buttons[i].node.hp.style.transition='all 0s';
+	                        buttons[i].node.hp._innerHTML=buttons[i].node.hp.innerHTML;
+							
+							//ui.click.charactercard(buttons[i].node.name,buttons[i]);
+	                    }
+	                    */
+	                    //dialog.add(buttons);
+						this.appendChild(dialog);
+						dialog.noopen=true;
+	            	}
 	            },
 	        },
 	        cardview:{
@@ -321,26 +412,28 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        	mode:'',
 	        	intro:'卡牌花色点数以牌局内为准。',
 	        	showcase:function(init){
-	        		var i;
-	            	var list=[];
-					event.list=list;
-	            	var dialog=ui.create.dialog('hidden');
-					//var dialog=this;
-					dialog.classList.add('fixed');
-					//dialog.classList.add('bosscharacter');
-					//dialog.classList.add('withbg');
-					dialog.style.left = "0px";
-					dialog.style.top = "0px";
-					dialog.style.width = "100%";
-					dialog.style.height = "100%";
-					for (i in lib.card){
-						if(lib.translate[i] && lib.card[i].type != 'zhenfa' && !lib.card[i].vanish && lib.card[i].type != 'delay'){
-							var card=game.createCard(i, undefined, undefined, undefined);
-                            dialog.add(card);
-                        }
+	        		if (init){
+		        		var i;
+		            	var list=[];
+						event.list=list;
+		            	var dialog=ui.create.dialog('hidden');
+						//var dialog=this;
+						dialog.classList.add('fixed');
+						//dialog.classList.add('bosscharacter');
+						//dialog.classList.add('withbg');
+						dialog.style.left = "0px";
+						dialog.style.top = "0px";
+						dialog.style.width = "100%";
+						dialog.style.height = "100%";
+						for (i in lib.card){
+							if(lib.translate[i] && lib.card[i].type != 'zhenfa' && !lib.card[i].vanish && lib.card[i].type != 'delay'){
+								var card=game.createCard(i, undefined, undefined, undefined);
+	                            dialog.add(card);
+	                        }
+						}
+						this.appendChild(dialog);
+						dialog.noopen=true;
 					}
-					this.appendChild(dialog);
-					dialog.noopen=true;
 	        	},
 	        },
 	        skillview:{
@@ -348,26 +441,28 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        	mode:'',
 	        	intro:'技能牌是特殊的游戏卡牌，没有花色点数，也不可以转化',
 	        	showcase:function(init){
-	        		var i;
-	            	var list=[];
-					event.list=list;
-	            	var dialog=ui.create.dialog('hidden');
-					//var dialog=this;
-					dialog.classList.add('fixed');
-					//dialog.classList.add('bosscharacter');
-					//dialog.classList.add('withbg');
-					dialog.style.left = "0px";
-					dialog.style.top = "0px";
-					dialog.style.width = "100%";
-					dialog.style.height = "100%";
-					for (i in lib.card){
-						if(lib.translate[i] && !lib.card[i].vanish && lib.card[i].type == 'delay'){
-							list.push(i);
-                        }
+	        		if (init){
+		        		var i;
+		            	var list=[];
+						event.list=list;
+		            	var dialog=ui.create.dialog('hidden');
+						//var dialog=this;
+						dialog.classList.add('fixed');
+						//dialog.classList.add('bosscharacter');
+						//dialog.classList.add('withbg');
+						dialog.style.left = "0px";
+						dialog.style.top = "0px";
+						dialog.style.width = "100%";
+						dialog.style.height = "100%";
+						for (i in lib.card){
+							if(lib.translate[i] && !lib.card[i].vanish && lib.card[i].type == 'delay'){
+								list.push(i);
+	                        }
+						}
+						dialog.add([list,'vcard']);
+						this.appendChild(dialog);
+						dialog.noopen=true;
 					}
-					dialog.add([list,'vcard']);
-					this.appendChild(dialog);
-					dialog.noopen=true;
 	        	},
 	        },
 	        incidentview:{
@@ -375,32 +470,61 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        	mode:'identity',
 	        	intro:'异变牌持有胜利条件，特殊效果。不是游戏牌，也没有花色点数的。',
 	        	showcase:function(init){
-	        		var i;
-	            	var list=[];
-					event.list=list;
-	            	var dialog=ui.create.dialog('hidden');
-					dialog.classList.add('fixed');
-					dialog.style.left = "0px";
-					dialog.style.top = "0px";
-					dialog.style.width = "100%";
-					dialog.style.height = "100%";
-					for (i in lib.card){
-						if(lib.translate[i] && lib.card[i].type == 'zhenfa'){
-							list.push(i);
+	        		if (init){
+	        			var i;
+		            	var list=[];
+						event.list=list;
+		            	var dialog=ui.create.dialog('hidden');
+						dialog.classList.add('fixed');
+						dialog.style.left = "0px";
+						dialog.style.top = "0px";
+						dialog.style.width = "100%";
+						dialog.style.height = "100%";
+						for (i in lib.card){
+							if(lib.translate[i] && lib.card[i].type == 'zhenfa'){
+								list.push(i);
+	                        }
+						}
+						dialog.add([list,'vcard']);
+						this.appendChild(dialog);
+						dialog.noopen=true;
+	        		}
+	        	},
+	        },
+	        record:{
+	        	name:'你的战绩',
+	        	intro:[''],
+	        	showcase:function(init){
+	        		if (init){
+		        		var node = this;
+		        		this.style.height=(parseInt(this.style.height.substr(0,this.style.height.length-2))-this.offsetTop)+'px';
+		        		//this.
+	                    //var page=ui.create.div('');
+	                    for(var i=0;i<lib.config.all.mode.length;i++){
+                            if(!lib.config.gameRecord[lib.config.all.mode[i]]) continue;
+                            if(lib.config.gameRecord[lib.config.all.mode[i]].str){
+                                ui.create.div('.config.indent',lib.translate[lib.config.all.mode[i]]+'模式',node);
+                                //var item=ui.create.div('.config.indent',lib.config.gameRecord[lib.config.all.mode[i]].str+'<span>重置</span>',node);
+                                var item=ui.create.div('.config.indent',lib.config.gameRecord[lib.config.all.mode[i]].str+'<span><br><br></span>',node);
+                                item.style.height='auto';
+                                //item.lastChild.addEventListener('click',reset);
+                                item.lastChild.classList.add('pointerdiv');
+                                item.link=lib.config.all.mode[i];
+                            }
                         }
-					}
-					dialog.add([list,'vcard']);
-					this.appendChild(dialog);
-					dialog.noopen=true;
+                     //node.appendChild(page);
+                 	}
 	        	},
 	        },
 	        download:{
-	        	name:'更多资源',
+	        	name:'联系制作',
 	        	intro:[
+	        		'你玩流星夜觉得开心吗？觉得不开心吗？觉得制作组是傻逼吗？自己也想要做吗？那么…………',
 	                '欢迎大家光临雾雨魔法店！',
+	                '官方QQ群：<a href = "https://jq.qq.com/?_wv=1027&k=570nlJG">东方流星夜总会</a>',
+	                '实卡淘宝链接：<a href = "https://item.taobao.com/item.htm?spm=a2126o.11854294.0.0.19cf4831lNX5xr&id=586815026235">游家桌游店</a>',
 	                '官方百度贴吧：<a href="https://tieba.baidu.com/f?kw=%CE%ED%D3%EA%BC%D2%B5%C4%C4%A7%B7%A8%B5%EA">雾雨家的魔法店吧</a>',
 	                '官方资源库兼论坛：<a href="http://liuxingye.666forum.com">雾雨魔法店的仓库</a>',
-	                '官方QQ群：<a href = "https://jq.qq.com/?_wv=1027&k=570nlJG">东方流星夜总会</a>',
 	                '无论是聊天，看漫画，反映问题，还是想提出建议，都可以到以上任意一个地方去发表意见，我们会看到并尊重你的每一个意见。',
 	            ],
 	        	showcase:function(init){
@@ -481,14 +605,14 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        	mode:'',
 	        	intro:[
 	        	'第一，感谢ZUN和上海爱丽丝幻乐团。只希望，玩这个游戏的大家也能感受到幻想乡的魅力。',
-	        	'然后，感谢无名杀的各位开发者和维护者，提供了如此漂亮的一个平台。',
+	        	'然后，感谢无名杀的各位开发者和维护者，提供了如此靓丽的平台。',
 	        	'接着，感谢魔法店里陪着我们走到现在的大家。',
 	        	'最后，感谢你，玩这个游戏的玩家，的支持。',
 	        	'我们衷心希望，你能在这里玩的开心。',
 	        	'',
 	        	'',
 	        	'各个角色的画师可以在角色简介内找到。',
-	        	'游戏BGM：<a href="https://www.bilibili.com/video/av30877"> 东方连奏Pianoforte - Shiraha </a>',
+	        	'游戏BGM：東方紅魔月譚 ～ Scarlet Devil Fantasic Rhapsody 【まぐなむおーぱす】',
 	        	'红月异变BGM：「artificial」 【THE OTHER FLOWER】',
 	        	'散樱异变BGM：「桜風」 【森羅万象】',
 	        	'永夜异变BGM：「輝夜」 【凋叶棕】',

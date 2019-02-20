@@ -17,8 +17,9 @@ window.noname_package={
         skill:'技能',
     },
     play:{
-        boss:'诸神降临',
+        boss:'闯关角色',
         cardpile:'牌堆补充',
+        coin:'金币系统',
     },
     mode:{
         library:'图鉴',
@@ -32,12 +33,13 @@ window.noname_package={
         brawl:'场景',
     },
     background:{
-        shengshi_bg:'盛世',
+        shengshi_bg:'夜空',
         tianjie:'天界',
         shenshe:'神社',
         tiangou:'山水',
         yongyuan:'永远',
         yuji:'雨季',
+        nero:'罗马！',
         scarlet:'红月异变',
         sakura:'散樱异变',
         imperishable:'永夜异变',
@@ -45,6 +47,7 @@ window.noname_package={
         phantasmagoria:'花映异变',
         sb:'文花异变',
         baka:'笨蛋异变',
+        stg_scarlet:'红魔乡',
     },
     music:{
         music_default:'默认',
