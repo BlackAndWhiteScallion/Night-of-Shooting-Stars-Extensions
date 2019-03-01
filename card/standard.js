@@ -362,9 +362,11 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			enable:true,
 			selectTarget:1,
 			range:{attack:1},
+			/*
 			postAi:function(targets){
 				return targets.length==1&&targets[0].num('j');
 			},
+			*/
 			filterTarget:function(card,player,target){
 				return (target.num('hej') != 0);
 			},
@@ -400,7 +402,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 						return -1.5;
 					},
 					player:function(player,target){
-						if(ai.get.attitude(player,target)<0&&!target.num('hej')){
+						if(ai.get.attitude(player,target)>0||!target.num('hej')){
 							return 0;
 						}
 						if (!target.storage._mubiao) return 0.5;
@@ -1229,7 +1231,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				if (target.countCards('e') > 0){
 					player.discardPlayerCard(target,'e');
 				}
-				target.damage(1,'thunder');
+				target.loselili();
 				target.equip(event.card);
 			},
 			skills:['frog_skill'],
@@ -1351,7 +1353,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			discard:false,
 			line:true,
 			prepare:function(cards,player,targets){
-				player.$give(cards,targets[0]);
+				player.$give(cards.length,targets[0]);
 			},
 			filter:function(event,player){
 				if(player.num('h') == 0) return 0;
@@ -1617,7 +1619,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 					return;
 				}
 				var rand=Math.random()<0.5;
-				target.chooseCard(true).ai=function(card){
+				target.chooseCard('净颇梨之镜：亮一张牌给'+get.translation(player)+'看',true).ai=function(card){
 					if(rand) return Math.random();
 					return ai.get.value(card);
 				};
@@ -1812,7 +1814,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 						if(target.countCards('h')==0) return 0;
 						if(player.countCards('h')<=1) return 0;
 						if(player.lili<=2) return 0;
-						return get.attitude(player,target);
+						return -1;
 					}
 				},
 			}
@@ -2471,7 +2473,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				if(result.bool){
 					player.discard(result.cards[0]);
 					for(var i=0;i<ui.skillPile.childNodes.length;i++){
-                          if (ui.skillPile.childNodes[i].name == 'shenyou'){
+                          if (ui.skillPile.childNodes[i].name == 'qianxing'){
                             player.gain(ui.skillPile.childNodes[i]);
                             break;
                           } else if (i == ui.skillPile.childNodes.length -1){

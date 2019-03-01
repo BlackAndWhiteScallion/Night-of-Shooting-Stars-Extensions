@@ -12713,6 +12713,69 @@
                         }
                     }
                 },
+                recast:function(){
+                    "step 0"
+                    game.log(player,'重铸了',cards);
+                    player.lose(cards,event.position);
+                    if(event.animate!=false){
+                        event.discardid=lib.status.videoId++;
+                        game.broadcastAll(function(player,cards,id){
+                            player.$throw(cards,null,'nobroadcast');
+                            var cardnodes=[];
+                            cardnodes._discardtime=get.time();
+                            for(var i=0;i<cards.length;i++){
+                                if(cards[i].clone){
+                                    cardnodes.push(cards[i].clone);
+                                }
+                            }
+                            ui.todiscard[id]=cardnodes;
+                        },player,cards,event.discardid);
+                        if(lib.config.sync_speed&&cards[0]&&cards[0].clone){
+                            if(event.delay!=false){
+                                var waitingForTransition=get.time();
+                                event.waitingForTransition=waitingForTransition;
+                                cards[0].clone.listenTransition(function(){
+                                    if(_status.waitingForTransition==waitingForTransition&&_status.paused){
+                                        game.resume();
+                                    }
+                                    delete event.waitingForTransition;
+                                });
+                            }
+                            else if(event.getParent().discardTransition){
+                                delete event.getParent().discardTransition;
+                                var waitingForTransition=get.time();
+                                event.getParent().waitingForTransition=waitingForTransition;
+                                cards[0].clone.listenTransition(function(){
+                                    if(_status.waitingForTransition==waitingForTransition&&_status.paused){
+                                        game.resume();
+                                    }
+                                    delete event.getParent().waitingForTransition;
+                                });
+                            }
+                        }
+                    }
+                    event.trigger('recast');
+                    "step 1"
+                    if(event.delay!=false){
+                        if(event.waitingForTransition){
+                            _status.waitingForTransition=event.waitingForTransition;
+                            game.pause();
+                        }
+                        else{
+                            game.delayx();
+                        }
+                    }
+                    "step 2"
+                    var num  = 0;
+                    for(var i=0;i<cards.length;i++){
+                        if(get.type(cards[i]) == 'delay'){
+                            player.gain(ui.skillPile.childNodes[0],'draw2');
+                        } else {
+                            num ++;
+                        }
+                    }
+                    if (num > 0) player.draw(num);
+                },
                 respond:function(){
                     var cardaudio=true;
                     if(event.skill){
@@ -13112,7 +13175,7 @@
                                 var info1=get.info(cards[num]);
                                 if(info1.skills){
                                     for(var i=0;i<info1.skills.length;i++){
-                                        player.removeSkill(info1.skills[i]);
+                                        if (!player.countCards(cards[num].name, 'j')) player.removeSkill(info1.skills[i]);
                                     }
                                 }
                             }
@@ -13557,8 +13620,19 @@
                     }
                     var skills=player.getSkills();
                     for(var i=0;i<skills.length;i++){
-                        if(lib.skill[skills[i]].temp){
+                        var info = lib.skill[skills[i]];
+                        if(info.temp){
                             player.removeSkill(skills[i]);
+                        }
+                        if(info.global){
+                            if(typeof info.global=='string'){
+                                game.removeGlobalSkill(info.global);
+                            }
+                            else{
+                                for(var j=0;j<info.global.length;j++){
+                                    game.removeGlobalSkill(info.global[j]);
+                                }
+                            }
                         }
                     }
                     player.removeEquipTrigger();
@@ -16625,6 +16699,31 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                     }
                     if(next.cards==undefined) _status.event.next.remove(next);
                     next.setContent('discard');
+                    return next;
+                },
+                recast:function(){
+                    var next=game.createEvent('recast');
+                    next.player=this;
+                    next.num=0;
+                    for(var i=0;i<arguments.length;i++){
+                        if(get.itemtype(arguments[i])=='player'){
+                            next.source=arguments[i];
+                        }
+                        else if(get.itemtype(arguments[i])=='cards'){
+                            next.cards=arguments[i];
+                        }
+                        else if(get.itemtype(arguments[i])=='card'){
+                            next.cards=[arguments[i]];
+                        }
+                        else if(typeof arguments[i]=='boolean'){
+                            next.animate=arguments[i];
+                        }
+                        else if(get.objtype(arguments[i])=='div'){
+                            next.position=arguments[i];
+                        }
+                    }
+                    if(next.cards==undefined) _status.event.next.remove(next);
+                    next.setContent('recast');
                     return next;
                 },
                 respond:function(){
@@ -21169,7 +21268,8 @@ throwDice:function(num){
                 },
                	discard:function(bool){
 					if(!this.destroyed){
-						ui.discardPile.appendChild(this);
+                        if (get.type(this) == 'delay') ui.skillPile.appendChild(this);
+						else ui.discardPile.appendChild(this);
 					}
 					this.fix();
 					this.classList.remove('glow');
@@ -22525,10 +22625,12 @@ throwDice:function(num){
             },
             chuwai:{
                 init:function(player){
-                    player.isOut() == true;
+                    player.classList.add('out');
+                    player.hide();
                 },
                 onremove:function(player){
-                    player.isOut() == false;
+                    player.classList.remove('out');
+                    player.show();
                 },
                 mod:{
                     cardEnabled:function(){
@@ -22546,7 +22648,12 @@ throwDice:function(num){
                     content:'视为不在游戏内'
                     // 那么应该使用game.player.isOut()之类的么？
                 },
-                group:['undist','mianyi']
+                group:['undist','mianyi'],
+                trigger:{player:'phaseBefore'},
+                content:function(){
+                    trigger.cancel();
+                    player.phaseSkipped=true;
+                },
             },
             mingzhi:{
                 intro:{
@@ -26564,7 +26671,7 @@ smoothAvatar:function(player,vice){
             }
         },
         prompt:function(){
-            			var str,forced,callback,noinput=false;
+            var str,forced,callback,noinput=false;
 			for(var i=0;i<arguments.length;i++){
 				if(arguments[i]=='alert'){
 					forced=true;
@@ -37660,7 +37767,7 @@ smoothAvatar:function(player,vice){
                                         case '摸牌':target.draw(num);break;
                                         case '弃牌':target.discard(target.getCards('he').randomGets(num));break;
                                         case '横置':target.link();break;
-                                        case '翻面':target.turnOver();break;
+                                        case '加灵':target.gainlili(num, 'nosource');break;
                                         case '复活':target.revive(target.maxHp);break;
                                         case '换人':{
                                             if(_status.event.isMine()){
@@ -37721,7 +37828,7 @@ smoothAvatar:function(player,vice){
                         var nodedraw=ui.create.div('.menubutton','摸牌',row1,clickrow1);
                         var nodediscard=ui.create.div('.menubutton','弃牌',row1,clickrow1);
                         var nodelink=ui.create.div('.menubutton','横置',row1,clickrow1);
-                        var nodeturnover=ui.create.div('.menubutton','翻面',row1,clickrow1);
+                        var nodeturnover=ui.create.div('.menubutton','加灵',row1,clickrow1);
                         var noderevive=ui.create.div('.menubutton','复活',row1,clickrow1);
                         var nodereplace=ui.create.div('.menubutton','换人',row1,clickrow1);
                         if(lib.config.mode!='identity'&&lib.config.mode!='guozhan'){
