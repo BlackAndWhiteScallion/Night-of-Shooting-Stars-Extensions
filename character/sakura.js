@@ -408,17 +408,22 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         if (!player.storage.huanfa.length) player.unmarkSkill('huanfa');
                         if (event.index == 0){
                             trigger.target.gain(result.links[0],'log');
-                            event.finish();
+                            player.$give(1,trigger.target);
+                            if (get.type(result.links[0]) == 'equip'){
+                                event.card = result.links[0];
+                                player.chooseBool('是否将'+get.translation(result.links[0])+'置入'+get.translation(trigger.target)+'的装备区内？').set('choice',get.bonus(result.links[0])<=0);
+                            }
                         } else {
                             var cards = [];
                             for(var i=0;i<3;i++){
                                 cards.push(ui.skillPile.childNodes[i]);
                             }
-                            player.chooseCardButton(cards,'选择一张技能牌',1,true);
+                            player.chooseCardButton(cards,'选择一张技能牌交给'+get.translation(trigger.player),1,true);
                         }
                     }
                     'step 3'
                     if (event.index == 1 && result.links) trigger.target.gain(result.links[0],'log');
+                    if (event.index == 0 && result.bool && event.card) trigger.target.equip(event.card);
                 },
             },
             hanghourai:{
@@ -470,13 +475,14 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         player.storage.huanfa.remove(event.card);
                         player.syncStorage('huanfa');
                         var players = game.filterPlayer();
+                        var f = [];
                         for (var i = 0; i < players.length; i++){
-                            if (!trigger.target.canUse(event.card, players[i])) players.remove(players[i]);
+                            if (trigger.target.canUse(event.card, players[i])) f.push(players[i]);
                         }
-                        if (players.length == 0) event.finish();
+                        if (f.length == 0) event.finish();
                         else {
                             player.chooseTarget(('选择'+get.translation(trigger.target)+'使用'+get.translation(event.card)+'的目标'),function(card,player,target){
-                                return players.contains(target);
+                                return f.contains(target);
                             });
                         }
                     }
@@ -512,7 +518,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         event.redo();
                     }
                     "step 2"
-                    event.current.chooseTarget([1,1],true,'春晓：弃置你上家或下家一张牌',function(card,player,target){
+                    event.current.chooseTarget([1,1],true,'春晓：弃置与你最近的一名角色一张牌',function(card,player,target){
                         if(player==target) return false;
                         if(get.distance(player,target)<=1) return true;
                         if(game.hasPlayer(function(current){
@@ -2238,7 +2244,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             alice:'爱丽丝',
             huanfa:'幻法',
             huanfa_bg:'手',
-            huanfa_info:'弃牌阶段开始时，若“手办”数小于场上角色数，你可以将一至两张手牌扣置于角色牌上，称为“手办”，并摸等量张牌。',
+            huanfa_info:'弃牌阶段开始时，若“手办”数小于场上角色数，你可以将一至两张牌扣置于角色牌上，称为“手办”，并摸等量张牌。',
             huanfa_audio1:'表演正在准备中，请稍微片刻。',
             huanfa_audio2:'嗯？已经等不及了么？',
             mocai:'魔彩',
