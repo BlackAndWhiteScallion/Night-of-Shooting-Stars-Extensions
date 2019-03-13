@@ -599,6 +599,11 @@
                         init:true,
                         intro:'防止0灵力的角色造成的所有伤害',
                     },
+                    nei_end:{
+                        name:'路人胜利时游戏不结束',
+                        init:false,
+                        intro:'异变模式下，路人因异变胜利后，游戏不结束',
+                    },
                 },
             },
             appearence:{
@@ -10399,6 +10404,7 @@
                 },
                 chooseToDiscard:function(){
                     "step 0"
+                    //if (event.parent.name != 'phaseDiscard') console.log(event);
                     if(event.autochoose()){
                         event.result={
                             bool:true,
@@ -13785,7 +13791,8 @@
                     // 这里是替换装备的部分
                     // player.lose(player.get('e',{subtype:get.subtype(card)}),false);
                     if (player.num('e',{type:'equip'})>=player.maxequip){
-                        player.chooseToDiscard(1,{type:'equip'},'e',true);
+                        var num = player.num('e', {type:'equip'}) - player.maxequip + 1;
+                        player.chooseToDiscard('装备区达到上限，请弃置'+num+'张装备牌', num, {type:'equip'},'e',true);
                     }
                     "step 3"
                     if(player.isMin()){
@@ -13870,7 +13877,8 @@
                         }
                         // 多了就扔掉
                         if (player.num('j',{type:'delay'})>player.maxjudge){
-                            player.discardPlayerCard(player,'j',true);
+                            var num = player.num('j',{type:'delay'}) - player.maxjudge;
+                            player.chooseToDiscard('技能牌数量达到上限，请弃置'+num+'张技能牌',num, {type:'delay'},'j',true);
                         }
                         if(_status.discarded){
 							_status.discarded.remove(cards[0]);
@@ -17282,7 +17290,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                     }
                 },
                 isMad:function(){
-                    return this.hasSkill('mad');
+                    return this.hasSkill('mad') || this.hasSkill('death_win');
                 },
                 goMad:function(end){
                     if(end){
@@ -18781,7 +18789,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
 						func=null;
 						self=true;
 					}
-                    if(mode=='identity'){
+                    if(mode=='identity' || mode == 'old_identity'){
                         switch(player.identity){
                             case 'zhu':case 'zhong':case 'mingzhong':targets=game.filterPlayer(function(target){
                                 if(func&&!func(target)) return false;
@@ -22920,14 +22928,17 @@ throwDice:function(num){
             },
             // 本阶段已经成为过牌的目标啦
             _mubiao:{
-                trigger:{target:'useCardToAfter'},
+                trigger:{player:'useCardAfter'},
                 forced:true,
+                direct:true,
                 priority:-100,
                 content:function(){
-                    if (!player.storage._mubiao){
-                        player.storage._mubiao = 1;
-                    } else {
-                        player.storage._mubiao += 1;
+                    for (var i = 0; i < trigger.targets.length; i ++){
+                        if (!trigger.targets[i].storage._mubiao){
+                            trigger.targets[i].storage._mubiao = 1;
+                        } else {
+                            trigger.targets[i].storage._mubiao += 1;
+                        }
                     }
                 }               
             },
@@ -27618,6 +27629,66 @@ smoothAvatar:function(player,vice){
                 game.resume();
             }
         },
+        // 异变胜利要怎么游戏结束的设置
+        // 联机时需要一个别的设置……
+        incidentover:function(player){
+            // 如果是玩家胜利就是玩家胜利
+            "step 0"
+            if (game.me == player){
+                game.over(true);
+                return;
+            }
+            // 如果有人有皆杀时游戏结束，如果是玩家就玩家赢，否则玩家失败。
+            "step 1"
+            var p = game.filterPlayer();
+            for (var i = 0; i < p.length; i ++){
+                if (p[i].storage._tanpai){
+                    for (var j = 0; j < p[i].storage._tanpai.length; j ++){
+                        if (p[i].storage._tanpai[j].name == 'death'){
+                            if (p.length > 1) return ;
+                            else {
+                                if (p[i] == game.me) game.over(true);
+                                else game.over();
+                                return ;
+                            }
+                        }
+                    }
+                }
+            }
+            "step 2"
+            /*  联机时使用的游戏结束设置
+            var clients=game.players.concat(game.dead);
+            for(var i=0;i<clients.length;i++){
+                if(clients[i].isOnline2()){
+                    clients[i].send(game.over,dialog.content.innerHTML,game.incidentoverOL(clients[i]));
+                }
+            }
+            */
+            "step 3"
+            // 当前模式：
+            // 如果是异变模式，且胜利玩家的身份是路人，如果玩家就是路人的话判定胜利，否则判定平局
+            var mode=get.mode();
+            if (mode == 'identity' && player.identity == 'nei'){
+                if (player == game.me) game.over(true);
+                else game.over();
+                return;
+            }
+            // 如果是异变模式，且玩家是路人，判定平局。
+            if (mode == 'identity' && game.me.identity == 'nei'){
+                game.over();
+                return;
+            }
+            // 如果胜利玩家的队友包括玩家，判定胜利，否则判定失败。
+            if (player.getFriends().contains(game.me)){
+                game.over(true);
+            } else {
+                game.over(false);
+            }
+            "step 4"
+        },
+        incidentoverOL:function(player){
+
+        },
         // 这里是游戏结束的设置
         over:function(result){
             "step 0"
@@ -27626,7 +27697,7 @@ smoothAvatar:function(player,vice){
             for (var i = 0; i < p.length; i ++){
                 if (p[i].storage._tanpai){
                     for (var j = 0; j < p[i].storage._tanpai.length; j ++){
-                        if (p[i].storage._tanpai[j].name == 'death' && p.length > 1) return ;
+                        if (p[i].storage._tanpai[j].name == 'death' && p.length > 1) return;
                     }
                 }
             }
@@ -38805,7 +38876,7 @@ smoothAvatar:function(player,vice){
                             packsource.previousSibling.style.display='none';
                         }
                         else{
-                            packsource.innerHTML='角色包';
+                            packsource.innerHTML='按作品查找';
                         }
                     }
 
@@ -47695,7 +47766,6 @@ smoothAvatar:function(player,vice){
             return 10-get.useful(card);
         },
         unuseful3:function(card){
-            if(card.name=='du') return 20;
             return 10-get.useful(card);
         },
         value:function(card,player,method){
@@ -47833,7 +47903,7 @@ smoothAvatar:function(player,vice){
                 }
             }
             var result=get.result(card,eventskill);
-            var result1=result.player,result2=result.target;
+            var result1=result.player, result2=result.target;
             if(typeof result1=='function') result1=result1(player,target,card);
             if(typeof result2=='function') result2=result2(player,target,card);
             if(typeof result1!='number') result1=0;

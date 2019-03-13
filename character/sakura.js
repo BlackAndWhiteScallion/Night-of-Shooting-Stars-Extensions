@@ -18,15 +18,15 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 		},
 		characterIntro:{
 			letty:'全名蕾蒂·霍瓦特洛克。在冬天才会出来的雪女。能力是操纵寒气，也可以强化冬天的效果。<br> <b>画师：国家飯</b>',
-            chen:'一只妖怪猫化作的，八云蓝的式神。因为是式神的式神所以比较弱，习性也更接近猫而不是妖怪。能力是使用妖术的能力。<br> <b>画师：水佾</b>',
-            lilywhite:'在春天才会出现的，宣告春天到来的妖精。<br> <b>画师：oninoko</b>',
+            chen:'一只妖怪猫化作的，八云蓝的式神。因为是式神的式神所以比较弱，习性也更接近猫而不是妖怪。能力是使用妖术的能力。<br> <b>设计：安定   画师：水佾</b>',
+            lilywhite:'在春天才会出现的，宣告春天到来的妖精。<br> <b>设计：安定   画师：oninoko</b>',
             lunasa:'全名露娜萨·普莉兹姆利巴。骚灵三姐妹中的大姐，因此也担任乐团的领队。有些阴沉，但又不喜欢拐弯抹角，且很容易较真的性子。使用乐器为小提琴，演奏的曲调带有令观众镇静，低落，甚至忧郁的效果。<br><b>画师：中島楓</b>',
             merlin:'全名梅露兰·普莉兹姆利巴。骚灵三姐妹中的二姐。很是开朗，但是感觉上有点神经质。力量上是姐妹中最强的。使用乐器为小号，演奏的曲调带有令观众激动，激昂，甚至抓狂的效果。<br><b>画师：中島楓</b>',
             lyrica:'全名莉莉卡·普莉兹姆利巴。骚灵三姐妹中的三妹。聪明，但是总是想用小聪明去赚姐姐们的便宜。力量上是姐妹中最强的。使用乐器为键盘，打击乐器也可以使用。<br><b>画师：中島楓</b>',
             alice:'全名爱丽丝·玛格特罗伊德。住在魔法森林中，以操纵人偶出名的魔法使。因为是人偶使，大部分人不太敢接近，所以比较孤僻的样子。顺便也有着收集各种道具的坏习惯。<br><b>画师：藤原</b>',
             youmu:'全名魂魄妖梦。冥界白玉楼的庭师（同时也是女仆，厨师，剑术指导）。是半人半幽灵的混血，因此持有更长的寿命和更强的身体能力。使用楼观剑和白楼剑的二刀流剑豪。<br><b>画师：daiaru</b>',
             yuyuko:'全名西行寺幽幽子。冥界白玉楼的大小姐。冥界的管理者，可以控制死亡，也可以控制已死的幽灵。已经成为亡灵千年以上，并且没有生前的记忆，因而很是乐天和无忧无虑。<br><b>画师：.SIN</b>',
-            ran:'全名八云蓝。八云紫的式神，传说中的九尾妖狐。因为紫长期睡觉，还需要冬眠，所以工作从日常打理到大结界的维护都是蓝来进行。<br> <b>画师：ルリア</b>',
+            ran:'全名八云蓝。八云紫的式神，传说中的九尾妖狐。因为紫长期睡觉，还需要冬眠，所以工作从日常打理到大结界的维护都是蓝来进行。<br> <b>设计：无限连的陆伯言  画师：ルリア</b>',
             yukari:'全名八云紫。持有如同GM权限的控制境界的能力，力量深不可测。幻想乡的创始人之一。大部分时候都在睡觉，或者是用隙间做些很逗比的事情。<br> <b>画师：Shionty</b>',
 		},       
 		perfectPair:{
@@ -258,6 +258,9 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         result.targets[0].gainlili();
                         if (result.targets[0].name == 'ran'){
                             game.trySkillAudio('shihuo',result.targets[0],true,3);
+                        }
+                        if (result.targets[0].name == 'yukari'){
+                            game.trySkillAudio('shihuo',result.targets[0],true,4);
                         }
                     }
                 },
@@ -514,6 +517,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     if(event.num<event.players.length){
                         var target=event.players[event.num];
                         target.draw();
+                        if (target.name == 'lilyblack') game.trySkillAudio('chunxiao',player,true,3);
                         event.num++;
                         event.redo();
                     }
@@ -776,7 +780,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     player.logSkill('zhenhun');
                     if (result.bool && event.control == '获得牌'){
                         if (result.links.length){
-                            //player.$gain(result.links);
+                            player.$gain(result.links);
                             player.gain(result.links[0],'log');
                             if (!player.storage.mingzhi){
                                 player.storage.mingzhi = [result.links[0]];
@@ -1812,6 +1816,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     'step 1'
                     if (result.targets){
                         result.targets[0].gainlili(get.bonus(cards[0]));
+                        if (result.targets[0].name == 'yukari') game.trySkillAudio('shiqu',result.targets[0],true,3);
+                        if (result.targets[0].name == 'chen') game.trySkillAudio('shiqu',result.targets[0],true,4);
                         if (result.targets[0] != player){
                             result.targets[0].addTempSkill('shiqu2',{player:'phaseBegin'});
                             player.addTempSkill('shiqu2',{player:'phaseBegin'});
@@ -1930,7 +1936,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     if (get.subtype(card) == 'attack' || get.subtype(card) == 'disrupt') return get.attitude(player,event.player) < 0;
                     if (get.type(card) == 'equip' || get.subtype(card) == 'support') return get.attitude(player,event.player) > 0;
                     */
-                    if (player.canUse(card,event.player)) return get.effect(event.player,{name:card.name}, player, player);
+                    if (!card) return false;
+                    if (player.canUse(card,event.player)) return get.effect(event.player,{name:card.name}, player, player) > 0;
                     return false;
                 },
                 content:function(){
@@ -1941,6 +1948,10 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     'step 1'
                     if(result.bool){
                         var current = _status.currentPhase;
+                        if (current.name == 'yuyuko' && player.name == 'yukari') game.trySkillAudio('huanjing',current,true,3);
+                        if (current.name == 'renko' && player.name == 'yukari' ) game.trySkillAudio('huanjing',player,true,4);
+                        if (current.name == 'meribel' && player.name == 'yukari') game.trySkillAudio('huanjing',current,true,5);
+                        if (current.name == 'reimu' && player.name == 'yukari') game.trySkillAudio('huanjing',current,true,6);
                         event.cards = [];
                         event.cards.push(ui.cardPile.childNodes[ui.cardPile.childNodes.length-1]);
                         player.showCards(event.cards[0]);
@@ -1954,7 +1965,6 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         } else if (get.type(event.cards[0]) == 'equip'){
                             current.equip(event.cards[0]);
                         }
-                        if (player.storage.bot) player.storage.bot.remove(player.storage.bot[0]);
                     }
                 }
             },
@@ -2234,7 +2244,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             shihuo_info:'一回合一次，你获得1点灵力值后，可以令一名角色获得1点灵力值。',
             shihuo_audio1:'喵呜~',
             shihuo_audio2:'喵帕斯！……喵？',
-            shihuo_audio3:'橙也渐渐懂事起来了啊www',
+            shihuo_audio3:'橙也渐渐懂事起来了啊w',
+            shihuo_audio4:'（揉揉橙）',
             shuanggui:'青鬼赤鬼',
             shuanggui_audio1:'鬼符「青鬼赤鬼」!',
             shuanggui_audio2:'不要因为我是猫就小看我了喵！',
@@ -2264,6 +2275,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             chunxiao_info:'准备阶段，若你的灵力值不小于体力值，你可以令所有角色各摸一张牌，然后各弃置与其最近的一名角色一张牌。',
             chunxiao_audio1:'春天到了！',
             chunxiao_audio2:'<u><b>春！天！到！了！</u></b>',
+            chunxiao_audio3:'是你！春天对决，来吧！',
             mengya:'萌芽',
             mengya_info:'一回合两次，出牌阶段，你可以选择一项：获得1点灵力，然后弃置一张牌；或消耗1点灵力，然后摸一张牌。',
             mengya_audio1:'春天是万物复苏的季节！',
@@ -2365,6 +2377,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             shiqu_info:'一回合一次，出牌阶段，你可以重铸一张牌；若该牌有灵力，你可以令一名角色获得等量的灵力；若如此做，直到你的准备阶段：你或其需要消耗灵力时，可以改为由对方消耗灵力。',
             shiqu_audio1:'先说清楚，这可不是什么结婚宣言啊？',
             shiqu_audio2:'是谁把我们妖狐的印象污染成了容易暴走的理性蒸发的疯怪啊……',
+            shiqu_audio3:'蓝可真是不错呢，谢谢。',
+            shiqu_audio4:'谢谢你蓝大人！',
             shiqu2:'式取',
             shiqu2_bg:'式',
             tianhugongzhu:'天狐公主 -illusion-',
@@ -2377,6 +2391,10 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             pileBottom:'牌堆底',
             huanjing_audio1:'来，见识一下隙间的尽头吧？',
             huanjing_audio2:'下面的应该不是【决斗】来着？',
+            huanjing_audio3:'紫，这次又想搞什么事了？',
+            huanjing_audio4:'你这次可是跑到了个不该来的地方呢。',
+            huanjing_audio5:'啊，是你——',
+            huanjing_audio5:'紫你很烦啊，怎么又来了？',
             mengjie:'梦界',
             mengjie_info:'出牌阶段开始时，或你成为攻击牌的目标后，你可以观看牌堆底的三张牌，并可以将其中任意张置于牌堆顶；若此时为回合外，你可以摸一张牌。',
             mengjie_audio1:'呼呼呼呼呼——',
