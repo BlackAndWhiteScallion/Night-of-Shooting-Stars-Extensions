@@ -25,7 +25,7 @@
         //updateURL:'https://raw.githubusercontent.com/libccy/noname',
         extensionURL:'https://raw.githubusercontent.com/BlackAndWhiteScallion/Night-of-Shooting-Stars-Extensions/master/',
         //mirrorURL:'',
-        mirrorURL:'https://coding.net/u/BWS/p/Night-of-Shooting-Stars/git/raw',
+        mirrorURL:'https://dev.tencent.com/u/BWS/p/Night-of-Shooting-Stars/git/raw',
         hallURL:'318sgs.6655.la',
         //hallURL:'noname.pub',
         assetURL:'',
@@ -1139,7 +1139,7 @@
                     },
                     card_style:{
                         name:'卡牌样式',
-                        init:'default',
+                        init:'simple',
                         intro:'设置正面朝上的卡牌的样式',
                         item:{
                             wood:'木纹',
@@ -21085,10 +21085,13 @@ throwDice:function(num){
                     // 贴个灵力加成在底下
                     // 这里可能要被换掉吧……
                     if (this.bonus && this.bonus != 0) {
-                        if (this.bonus > 0)
+                        if (this.bonus > 0){
                             this.node.range.innerHTML = '灵力：+' + this.bonus;
-                        else
+                            //this.node.range.style.color = 'rgb(255,0,0)';
+                        }else{
                             this.node.range.innerHTML = '灵力：' + this.bonus;
+                            //this.node.range.style.color = 'rgb(0,0,255)';
+                        }
                     }
                     switch(get.subtype(this)){
                         case 'equip1':
@@ -21151,6 +21154,23 @@ throwDice:function(num){
 							this.node.range.innerHTML+=tagstr;
 						}
 					}
+                    // 在这里追加因禁忌牌而更改的东西应该就可以了吧？
+                    // 为什么这个会出现两次呢？难道每次加载的时候都要跑两次？不过对于我要做的事情没有影响就是了……
+                    if (info.type == 'jinji'){
+                        this.node.name.style.color='rgb(255, 255, 255)';
+                        this.node.name.style.border='1px solid rgb(255,255,255)';
+                        this.node.info.style.color='rgb(255,255,255)';
+                        this.setBackgroundImage('theme/card.png');
+                    } else if (info.type == 'zhenfa'){
+                        this.node.name.style.color='rgb(255, 255, 255)';
+                        this.node.name.style.fontSize='16px';
+                        this.node.name.style.border='0px solid rgb(255,255,255)';
+                        this.node.info.style.color='rgb(255,255,255)';
+                        this.setBackgroundImage('theme/zhenfa.png');
+                    } else if (info.type == 'delay'){
+                        if (this.node.info.innerHTML != '技能<span> </span>') this.node.info.innerHTML = '';
+                        this.node.name.style.fontSize = '15px';
+                    }
                     return this;
                 },
                 updateTransform:function(bool,delay){
@@ -22829,16 +22849,10 @@ throwDice:function(num){
                 content:function(){
                     // 回合开始时如果有不是极意的符卡就翻回去。
                     if (player.isTurnedOver()){
-                        var info = ""
-                        for(var i=0;i<player.skills.length;i++){
-                            if (lib.skill[player.skills[i]].spell){
-                                var info = lib.skill[player.skills[i]];
-                                if (player.hasSkill(info.spell[0])){
-                                    if (!info.infinite){
-                                        player.turnOver();
-                                    }
-                        //          break;
-                                }
+                        if (player.storage.spell){
+                            var info = lib.skill[player.storage.spell];
+                            if (info.spell){
+                                if (!info.infinite) player.turnOver();
                             }
                         }
                     }
@@ -22860,16 +22874,12 @@ throwDice:function(num){
                     // 结束阶段，如果有角色是背面朝上的，就翻过去。
                     var players = game.filterPlayer();
                     for (var j = 0; j < players.length; j ++) {
-                        if (players[j].isTurnedOver()){
-                            for(var i=0;i<players[j].skills.length;i++){
-                                if (lib.skill[players[j].skills[i]].spell){
-                                    var info = lib.skill[players[j].skills[i]];
-                                    if (players[j].hasSkill(info.spell[0])){
-                                        if (!info.roundi && !info.infinite){
-                                            players[j].turnOver();
-                                        }
-                            //          break;
-                                    }
+                        if (players[j].isTurnedOver() && player.storage.spell){
+                            var skillname = player.storage.spell;
+                            var info = lib.skill[skillname];
+                            if (info.spell){
+                                if (!info.roundi && !info.infinite){
+                                    players[j].turnOver();
                                 }
                             }
                         }
@@ -22891,12 +22901,10 @@ throwDice:function(num){
                     return player.isTurnedOver() && player.lili < 1;
                 },
                 content:function(){
-                    for(var i in player.skills){
-                        if (i.spell){
-                            game.log(player+'的灵力值变为0,'+get.translation(i)+'符卡结束');
-                        }
+                    if (player.storage.spell){
+                        game.log(get.translation(player)+'的灵力值变为0，符卡结束。');
+                        player.turnOver();
                     }
-                    player.turnOver();
                 },
             },
             // 符卡结束翻面回来，取除所有符卡技能。
@@ -22907,21 +22915,30 @@ throwDice:function(num){
                     return true;
                 },
                 content:function(){
-                    for(var i=0;i<player.skills.length;i++){
-                        var info = lib.skill[player.skills[i]];
+                    if (player.isTurnedOver()){
+                        var skillname = trigger.parent.name;
+                        var info = lib.skill[skillname];
                         if (info.spell){
-                            for (var j = 0; j < info.spell.length; j ++){
-                                if (!player.isTurnedOver()){
-                                    player.removeSkill(info.spell[j]);
-                                    player.addSkillTrigger(player.skills[i]);
-                                    if (info.infinite){
-                                        player.die();
-                                    }
-                                } else {
-                                    player.addSkill(info.spell[j]);
-                                    player.removeSkillTrigger(player.skills[i]);
+                            for (var i = 0; i < info.spell.length; i ++){
+                                player.addSkill(info.spell[i]);
+                            }
+                            player.removeSkillTrigger(skillname);
+                        }
+                        player.storage.spell = skillname;
+                    } else {
+                        if (player.storage.spell){
+                            var info = lib.skill[player.storage.spell];
+                            if (info.spell){
+                                game.log(get.translation(player)+'的【'+get.translation(player.storage.spell)+'】符卡结束。');
+                                for (var i = 0; i < info.spell.length; i ++){
+                                    player.removeSkill(info.spell[i]);
+                                }
+                                player.removeSkillTrigger(player.storage.spell);
+                                if (info.infinite){
+                                    player.die();
                                 }
                             }
+                            delete player.storage.spell;
                         }
                     }
                 },
@@ -36857,7 +36874,7 @@ smoothAvatar:function(player,vice){
                                 return 'GitHub';
                             }
                             if(str==lib.mirrorURL){
-                                return 'Coding';
+                                return 'Gitee';
                             }
                             var index;
                             index=str.indexOf('://');
@@ -37002,7 +37019,7 @@ smoothAvatar:function(player,vice){
                                 // 似乎是在这里进行更新的
                                 if (!lib.config.updateURL || lib.config.updateURL.includes("github")){
                                     updateURL = lib.updateURL+'/master/';
-                                } else if (lib.config.updateURL.includes('coding')){
+                                } else if (lib.config.updateURL.includes('gitee')){
                                     updateURL = lib.mirrorURL+'/master/';
                                 } else {
                                     updateURL = lib.config.updateURL;
@@ -37440,7 +37457,7 @@ smoothAvatar:function(player,vice){
                         var span6_br=ui.create.node('br');
                         li2.lastChild.appendChild(span6_br);
 
-                        var span5=ui.create.div('','图片素材（精简，24MB）');
+                        var span5=ui.create.div('','图片素材（精简，只有东方）');
                         span5.style.fontSize='small';
                         span5.style.lineHeight='16px';
                         var span5_check=document.createElement('input');
@@ -37471,7 +37488,7 @@ smoothAvatar:function(player,vice){
                         var span3_br=ui.create.node('br');
                         li2.lastChild.appendChild(span3_br);
 
-                        var span3=ui.create.div('','音效素材（36MB）');
+                        var span3=ui.create.div('','音效素材（162MB）');
                         span3.style.fontSize='small';
                         span3.style.lineHeight='16px';
                         li2.lastChild.appendChild(span3);
@@ -37488,7 +37505,7 @@ smoothAvatar:function(player,vice){
                         var span4_br=ui.create.node('br');
                         li2.lastChild.appendChild(span4_br);
 
-                        var span2=ui.create.div('','皮肤素材（23MB）');
+                        var span2=ui.create.div('','皮肤素材（21MB）');
                         span2.style.fontSize='small';
                         span2.style.lineHeight='16px';
                         li2.lastChild.appendChild(span2);
@@ -37510,7 +37527,7 @@ smoothAvatar:function(player,vice){
                         li2.lastChild.appendChild(span5_check);
                         li2.lastChild.appendChild(span2_br);
 
-                        var span6=ui.create.div('','图片素材（完整，64MB）');
+                        var span6=ui.create.div('','图片素材（完整）');
                         span6.style.fontSize='small';
                         span6.style.lineHeight='16px';
                         li2.lastChild.appendChild(span6);
@@ -39777,7 +39794,7 @@ smoothAvatar:function(player,vice){
                     if(lib.forcehide.contains('wuxie')) ui.wuxie.classList.add('forcehide');
                     if(lib.forcehide.contains('cardPileButton')) ui.cardPileButton.classList.add('forcehide');
                 }
-                ui.volumn=ui.create.system('♫');
+                ui.volumn=ui.create.system('♫ 音乐');
                 lib.setPopped(ui.volumn,ui.click.volumn,200);
                 // if(lib.config.show_pause) ui.auto.style.marginLeft='10px';
                 if(!lib.config.show_volumn){
@@ -47742,6 +47759,7 @@ smoothAvatar:function(player,vice){
                 }
                 delete _status.tempnofake;
             }
+            if (from.hasSkill('death_win') || to.hasSkill('death_win')) att = -1;
             return att;
         },
         sgnAttitude:function(){
@@ -47819,14 +47837,17 @@ smoothAvatar:function(player,vice){
             }
             var value1=get.equipValue(card,target);
             var value2=0;
+            /* 无视换装备部分
             var current=target.getEquip(card);
             if(current&&current!=card){
                 value2=get.equipValue(current,target);
                 if(value2>0&&!target.needsToDiscard()&&!get.tag(card,'valueswap')){
                     return 0;
                 }
-            }
-            return Math.max(0,value1-value2)/5;
+            }*/
+            if (!player.countCards('e') || player.countCards('e') < player.maxequip) return value1;
+            //return Math.max(0,value1-value2)/5;
+            return 0;
         },
         equipValue:function(card,player){
             if(player==undefined||get.itemtype(player)!='player') player=get.owner(card);
