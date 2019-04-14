@@ -2449,7 +2449,7 @@
                         name:'手牌显示',
                         intro:'将手牌设置为正方形或长方形',
                         init:'oblong',
-                        unfrequent:true,
+                        //unfrequent:true,
                         item:{
                             default:'默认',
                             oblong:'长方',
@@ -3734,19 +3734,6 @@
 					onswitch:function(bool){
 						if(bool){
 							var storage={boss:{},versus:{},translate:{}};
-							var loadversus=function(){
-								game.loadModeAsync('versus',function(mode){
-									for(var i in mode.translate){
-										storage.translate[i]=mode.translate[i];
-									}
-									for(var i in mode.jiangeboss){
-										if(mode.jiangeboss[i][4].contains('bossallowed')){
-											storage.versus[i]=mode.jiangeboss[i];
-										}
-									}
-									localStorage.setItem('boss_storage_playpackconfig',JSON.stringify(storage));
-								});
-							};
 							game.loadModeAsync('boss',function(mode){
 								for(var i in mode.translate){
 									storage.translate[i]=mode.translate[i];
@@ -3756,7 +3743,6 @@
 										storage.boss[i]=mode.characterPack.mode_boss[i];
 									}
 								}
-								loadversus();
 							});
 						}
 						else{
@@ -3788,6 +3774,59 @@
                         else{
                             this.firstChild.innerHTML='隐藏此扩展';
                             lib.config.hiddenPlayPack.remove('boss');
+                        }
+                        game.saveConfig('hiddenPlayPack',lib.config.hiddenPlayPack);
+                    }
+                },
+            },
+            boss1:{
+                enable:{
+                    name:'开启',
+                    init:true,
+                    restart:true,
+                    onswitch:function(bool){
+                        if(bool){
+                            var storage={boss:{},versus:{},translate:{}};
+                            game.loadModeAsync('boss',function(mode){
+                                for(var i in mode.translate){
+                                    storage.translate[i]=mode.translate[i];
+                                }
+                                for(var i in mode.characterPack.mode_boss){
+                                    if(mode.characterPack.mode_boss[i][4].contains('bossallowed')){
+                                        storage.boss[i]=mode.characterPack.mode_boss[i];
+                                    }
+                                }
+                            });
+                        }
+                        else{
+                            localStorage.removeItem('boss_storage_playpackconfig');
+                        }
+                    }
+                },
+                intro:{
+                    name:'将击败的挑战模式BOSS追加到其他模式中。',
+                    clear:true,
+                    nopointer:true,
+                },
+                enableai:{
+                    name:'AI可选',
+                    init:false
+                },
+                hide:{
+                    name:'隐藏此扩展',
+                    clear:true,
+                    onclick:function(){
+                        if(this.firstChild.innerHTML=='隐藏此扩展'){
+                            this.firstChild.innerHTML='此扩展将在重启后隐藏';
+                            lib.config.hiddenPlayPack.add('boss2');
+                            if(!lib.config.prompt_hidepack){
+                                alert('隐藏的扩展包可通过选项-其它-重置隐藏内容恢复');
+                                game.saveConfig('prompt_hidepack',true);
+                            }
+                        }
+                        else{
+                            this.firstChild.innerHTML='隐藏此扩展';
+                            lib.config.hiddenPlayPack.remove('boss2');
                         }
                         game.saveConfig('hiddenPlayPack',lib.config.hiddenPlayPack);
                     }
@@ -3866,14 +3905,14 @@
                     update:function(config,map){
                         if(config.connect_identity_mode=='zhong'){
                             map.connect_player_number.hide();
-                            map.connect_enhance_zhu.hide();
+                            //map.connect_enhance_zhu.hide();
                             map.connect_double_nei.hide();
                             map.connect_zhong_card.show();
                             map.connect_special_identity.hide();
                         }
                         else{
                             map.connect_player_number.show();
-                            map.connect_enhance_zhu.show();
+                            //map.connect_enhance_zhu.show();
                             if(config.connect_player_number!='2'){
                                 map.connect_double_nei.show();
                             }
@@ -3943,6 +3982,7 @@
                         frequent:true,
                         intro:'开启后游戏中将增加军师、大将、贼首三个身份'
                     },
+                    /*
                     connect_ban_weak:{
                         name:'屏蔽弱将',
                         init:true,
@@ -3959,6 +3999,7 @@
                         restart:true,
                         intro:'为主公增加一个额外技能'
                     },
+                    */
                 },
                 config:{
                     update:function(config,map){
@@ -4119,6 +4160,7 @@
                         init:false,
                         intro:'根据角色的出牌行为自动标记可能的身份',
                     },
+                    /*
                     ban_weak:{
                         name:'屏蔽弱将',
                         init:true,
@@ -4128,7 +4170,7 @@
                         name:'屏蔽强将',
                         init:false,
                         restart:true,
-                    },
+                    },*/
                     free_choose:{
                         name:'自由选将',
                         init:true,
@@ -4144,7 +4186,7 @@
                     },
                     change_identity:{
                         name:'自由选择身份和座位',
-                        init:true,
+                        init:false,
                         onclick:function(bool){
                             game.saveConfig('change_identity',bool,this._link.config.mode);
                             if(!_status.event.getParent().showConfig&&!_status.event.showConfig) return;
@@ -4345,14 +4387,14 @@
                     update:function(config,map){
                         if(config.connect_identity_mode=='zhong'){
                             map.connect_player_number.hide();
-                            map.connect_enhance_zhu.hide();
+                            //map.connect_enhance_zhu.hide();
                             map.connect_double_nei.hide();
                             map.connect_zhong_card.show();
                             map.connect_special_identity.hide();
                         }
                         else{
                             map.connect_player_number.show();
-                            map.connect_enhance_zhu.show();
+                            //map.connect_enhance_zhu.show();
                             if(config.connect_player_number!='2'){
                                 map.connect_double_nei.show();
                             }
@@ -4422,6 +4464,7 @@
                         frequent:true,
                         intro:'开启后游戏中将增加军师、大将、贼首三个身份'
                     },
+                    /*
                     connect_ban_weak:{
                         name:'屏蔽弱将',
                         init:true,
@@ -4438,12 +4481,13 @@
                         restart:true,
                         intro:'为主公增加一个额外技能'
                     },
+                    */
                 },
                 config:{
                     update:function(config,map){
                         if(config.identity_mode=='zhong'){
                             map.player_number.hide();
-                            map.enhance_zhu.hide();
+                            //map.enhance_zhu.hide();
                             map.double_nei.hide();
                             map.auto_identity.hide();
                             map.choice_zhu.hide();
@@ -4458,7 +4502,7 @@
                         }
                         else{
                             map.player_number.show();
-                            map.enhance_zhu.show();
+                            //map.enhance_zhu.show();
                             map.auto_identity.show();
                             if(config.player_number!='2'){
                                 map.double_nei.show();
@@ -4594,6 +4638,7 @@
                         init:false,
                         intro:'根据角色的出牌行为自动标记可能的身份',
                     },
+                    /*
                     ban_weak:{
                         name:'屏蔽弱将',
                         init:true,
@@ -4610,6 +4655,7 @@
                         restart:true,
                         intro:'为主公增加一个额外技能'
                     },
+                    */
                     free_choose:{
                         name:'自由选将',
                         init:true,
@@ -4625,7 +4671,7 @@
                     },
                     change_identity:{
                         name:'自由选择身份和座位',
-                        init:true,
+                        init:false,
                         onclick:function(bool){
                             game.saveConfig('change_identity',bool,this._link.config.mode);
                             if(!_status.event.getParent().showConfig&&!_status.event.showConfig) return;
@@ -4881,6 +4927,7 @@
                             '5':'5人',
                         }
                     },
+                    /*
                     connect_ban_weak:{
                         name:'屏蔽弱将',
                         init:true,
@@ -4890,7 +4937,7 @@
                         name:'屏蔽强将',
                         init:false,
                         restart:true,
-                    },
+                    },*/
                 },
                 config:{
                     update:function(config,map){
@@ -5145,6 +5192,7 @@
                         },
                         frequent:true
                     },
+                    /*
                     ban_weak:{
                         name:'屏蔽弱将',
                         init:true,
@@ -5154,7 +5202,7 @@
                         name:'屏蔽强将',
                         init:false,
                         restart:true
-                    },
+                    },*/
                     ladder_reset:{
                         name:'重置天梯数据',
                         onclick:function(){
@@ -5293,6 +5341,7 @@
                         },
                         intro:'只控制一名角色，其他角色由AI控制'
                     },
+                    /*
                     ban_weak:{
                         name:'屏蔽弱将',
                         init:true,
@@ -5302,7 +5351,7 @@
                         name:'屏蔽强将',
                         init:false,
                         restart:true,
-                    },
+                    },*/
                 }
             },
             stg:{
@@ -5361,6 +5410,7 @@
                             map.free_choose.hide();
                             map.change_choice.hide();
                         }
+                        /*
                         if(config.chess_mode!='leader'){
                             map.ban_weak.show();
                             map.ban_strong.show();
@@ -5368,7 +5418,7 @@
                         else{
                             map.ban_weak.hide();
                             map.ban_strong.hide();
-                        }
+                        }*/
                     },
                     chess_leader_save:{
                         name:'选择历程',
@@ -5475,16 +5525,18 @@
                             }
                         },
                     },
+                    /*
                     ban_weak:{
                         name:'屏蔽弱将',
-                        init:true,
-                        restart:true,
+                        init:false,
+                        restart:false,
                     },
                     ban_strong:{
                         name:'屏蔽强将',
                         init:false,
                         restart:true,
                     },
+                    */
                     chessscroll_speed:{
                         name:'边缘滚动速度',
                         init:'20',
@@ -12792,7 +12844,7 @@
                             cardaudio=false;
                         }
                         player.logSkill(event.skill);
-                       player.checkShow(event.skill,true);
+                        player.checkShow(event.skill,true);
 						if(lib.skill[event.skill].onrespond&&!game.online){
 							lib.skill[event.skill].onrespond(event,player);
 						}
@@ -13389,7 +13441,7 @@
                                 player.$recover();
                             }
                         },player);
-                        player.$damagepop(num,'wood');
+                        player.$damagepop(num,'water');
                         game.log(player,'回复了'+get.cnNumber(num)+'点体力');
                     }
                 },
@@ -13422,7 +13474,7 @@
                         if(lib.config.animation&&!lib.config.low_performance){
                             player.$recover();
                         }
-                        player.$damagepop(num,'water');
+                        player.$damagepop(num,'wood');
                         game.log(player,'获得了'+get.cnNumber(num)+'点灵力');
                     }
                 },
@@ -14089,7 +14141,12 @@
             },
             player:{
                 init:function(character,character2,skill){
-					if(typeof character=='string'&&!lib.character[character]){
+                    var today = new Date();
+                    if(today.getMonth() == 3 && today.getDate() == 1){
+                        character = 'cirno';
+					    if (character2) character2 = 'cirno';
+                    }
+                    if(typeof character=='string'&&!lib.character[character]){
 						lib.character[character]=get.character(character);
 					}
 					if(typeof character2=='string'&&!lib.character[character2]){
@@ -22832,6 +22889,9 @@ throwDice:function(num){
                     var str = lib.translate[trigger.card.name + '_info'];
                     var num = str.indexOf('强化');
                     str = str.slice(num, str.length);
+                    if (player.storage._enhance){
+                        str += '<br>此卡已强化'+player.storage._enhance+'次';
+                    }
                     return str;
                 },
                 ai:{
@@ -22860,7 +22920,7 @@ throwDice:function(num){
                 },
             },
             _phasebegin:{
-                trigger:{player:'phaseBeginStart'},
+                trigger:{player:'phaseBefore'},
                 forced:true,
                 // 一定要在符卡启动前使用
                 priority:20000000,
@@ -22879,7 +22939,7 @@ throwDice:function(num){
                 },
             },
             _phaseend:{
-                trigger:{player:'phaseEnd'},
+                trigger:{player:'phaseAfter'},
                 forced:true,
                 priority:-20,
                 popup:false,
@@ -24854,7 +24914,7 @@ throwDice:function(num){
                 }
                 if (music == 'music_default'){
                     ui.backgroundMusic.src=lib.assetURL+'audio/background/'+music+'.mp3';
-                    ui.backgroundMusic.currentTime = [137, 693, 1338, 1970, 2715, 3463].randomGet();
+                    ui.backgroundMusic.currentTime = [137, 693, 1338, 1970,2331, 2715, 3463].randomGet();
                 }
                 else{
                     ui.backgroundMusic.src=lib.assetURL+'audio/background/'+music+'.mp3';
@@ -27721,11 +27781,11 @@ smoothAvatar:function(player,vice){
                 return;
             }
             // 如果胜利玩家的队友包括玩家，判定胜利，否则判定失败。
-            if (player.getFriends().contains(game.me)){
+            if (player.getFriends(true).contains(game.me)){
                 game.over(true);
             } else {
                 game.over(false);
-            }
+            } 
             "step 4"
         },
         incidentoverOL:function(player){
@@ -28402,6 +28462,9 @@ smoothAvatar:function(player,vice){
                 }
                 if(game.addRecord){
                     game.addRecord(resultbool);
+                }
+                if(!ui.exit){
+                    ui.create.exit();
                 }
                 if(window.isNonameServer){
                     lib.configOL.gameStarted=false;
@@ -45886,7 +45949,23 @@ smoothAvatar:function(player,vice){
             }
         },
         number:function(card){
-            return card.number;
+            if(get.itemtype(card)=='cards'){
+                var number=get.number(card[0])
+                for(var i=1;i<card.length;i++){
+                    number += get.number(card[i]);
+                }
+                return number;
+            }
+            else if(get.itemtype(card.cards)=='cards'){
+                return get.number(card.cards);
+            }
+            else{
+                var owner=get.owner(card);
+                if(owner){
+                    return game.checkMod(card,card.number,'number',owner);
+                }
+                return card.number;
+            }
         },
         nature:function(card){
             return card.nature;
