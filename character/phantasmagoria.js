@@ -35,15 +35,20 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                           event.players=game.filterPlayer();
                           player.line(event.players,'black');
                           "step 1"
-                          event.current.chooseTarget([1,1],true,'弃置与你最近的一名角色一张牌',function(card,player,target){
+                          event.current.chooseTarget([1,1],true,'弃置与你最近的一名其他角色一张牌',function(card,player,target){
+                              // 不能选玩家
                               if(player==target) return false;
-                              if(get.distance(player,target)<=1) return true;
-                              if(game.hasPlayer(function(current){
-                                  return current!=player&&get.distance(player,current)<get.distance(player,target);
+                              // 不能选“有比他离你更近”的玩家
+                              if (game.hasPlayer(function(current){
+                                return current != player && get.distance(player,current)<get.distance(player,target);
                               })){
+                                return false;
+                              } else {
+                                if (target.countCards('hej') || !game.hasPlayer(function(current){
+                                  return current != player && get.distance(player,current) == get.distance(player,target) && target.countCards('hej')
+                                })) return true;
+                              }
                               return false;
-                          }
-                              return target.countCards('hej');
                           }).set('ai',function(target){
                               return -get.attitude(_status.event.player,target);
                           }); 
@@ -51,8 +56,10 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                           if(result.bool){
                               event.current.line(result.targets,'black');
                               event.targets=result.targets;
-                              event.current.discardPlayerCard(event.targets[0],'hej',[1,1],true);
-                              event.targets[0].storage.chunmian = 1;
+                              if (event.targets[0].countCards('hej')){
+                                event.current.discardPlayerCard(event.targets[0],'hej',[1,1],true);
+                                event.targets[0].storage.chunmian = 1;
+                              }
                           }
                           if(event.current.next!=player){
                               event.current=event.current.next;
@@ -179,9 +186,11 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                               player.awakenSkill('zhanfang');
                               if (player.hp == player.maxHp) {
                                     player.storage.zaidu = 'damage';
+                                    lib.translate['zaidu_info'] = '结束阶段，你可以指定一名灵力不大于你的角色，令其受到1点弹幕伤害；你造成弹幕伤害后，或回复体力后，你获得1点灵力。';
                                     game.trySkillAudio('zhanfang',player,true,1);
                               } else {
                                     player.storage.zaidu = 'heal';
+                                    lib.translate['zaidu_info'] = '结束阶段，你可以指定一名灵力不大于你的角色，令其回复1点体力；你造成弹幕伤害后，或回复体力后，你获得1点灵力。';
                                     game.trySkillAudio('zhanfang',player,true,2);
                               }
                               player.markSkill('zaidu');
@@ -599,7 +608,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                   zhanfang_audio1:'有这么多毒的话，就是世界也可以征服的吧？',
                   zhanfang_audio2:'只用毒伤害别人，是不会成长的啦……所以！',
                   zhanfang_info:'觉醒技，准备阶段，若你的灵力等于上限：若你未受伤，将【灾毒】中的“受到1点灵击伤害”改为“受到1点弹幕伤害”；否则，改为“回复1点体力”；然后，你增加１点体力上限，并发动【毒气花园】（需要消耗）。',
-            	   huayuan:'毒气花园',
+            	    huayuan:'毒气花园',
                   huayuan_info:'符卡技（2）<u>若你体力为场上最高（或之一），符卡视为持有【永续】。</u>一回合一次，一名角色回复体力时，你可以：防止之，或令其额外回复1点；一名角色的体力值变动后，若为0，或为上限，你摸一张牌。',
                   huayuan_audio1:'霧符「毒气花园」!',
                   huayuan_audio2:'在铃兰的花园之中，永久的沉睡吧！',

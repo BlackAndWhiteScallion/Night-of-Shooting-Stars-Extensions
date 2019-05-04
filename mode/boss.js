@@ -341,7 +341,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 
 			game.arrangePlayers();
 			for(var i=0;i<game.players.length;i++){
-				game.players[i].node.action.innerHTML='行动';
+				game.players[i].node.action.innerHTML='玩家';
 			}
 
 			var players=get.players(lib.sort.position);
@@ -439,7 +439,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 							data[name]=[0,0,0,0];
 						}
 					}
-					if (name == 'boss_nianshou'){
+					if (name == 'boss_nianshou' && _status.damageCount > data[name][0]){
 						data[name][0] = _status.damageCount;
 					} else {
 						if(bool){
@@ -539,18 +539,27 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 			},
 			// 这里是回合顺序的地方
 			bossPhaseLoop:function(){
+				// 创建回合顺序，默认player为boss
+				// player指的就是当前回合角色了。
 				var next=game.createEvent('phaseLoop');
 				next.player=game.boss;
 				_status.looped=true;
 				next.setContent(function(){
 					"step 0"
+					if (result.bool) result.bool = false;
+					// 如果player重整，退出重整
+					// 这个重整似乎只有下面的looptype，如果是三连顺序的话会改成true，应该是用来强行减慢重整一轮的
 					if(player.chongzheng){
 						player.chongzheng=false;
 					}
+					// 如果玩家不是重整（而是死亡）
+					// player.storage.boss_chongzheng就是重整回合的计数了
 					else if(player.isDead()){
+						// 计数+1，血量补到0，如果血上限大于0，且这个BOSS让重整的话，开始重整
 						if(player.hp<0) player.hp=0;
 						player.storage.boss_chongzheng++;
 						if(player.maxHp>0&&game.bossinfo.chongzheng){
+							// 重整顺序：回血，摸牌
 							if(player.hp<player.maxHp){
 								player.hp++;
 							}
@@ -567,19 +576,40 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 								player.revive(player.hp);
 							}				
 						}
+						// 如果是1→1，重整为true
 						if(game.bossinfo.loopType==2){
 							game.boss.chongzheng=true;
 						}
 					}
 					else{
+						// 如果player是主（boss）并且boss不是player，把player改成boss
+						// 不太懂怎么用，什么情况会触发这个条件？
 						if(player.identity=='zhu'&&game.boss!=player){
 							player=game.boss;
 						}
-						player.phase();
+						// 不在重整状态的玩家进行一个回合
+						// 在这里加入让玩家选顺序应该就可以
+						if (player != game.boss && game.me != game.boss && game.bossinfo.loopType==2){
+							game.me.chooseTarget('选择下一名进行回合的我方角色',function(card,player,target){
+                              return target.identity == 'cai';
+                              }).set('ai',function(target){
+                                    return get.attitude(game.me,target);
+                              });
+						}
 					}
 					"step 1"
+					if (result.bool){
+						result.targets[0].phase();
+					} else {
+						player.phase();
+					}
+					"step 2"
+					// step 1就已经是回合结束后了，进入下一个回合了。
+					// 如果当前为1→1
 					if(game.bossinfo.loopType==2){
+						// 轮次开始（？）
 						_status.roundStart=true;
+						// 如果当前回合角色是boss
 						if(event.player==game.boss){
 							if(!_status.last||_status.last.nextSeat==game.boss){
 								event.player=game.boss.nextSeat;
@@ -596,9 +626,11 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 							}
 						}
 					}
+					// 如果是3->1就进入下一个座位的角色的回合
 					else{
 						event.player=event.player.nextSeat;
 					}
+					// 进入下一个回合
 					event.goto(0);
 				});
 			},
@@ -977,7 +1009,12 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
     		},
     		boss_damagecount:{
 				mode:['boss'],
-				global:'boss_damagecount2'
+				global:'boss_damagecount2',
+				direct:true,
+				trigger:{player:'phaseBegin'},
+				content:function(){
+					player.skip('phaseUse');
+				},
 			},
 			boss_damagecount2:{
 				trigger:{source:'damageEnd'},
@@ -996,7 +1033,6 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				forced:true,
 				content:function(){
 					trigger.num+=2;
-					player.skip('phaseUse');
 				},
 				ai:{
 					threaten:1.6
@@ -1217,13 +1253,13 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 			mengxiangtiansheng_info:'准备阶段，或结束阶段，你可以消耗1点灵力，视为对所有其他角色使用了一张【轰！】。',
 			boss_nianshou:'年兽',
 			boss_nianrui:'年瑞',
-			boss_nianrui_info:'锁定技，摸牌阶段，你额外摸两张牌；跳过你的出牌阶段',
+			boss_nianrui_info:'锁定技，摸牌阶段，你额外摸两张牌。',
 			boss_qixiang:'祺祥',
 			boss_qixiang1:'祺祥',
 			boss_qixiang2:'祺祥',
 			boss_qixiang_info:'乐不思蜀判定时，你的方块判定牌视为红桃；兵粮寸断判定时，你的黑桃判定牌视为草花',
 			boss_damagecount:'沙袋武将',
-			boss_damagecount_info:'你在6分钟之内可以对我造成多少伤害呢？',
+			boss_damagecount_info:'锁定技，跳过你的出牌阶段。<br>你在6分钟之内可以对我造成多少伤害呢？',
 			mode_boss_character_config:'挑战角色',
 			boss_zhaoyun:'高达一号',
 			boss_juejing:'绝境',

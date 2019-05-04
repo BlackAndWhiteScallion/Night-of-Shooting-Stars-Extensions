@@ -2085,7 +2085,6 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			},
 			// 舞燕方片
 			wuyan4:{
-				forced:true,
 				intro:{
                     content:function(storage,player){
                         return '所有角色在弃牌阶段开始时，可以交给初音一张牌';
@@ -2116,7 +2115,12 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                       player.$give(result.cards.length,result.targets[0]);
                       result.targets[0].say('谢谢你的应援~！');  
                     }
-				}
+				},
+				check:function(event,player){
+					return game.hasPlayer(function(target){
+						return target.hasSkill('wuyan') && target.storage.wuyan4 && target.storage.wuyan4 != 0 && get.attitude(player,target) && player.countCards('h') > target.countCards('h');
+					});
+				},
 			},
 			stage:{
 				spell:['stage1'],
@@ -2180,6 +2184,10 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 						player.loselili();
 						player.logSkill('yanju',result.targets);
 						player.useCard({name:'sha'},result.targets[0],false);
+					} else {
+						player.removeSkill('yanju1');
+						player.removeSkill('louguan_skill');
+						player.removeSkill('yanju3');
 					}
 				},
 			},
@@ -2229,11 +2237,14 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 						player.addTempSkill('shangtang1',{player:'phaseBefore'});
 					}
 				},
+				check:function(event,player){
+					return player.countCards('h') < 2 || player.lili < 2;
+				},
 			},
 			shangtang1:{
 				mark:true,
 				intro:{
-					content:'不能对其他角色使用牌<br>不在其他角色攻击范围内<br>手牌上限至少为3',
+					content:'不能对其他角色使用牌<br>手牌上限至少为3',
 				},
 				mod:{
 					playerEnabled:function(card,player,target){
@@ -2243,10 +2254,12 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 						if (num < 3) return 3;
 						else return num;
 					},
+					/*
                     globalTo:function(from,to,distance){
                         if (to.hasSkill('shangtang1')) return distance+10000;
                         return distance;
                     },
+                    */
 				}
 			},
 			ruizhi:{
@@ -2389,10 +2402,10 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			},
 			ng_pinjian:{
 				audio:2,
-				trigger:{global:'useCardToBegin'},
+				trigger:{player:'useCardToBegin',target:'useCardToBegin'},
 				filter:function(event, player){
 					if(event._notrigger.contains(player)) return false;
-					return event.card&&lib.card[event.card.name].subtype&&(lib.card[event.card.name].subtype=='attack')&&event.player&&event.target&&event.target.isAlive()&&event.player.isAlive()&&event.player!=event.target&&event.player.countCards('h')&&event.target.countCards('h');
+					return event.card&&get.subtype(event.card) == 'attack' &&event.player && event.target && event.player!=event.target &&event.player.countCards('h') && event.target.countCards('h');
 				},
 				check:function(event,player){
 					if(event.target==player) return -get.attitude(player,event.player);
@@ -2419,7 +2432,6 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			ng_pinjian3:{
 				trigger:{player:'chooseCardBegin'},
 				filter:function(event){
-					console.log(event);
 					return event.type=='compare'&&!event.directresult;
 				},
 				content:function(){
@@ -2437,7 +2449,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 				},
 				filter:function(event,player){
 					if(player.storage.ng_wenhao2) return false;
-					return true;
+					return player.lili > 1;
 				},
 				trigger:{player:'phaseBegin'},
 				content:function (event,player){
@@ -2454,6 +2466,11 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 					player.lili=lili;
 					player.useSkill('ClarentBloodArthur');
 					player.update();
+					lib.translate['ng_pinjian'] = '逆光';
+					lib.translate['ng_pinjian3'] = '逆光';
+				},
+				check:function(event,player){
+					return player.lili > 3 || player.hp < 3;
 				},
 			},
 			ClarentBloodArthur:{
@@ -2610,6 +2627,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			kedan_info:'你可以将一张有灵力的牌当作一种禁忌牌使用，一回合一种禁忌牌名限一次；你使用禁忌牌时，可以将目标改为“一名角色”。',
 			shishu:'时溯',
 			shishu3:'本回合进入弃牌堆的有灵力/禁忌牌',
+			shishu3_bg:'时',
 			shishu_info:'结束阶段，你可以获得场上或本回合进入弃牌堆的至多Ｘ张有灵力的牌或禁忌牌（Ｘ为本回合其他角色扣减的体力总值）。',
 			shishi:'食时之城',
 			shishi_info:'符卡技（4）<永续>防止你扣减体力或灵力；你的攻击范围和使用【轰！】的次数限制视为无限；结束阶段，若你本回合击坠过角色，你于回合结束后进行一个额外的回合，该回合内符卡不结束。',
@@ -2641,7 +2659,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			shangtang_audio2:'你们等我一下……',
 			shangtang1:'上膛（后续）',
 			shangtang1_bg:'膛',
-			shangtang_info:'准备阶段，若你的手牌数／灵力值小于初始值，你可以重置该数值，然后获得以下效果，直到你的下个准备阶段：你不能对其他角色使用牌；你的手牌上限至少为３；你视为不在其他角色的攻击范围内。',
+			shangtang_info:'准备阶段，若你的手牌数／灵力值小于初始值，你可以重置该数值，然后获得以下效果，直到你的下个准备阶段：你不能对其他角色使用牌；你的手牌上限至少为３。',
 			sinon_die:'撤退……',
 			scathach:'斯卡哈',
 			ruizhi:'魔境智慧',
@@ -2665,7 +2683,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			ng_pinjian3:'？',
 			ng_wenhao2:'？',
 			ng_wenhao2_audio1:'我不是王，而是走在王身后的人我，为了王的安危，驱逐一切敌人！',
-			ng_wenhao2_info:'限定技，准备阶段，你可以摸X张牌（X为你已受伤值），然后获得并发动你的符卡技。',
+			ng_wenhao2_info:'限定技，准备阶段，若你的灵力大于1，你可以摸X张牌（X为你已受伤值），然后获得并发动你的符卡技。',
 			ClarentBloodArthur:'向端丽的吾父发起叛逆',
 			ClarentBloodArthur_audio1:'[向端丽的吾父发起叛逆]！',
 			ClarentBloodArthur_audio2:'这便是毁灭吾父的邪剑！',

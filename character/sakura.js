@@ -45,9 +45,9 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 content:function(){
                     'step 0'
                     var players = game.filterPlayer();
+                    var p = [];
                     for (var i = 0; i < players.length; i ++){
-                        if (players[i] == player) players.remove(players[i]);
-                        if (!(!players[i].storage.shuang && players[i].storage._mubiao)) players.remove(players[i]);
+                        if (!players[i].storage.shuang && players[i].storage._mubiao) p.push(players[i]);
                     }
                     var num = 0;
                     for (var i = 0; i < players.length; i++){
@@ -55,7 +55,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         if (get.attitude(player,players[i]) < 0) num ++;
                     }
                     player.chooseTarget(players.length,('霜降：是否对所有亮的角色各造成1点灵击伤害'),function(card,player,target){
-                            return players.contains(target);
+                            return p.contains(target);
                           }).set('num',num).set('ai',function(target){
                               return _status.event.num > 0;
                           }); 
@@ -2258,7 +2258,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             hanghourai_audio2:'表演现在才刚刚开始哟！',
             hanghourai1:'上吊的蓬莱人形',
             hanghourai1_audio1:'你只不过是一名演员而已。',
-            hanghourai2_audio2:'一切都是我的掌控之中。',
+            hanghourai1_audio2:'一切都是我的掌控之中。',
             hanghourai_info:'符卡技（2）<永续> 符卡发动时，你可以将任意张手牌扣置为“手办”，并摸等量牌；一名角色的结束阶段，你可以交给其一张“手办”；若其可以使用该牌，你令其使用之，目标由你指定。',
             alice_die:'谢谢大家观赏。',
             lilywhite:'莉莉白',

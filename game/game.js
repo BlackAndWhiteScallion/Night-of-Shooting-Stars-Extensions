@@ -3407,7 +3407,7 @@
                     },
                     background_music:{
                         name:'背景音乐',
-                        init:true,
+                        init:'music_default',
                         item:{
                             music_default:'默认',
                         },
@@ -3734,15 +3734,17 @@
 					onswitch:function(bool){
 						if(bool){
 							var storage={boss:{},versus:{},translate:{}};
-							game.loadModeAsync('boss',function(mode){
+							game.loadModeAsync('stg',function(mode){
 								for(var i in mode.translate){
 									storage.translate[i]=mode.translate[i];
 								}
+                                /*
 								for(var i in mode.characterPack.mode_boss){
 									if(mode.characterPack.mode_boss[i][4].contains('bossallowed')){
 										storage.boss[i]=mode.characterPack.mode_boss[i];
 									}
 								}
+                                */
 							});
 						}
 						else{
@@ -3791,15 +3793,17 @@
                                 for(var i in mode.translate){
                                     storage.translate[i]=mode.translate[i];
                                 }
+                                /*
                                 for(var i in mode.characterPack.mode_boss){
                                     if(mode.characterPack.mode_boss[i][4].contains('bossallowed')){
                                         storage.boss[i]=mode.characterPack.mode_boss[i];
                                     }
                                 }
+                                */
                             });
                         }
                         else{
-                            localStorage.removeItem('boss_storage_playpackconfig');
+                            localStorage.removeItem('boss1_storage_playpackconfig');
                         }
                     }
                 },
@@ -5498,6 +5502,11 @@
                         name:'战棋卡牌',
                         init:true,
                         frequent:true,
+                    },
+                    damage_move:{
+                        name:'受伤弹飞',
+                        init:false,
+                        intro:'受到伤害的角色会向伤害来源的反方向移动一格',
                     },
                     free_choose:{
                         name:'自由选将',
@@ -7940,6 +7949,10 @@
                             node.addEventListener('mouseup',upNode);
                             node.addEventListener('mouseleave',upNode);
                         }
+                        if (lib.config.all.mode[i] == 'identity' && lib.config.gameRecord.incident && lib.config.gameRecord.incident.data['akyuu'] > 2){
+                            node.style.boxShadow='rgba(125, 90, 178, 1) 0 0 3px 5px, rgba(125, 90, 178, 1) 0 3px 10px';
+                            node.style.background='rgba(125, 90, 178, 1)';
+                        }
                         setTimeout((function(node){
                             return function(){
                                 node.show();
@@ -8479,7 +8492,7 @@
 				game.saveConfig('cards',lib.config.all.cards);
 				game.saveConfig('characters',lib.config.all.characters);
                 game.saveConfig('change_skin',false);
-                game.saveConfig('show_splash','off');
+                game.saveConfig('show_splash','always');
                 game.saveConfig('show_favourite',false);
 				game.saveConfig('animation', false);
                 // game.saveConfig('characters',lib.config.all.characters);
@@ -8488,7 +8501,7 @@
                 game.saveConfig('tao_enemy',true);
                 game.saveConfig('layout','long2');
 				game.saveConfig('hp_style','ol');
-                game.saveConfig('background_music','music_off');
+                game.saveConfig('background_music','music_default');
                 game.saveConfig('background_audio',false);
                 game.saveConfig('background_speak',false);
                 game.saveConfig('show_volumn',false);
@@ -9103,6 +9116,7 @@
             unknown5:'六号位',
             unknown6:'七号位',
             unknown7:'八号位',
+            akyuu:'阿求',
         },
         element:{
             content:{
@@ -10779,8 +10793,7 @@
                             event.addToAI=true;
                         }
                     }
-                    player.lose(event.card1);
-                    target.lose(event.card2);
+                    // 失去拼点牌原位置
 
                     "step 5"
                     game.broadcast(function(){
@@ -10791,8 +10804,8 @@
                     player.$compare(event.card1,target,event.card2);
                     game.log(player,'的拼点牌为',event.card1);
                     game.log(target,'的拼点牌为',event.card2);
-                    event.num1=event.card1.number;
-                    event.num2=event.card2.number;
+                    event.num1=get.number(event.card1);
+                    event.num2=get.number(event.card2);
                     event.trigger('compare');
                     game.delay(0,1500);
                     "step 6"
@@ -10833,6 +10846,10 @@
                     },str);
                     game.delay(2);
                     // 这里是拼点完摸牌。
+
+                    player.lose(event.card1);
+                    target.lose(event.card2);
+                    
                     if (lib.config.compare_discard){
                         player.draw();
                         target.draw();    
@@ -14842,6 +14859,22 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                     if (this.lili == Infinity){
                         lili.innerHTML = '∞';
                     }
+                    else if(game.layout=='default'&&this.maxlili>7){
+                        lili.innerHTML=this.lili+'/'+this.maxlili;
+                        lili.classList.add('text');
+                    }
+                    else if(get.is.newLayout()&&
+                    (
+                        this.maxlili>9||
+                        (this.maxlili>5&&this.classList.contains('minskin'))||
+                        ((game.layout=='mobile'||game.layout=='long')&&this.dataset.position==0&&this.maxlili>7)
+                    )){
+                        lili.innerHTML=this.lili+'/'+this.maxlili+'<div></div>';
+                        if(this.lili==0){
+                            lili.lastChild.classList.add('lost');
+                        }
+                        lili.classList.add('textstyle');
+                    }
                     else {
                         // 这里才是设置了体力的UI吧。
                         lili.innerHTML='';
@@ -15616,6 +15649,11 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                     this.$gain2(card);
                     if (!this.storage._tanpai) this.storage._tanpai=[];
                     this.storage._tanpai.add(card);
+                    if (!lib.skill['_tanpai']){
+                        lib.skill._tanpai = {intro:{
+                            content:'cards'
+                        }};
+                    }
                     this.markSkill('_tanpai');
                     this.syncStorage('_tanpai');
                     // 使用异变牌时，切换背景/BGM
@@ -15636,6 +15674,24 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                     for (var i = 0; i < get.info(card).skills.length; i ++){
                         this.addSkill(get.info(card).skills[i]);
                     }
+                    game.log(this,'明置了异变牌',card);
+
+                    // 将异变牌加入记录（阿求不加）
+                    if (this.name == 'akyuu') return ;
+                    if (!lib.config.gameRecord.incident) lib.config.gameRecord.incident={data:{}};
+                    var data=lib.config.gameRecord.incident.data;
+                    var incident = card.name;
+                    if(!data[incident]){
+                        data[incident]=[0,0];
+                    }
+                    data[incident][0] ++;
+                    var str='';
+                    for(var i=0;i<data.length;i++){
+                        if(data[i]){
+                            str+=lib.translate[data[i]]+'：'+data[i][0]+'出场'+' '+data[i][1]+'胜<br>';
+                        }
+                    }
+                    game.saveConfig('gameRecord',lib.config.gameRecord);
                 },
                 phase:function(skill){
                     var next=game.createEvent('phase');
@@ -18990,6 +19046,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                     }
                     return true;
                 },
+                // equal是true的话就是唯一，否则就不是唯一。
                 isMaxHandcard:function(equal){
                     var nh=this.countCards('h');
                     for(var i=0;i<game.players.length;i++){
@@ -20051,7 +20108,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                     lib.listenEnd(node);
                     return node;
                 },
-throwDice:function(num){
+                throwDice:function(num){
 					if(typeof num!='number'){
 						num=get.rand(6)+1;
 						_status.event.num=num;
@@ -22402,6 +22459,7 @@ throwDice:function(num){
                 return !this.player.hasShan();
             },
             wuxieSwap:function(event){
+                if (!event) return ;
                 if(event.type=='wuxie'){
                     if(ui.wuxie&&ui.wuxie.classList.contains('glow')){
                         return true;
@@ -24898,6 +24956,7 @@ throwDice:function(num){
             ui.window.appendChild(audio);
         },
         playBackgroundMusic:function(){
+            if (!lib.config.background_music) lib.config.backgroundmusic = 'music_default';
             if(lib.config.background_music=='music_off'){
                 ui.backgroundMusic.src='';
             }
@@ -27728,10 +27787,30 @@ smoothAvatar:function(player,vice){
         },
         // 异变胜利要怎么游戏结束的设置
         // 联机时需要一个别的设置……
-        incidentover:function(player){
+        incidentover:function(player, incident){
             // 如果是玩家胜利就是玩家胜利
             "step 0"
-            game.log(get.translation(player)+'异变胜利！');
+            game.log(get.translation(player)+'【'+get.translation(incident)+'】异变胜利！');
+            var data=lib.config.gameRecord.incident.data;
+            if(!data[incident]){
+                data[incident]=[0,0];
+            }
+            data[incident][1] ++;
+            /*
+            var str='';
+            for(var i=0;i<data.length;i++){
+                if(data[i]){
+                    str+=lib.translate[data[i]]+'：'+data[i][0]+'出场'+' '+data[i][1]+'胜<br>';
+                }
+            }
+            */
+            if (!data['akyuu']){
+                data['akyuu'] = 0;
+            }
+            data['akyuu'] ++;
+            //lib.config.gameRecord.incident.str=str;
+            game.saveConfig('gameRecord',lib.config.gameRecord);
+            'step 1'
             if (player.identity == 'nei' && game.filterPlayer().length > 1 && lib.config.nei_end){
                 player.storage.win = true;
                 return ;
@@ -27741,7 +27820,7 @@ smoothAvatar:function(player,vice){
                 return;
             }
             // 如果有人有皆杀时游戏结束，如果是玩家就玩家赢，否则玩家失败。
-            "step 1"
+            "step 2"
             var p = game.filterPlayer();
             for (var i = 0; i < p.length; i ++){
                 if (p[i].storage._tanpai){
@@ -27757,7 +27836,7 @@ smoothAvatar:function(player,vice){
                     }
                 }
             }
-            "step 2"
+            "step 3"
             /*  联机时使用的游戏结束设置
             var clients=game.players.concat(game.dead);
             for(var i=0;i<clients.length;i++){
@@ -27766,7 +27845,7 @@ smoothAvatar:function(player,vice){
                 }
             }
             */
-            "step 3"
+            "step 4"
             // 当前模式：
             // 如果是异变模式，且胜利玩家的身份是路人，如果玩家就是路人的话判定胜利，否则判定平局
             var mode=get.mode();
@@ -27786,7 +27865,7 @@ smoothAvatar:function(player,vice){
             } else {
                 game.over(false);
             } 
-            "step 4"
+            "step 5"
         },
         incidentoverOL:function(player){
 
@@ -40262,6 +40341,7 @@ smoothAvatar:function(player,vice){
                             if(lib.config.buttoncharacter_style=='simple'){
                                 node.node.group.style.display='none';
                             }
+                            
                             node.node.name.dataset.nature=get.groupnature(infoitem[1]);
                             //node.node.group.dataset.nature=get.groupnature(infoitem[1],'raw');
                             node.classList.add('newstyle');
@@ -40289,6 +40369,7 @@ smoothAvatar:function(player,vice){
                             } else {
                                 var textlili=ui.create.div('.text','2',node.node.lili);
                             }
+                            node.node.lili.condition='high';
                             /*
                             if(infoitem[5]==0){
                                 node.node.hp.hide();
@@ -45914,7 +45995,7 @@ smoothAvatar:function(player,vice){
 		},
         suit:function(card){
             if(get.itemtype(card)=='cards'){
-                var suit=get.suit(card[0])
+                var suit=get.suit(card[0]);
                 for(var i=1;i<card.length;i++){
                     if(get.suit(card[i])!=suit) return 'none';
                 }
@@ -45933,7 +46014,7 @@ smoothAvatar:function(player,vice){
         },
         color:function(card){
             if(get.itemtype(card)=='cards'){
-                var color=get.color(card[0])
+                var color=get.color(card[0]);
                 for(var i=1;i<card.length;i++){
                     if(get.color(card[i])!=color) return 'none';
                 }
@@ -45950,7 +46031,7 @@ smoothAvatar:function(player,vice){
         },
         number:function(card){
             if(get.itemtype(card)=='cards'){
-                var number=get.number(card[0])
+                var number=get.number(card[0]);
                 for(var i=1;i<card.length;i++){
                     number += get.number(card[i]);
                 }
@@ -48170,6 +48251,7 @@ smoothAvatar:function(player,vice){
                 name='thunderdamage';
             }
             if (player.lili == 0) return 0;
+            if (target.lili == 0 && nature == 'thunder') return 0; 
             var eff=get.effect(target,{name:name},player,viewer);
             if(eff>0&&target.hujia>0) return 0;
             return eff;
