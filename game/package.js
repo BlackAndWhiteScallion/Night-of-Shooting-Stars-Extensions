@@ -49,6 +49,9 @@ window.noname_package={
         sb:'文花异变',
         baka:'笨蛋异变',
         stg_scarlet:'红魔乡',
+        stg_library:'大图书馆',
+        stg_scarletstairs:'红魔馆内部',
+        stg_basement:'地下',
     },
     music:{
         music_default:'默认',
@@ -62,6 +65,7 @@ window.noname_package={
         sb:'文花异变',
         baka:'笨蛋异变',
         reimu:'灵梦战',
+        magicalgirl:'魔法少女',
     },
     font:{
         xiaozhuan:'小篆',

@@ -144,15 +144,15 @@
                         intro:'当候选目标只有1个时，点击目标后无需再点击确认',
                     },
                     wuxie_self:{
-                        name:'不无懈自己',
+                        name:'不住口自己',
                         init:true,
                         unfrequent:true,
                         intro:'自己使用的单目标普通锦囊即将生效时，不询问无懈',
                     },
                     tao_enemy:{
-                        name:'不对敌方出桃',
+                        name:'不对敌方出葱',
                         init:false,
-                        intro:'双方阵营明确的模式中（如对决），敌方角色濒死时不询问出桃',
+                        intro:'双方阵营明确的模式中（如对决），敌方角色濒死时不询问出葱',
                         unfrequent:true,
                     },
                     enable_drag:{
@@ -5386,7 +5386,7 @@
                         item:{
                             combat:'自由',
                             three:'统率',
-                            leader:'君主',
+                            leader:'后宫',
                         },
                         restart:true,
                         frequent:true,
@@ -5462,18 +5462,18 @@
                         clear:true,
                         frequent:true,
                     },
-                    // chess_treasure:{
-                    //  name:'战场机关',
-                    //  init:'0',
-                    //  frequent:true,
-                    //  item:{
-                    //      '0':'关闭',
-                    //      '0.1':'较少出现',
-                    //      '0.2':'偶尔出现',
-                    //      '0.333':'时常出现',
-                    //      '0.5':'频繁出现',
-                    //  }
-                    // },
+                    chess_treasure:{
+                      name:'战场机关',
+                      init:'0',
+                      frequent:true,
+                      item:{
+                          '0':'关闭',
+                          '0.1':'较少出现',
+                         '0.2':'偶尔出现',
+                         '0.5':'频繁出现',
+                         '1':'必定出现',
+                        }
+                    },
                     chess_obstacle:{
                         name:'随机路障',
                         init:'0.2',
@@ -10269,6 +10269,9 @@
                                 else{
                                     str='请选择要使用的牌';
                                 }
+                                if (!lib.config.new_tutorial){
+                                    str += '<br><br><div><div style="width:100%;text-align:center;font-size:14px">在牌上浮空或右键可以查看效果<br>在角色上浮空，右键，或双击可以查看技能</div>';
+                                }
                                 if(event.openskilldialog){
                                     event.skillDialog=ui.create.dialog(event.openskilldialog);
                                     delete event.openskilldialog;
@@ -10630,7 +10633,9 @@
                     "step 1"
                     event.list=targets.slice(0);
                     event.list.unshift(player);
-  					player.chooseCardOL(event.list,'请选择拼点牌',true).set('type','compare').set('ai',event.ai).set('source',player).aiCard=function(target){
+                    var str = '请选择拼点牌<br><br><div><div style="width:100%;text-align:center;font-size:14px">点数更大方为赢，点数相等为双方都没赢';
+                    if (lib.config.compare_discard) str += '<br>拼点完双方各摸一张牌</div>'; 
+  					player.chooseCardOL(event.list,str,true).set('type','compare').set('ai',event.ai).set('source',player).aiCard=function(target){
   						var hs=target.getCards('h');
                         var event=_status.event;
                         event.player=target;
@@ -10738,23 +10743,25 @@
                             };
                         }
                     };
+                    var str = '请选择拼点牌<br><br><div><div style="width:100%;text-align:center;font-size:14px">点数更大方为赢，点数相等为双方都没赢';
+                    if (lib.config.compare_discard) str += '<br>拼点完双方各摸一张牌</div>'; 
                     if(player.isOnline()){
                         player.wait(sendback);
                         event.ol=true;
                         player.send(function(ai){
-						game.me.chooseCard('请选择拼点牌',true).set('type','compare').set('glow_result',true).ai=ai;
+						game.me.chooseCard(str,true).set('type','compare').set('glow_result',true).ai=ai;
 							game.resume();
 						},event.ai);
 					}
 					else{
 						event.localPlayer=true;
-						player.chooseCard('请选择拼点牌',true).set('type','compare').set('glow_result',true).ai=event.ai;
+						player.chooseCard(str,true).set('type','compare').set('glow_result',true).ai=event.ai;
 					}
 					if(target.isOnline()){
 						target.wait(sendback);
 						event.ol=true;
 						target.send(function(ai){
-							game.me.chooseCard('请选择拼点牌',true).set('type','compare').set('glow_result',true).ai=ai;
+							game.me.chooseCard(str,true).set('type','compare').set('glow_result',true).ai=ai;
 							game.resume();
 						},event.ai);
 					}
@@ -10762,11 +10769,13 @@
 						event.localTarget=true;
 					}
 					"step 2"
+                    var str = '请选择拼点牌<br><br><div><div style="width:100%;text-align:center;font-size:14px">点数更大方为赢，点数相等为双方都没赢';
+                    if (lib.config.compare_discard) str += '<br>拼点完双方各摸一张牌</div>'; 
 					if(event.localPlayer){
 						event.card1=result.cards[0];
 					}
 					if(event.localTarget){
-						target.chooseCard('请选择拼点牌',true).set('type','compare').set('glow_result',true).ai=event.ai;
+						target.chooseCard(str,true).set('type','compare').set('glow_result',true).ai=event.ai;
 					}
                     "step 3"
                     if(event.localTarget){
@@ -12847,7 +12856,7 @@
                     var num  = 0;
                     for(var i=0;i<cards.length;i++){
                         if(get.type(cards[i]) == 'delay'){
-                            player.gain(ui.skillPile.childNodes[0],'draw2');
+                            player.gain(ui.skillPile.childNodes[i],'draw2');
                         } else {
                             num ++;
                         }
@@ -13253,7 +13262,7 @@
                                 var info1=get.info(cards[num]);
                                 if(info1.skills){
                                     for(var i=0;i<info1.skills.length;i++){
-                                        if (!player.countCards(cards[num].name, 'j')) player.removeSkill(info1.skills[i]);
+                                        if (!player.countCards('j', {name:cards[num].name})) player.removeSkill(info1.skills[i]);
                                     }
                                 }
                             }
@@ -14187,8 +14196,11 @@
                         info[4]=[];
                     }
                     // 默认起始灵力值 （默认为2）
-                    if(!info[1]){
-                        info[1]=0;
+                    if (info[1] == '0'){
+                        info[1] = 0;
+                    }
+                    else if(!info[1] || isNaN(parseInt(info[1]))){
+                        info[1]=2;
                     } else{
                         info[1] = parseInt(info[1]);
                     }
@@ -20689,7 +20701,8 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
 						node.classList.add('fullscreenavatar');
 						ui.create.div('',ui.create.div(node));
 						// ui.create.div('',str.split('').join('<br>'),ui.create.div('.text.textbg',node));
-						ui.create.div('','<div>'+str.split('').join('</div><br><div>')+'</div>',ui.create.div('.text',node));
+						//ui.create.div('','<div>'+str.split('').join('</div><br><div>')+'</div>',ui.create.div('.text',node));
+                        ui.create.div('',str,ui.create.div('.text',node));
 						node.firstChild.firstChild.style.backgroundImage=avatar.style.backgroundImage;
 						node.dataset.nature=nature||'unknown';
 						var num=0;
@@ -22213,8 +22226,8 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                 if(lib.character[i][4]&&lib.character[i][4].contains('forbidai')) return true;
                 if(lib.character[i][4]&&lib.character[i][4].contains('unseen')) return true;
                 if(lib.config.forbidai.contains(i)) return true;
-				if(lib.characterFilter[i]&&!lib.characterFilter[i](get.mode())) return true;
-				if(_status.connectMode){
+				//if(lib.characterFilter[i]&&!lib.characterFilter[i](get.mode())) return true;
+                if(_status.connectMode){
                     if(lib.configOL.banned.contains(i)) return true;
                    var double_character=false;
                     if(lib.configOL.mode=='guozhan'){
@@ -22705,6 +22718,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
 				},
 				group:['dualside_init','dualside_turn']
 			},
+            // 目前角色的所有技能失效（locked以外）
             fengyin:{
                 init:function(player,skill){
                     var skills=player.getSkills(true,false);
@@ -24973,7 +24987,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                 }
                 if (music == 'music_default'){
                     ui.backgroundMusic.src=lib.assetURL+'audio/background/'+music+'.mp3';
-                    ui.backgroundMusic.currentTime = [137, 693, 1338, 1970,2331, 2715, 3463].randomGet();
+                    ui.backgroundMusic.currentTime = [137, 693, 1338, 1970, 2715, 3463, 3982].randomGet();
                 }
                 else{
                     ui.backgroundMusic.src=lib.assetURL+'audio/background/'+music+'.mp3';
@@ -28031,7 +28045,10 @@ smoothAvatar:function(player,vice){
                     resultbool=null;
                 }
                 if(result===true) result='战斗胜利';
-                if(result===false) result='战斗失败';
+                if(result===false){
+                    result='战斗失败';
+                        if (get.mode() == 'stg') result = '满身疮痍';
+                    }
                 if(result==undefined) result='战斗结束';
                 dialog=ui.create.dialog(result);
                 dialog.forcebutton=true;
@@ -38734,7 +38751,6 @@ smoothAvatar:function(player,vice){
                     // 自由选将的武将在这里！
                     // 但是我不会设置！
                     for(var i in lib.character){
-                        //console.log(i);
                         if(lib.character[i][4].contains('minskin')) continue;
                         if(lib.character[i][4].contains('boss')||lib.character[i][4].contains('hiddenboss')){
                             if(lib.config.mode=='boss') continue;
@@ -41654,7 +41670,8 @@ smoothAvatar:function(player,vice){
                 else{
                     num=ui.cardPile.childNodes.length;
                 }
-                uiintro.add('剩余 <span style="font-family:'+'xinwei'+'">'+num);
+                uiintro.add('牌堆剩余 <span style="font-family:'+'xinwei'+'">'+num);
+                uiintro.add('技能牌剩余 <span style="font-family:'+'xinwei'+'">'+ui.skillPile.childNodes.length);
 
                 if(_status.connectMode) return uiintro;
                 uiintro.add('<div class="text center">轮数 <span style="font-family:xinwei">'+game.roundNumber+'</span>&nbsp;&nbsp;&nbsp;&nbsp;洗牌 <span style="font-family:xinwei">'+game.shuffleNumber+'</div>');
@@ -44834,7 +44851,7 @@ smoothAvatar:function(player,vice){
             locked:function(skill){
                 var info=lib.skill[skill];
                 if(info.locked==false) return false;
-                if(info.trigger&&info.forced) return true;
+                //if(info.trigger&&info.forced) return true;
                 if(info.mod) return true;
                 if(info.locked) return true;
                 return false;
@@ -48237,6 +48254,7 @@ smoothAvatar:function(player,vice){
             return (result1*get.attitude(player,player)+(target?result2*get.attitude(player,target):0));
         },
         damageEffect:function(target,player,viewer,nature){
+            if (!target) return 0;
             if(!player){
                 player=target;
             }

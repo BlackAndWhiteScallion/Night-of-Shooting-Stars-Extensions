@@ -2303,6 +2303,15 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				direct:true,
 				trigger:{global:'gameStart'},
 				group:'mengji2',
+				init:function(player){
+					player.say('欢迎回来！作为感谢你一直在幻想乡游玩的奖励——');
+					setTimeout(function(){
+						player.say('我为你特别准备了一份特殊的牌局！');
+						setTimeout(function(){
+							player.say('谢谢你对东方流星夜的支持，以后也请多关照了！');
+						}, 2500);
+					}, 2500);
+				},
 				content:function(){
 					game.saveConfig('akyuu',true);
 					lib.config.gameRecord.incident.data['akyuu'] = 0;
@@ -2502,8 +2511,13 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						game.me.damage(Number.MAX_SAFE_INTEGER);
 					}
 					"step 2"
-					if (game.me.isAlive() && game.me.name != 'marisa'){
-						event.goto(1);
+					if (game.me.isAlive()){
+						game.pause();
+						player.say('挺厉害的嘛，那这次就先放过你了吧。');
+						setTimeout(function(){
+	                        player.init('akyuu');
+	                        game.resume();
+	                    },2500);
 					}
 					"step 3"
 					trigger.cancel();
