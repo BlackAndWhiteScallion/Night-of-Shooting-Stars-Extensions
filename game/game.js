@@ -587,7 +587,7 @@
                     compare_discard:{
                         name:'拼点完摸一',
                         init:true,
-                        intro:'打开后，拼点后，双方各摸一张牌',
+                        intro:'拼点后，双方各摸一张牌',
                     },
                     regain_lili:{
                         name:'结束阶段灵力补至1',
@@ -603,6 +603,16 @@
                         name:'路人胜利时游戏不结束',
                         init:false,
                         intro:'异变模式下，路人因异变胜利后，游戏不结束',
+                    },
+                    eiki_silence:{
+                        name:'映姬大人闭嘴啦！',
+                        init:false,
+                        intro:'四季映姬在全模式下不会说台词——但是让阎罗王闭嘴，后果可要自负哟……',
+                    },
+                    pear_nobrain:{
+                        name:'大家都是烂好人',
+                        init:false,
+                        intro:'凤梨在场时，所有AI会无脑给凤梨所有牌。',
                     },
                 },
             },
@@ -10729,7 +10739,7 @@
                 },
                 chooseToCompare:function(){
                     "step 0"
-                    if(player.countCards('h')==0||target.countCards('h')==0){
+                    if(player.countCards('h')==0||target.countCards('h')==0|| player == target){
                         event.result={cancelled:true,bool:false}
                         event.finish();
                         return;
@@ -24854,6 +24864,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
             game.broadcast(game.trySkillAudio,skill,player,directaudio);
             var info=get.info(skill);
             if(!info) return;
+            if (lib.config.eiki_silence && player.name == 'eiki') return ;
             // 如果设置里打开了音效的话
             if((!info.direct||directaudio)&&lib.config.background_speak&&
                 (!lib.skill.global.contains(skill)||lib.skill[skill].forceaudio)){
@@ -47935,6 +47946,7 @@ smoothAvatar:function(player,vice){
         },
         attitude:function(from,to){
             if(!from||!to) return 0;
+            if (from.name == 'eiki' && lib.config.eiki_silence && to == game.me) return -10000000;
             var att=get.rawAttitude.apply(this,arguments);
             if(from.isMad()) att=-att;
             if(to.isMad()&&att>0){
