@@ -70,7 +70,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	            }
 	            if(this._nostart) start.style.display='none';
 	            else start.style.display='';
-	            game.save('currentBrawl',this.link);
+	            game.save('currentBrawl','help');
 	        }
 	        // 应该是这里是制作列表的地方
 	        var createNode=function(name){
@@ -109,6 +109,8 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
             	if(today.getMonth() == 3 && name == 'thanks') intro += '<br> 特殊BGM：資料室のお茶会 - key';
 	            var i = ui.create.div('.text center',intro);
 	            i.style.overflow='scroll';
+	            i.style.margin='0px';
+	            i.style.padding='0px';
 	            var showcase=ui.create.div();
 	            showcase.style.margin='0px';
 	            showcase.style.padding='0px';
@@ -290,6 +292,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	    			if(init){
 	                    var player=ui.create.player(null,true);
 	                    lib.character['akyuu'] = ['female','1',3,['luguo'],[]];
+	                    lib.characterIntro['akyuu']='全名稗田阿求，将毕生奉献于记载幻想乡的历史的稗田家的现任家主。持有过目不忘的记忆能力。<br><b>画师：渡瀬　玲<br></b><br>现因一些原因，被赋予了幻想乡的管理员权限。不过依然是和平常一样做着记录屋的工作。';
 				        lib.skill['luguo'] = {};
 				        lib.translate['luguo'] = '隐藏';
 				        lib.translate['luguo_info'] = '达成多次异变胜利的话，可以解锁这个角色哟？';
@@ -519,11 +522,8 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        	mode:'',
 	        	intro:[
 	        		'虽然新规则看起来有点太复杂，很麻烦，但是不用担心，规则比看起来的要容易理解多了！',
-	        		'',
-	        		'如果你觉得文字太枯燥的话，图文介绍可以在<a href="game/guide.pdf">幻想乡最速体系介绍</a>读到。',
-	        		'如果你觉得文字和图片都不够提起兴趣的话，你可以去[场景-对战练习]找子规老师探讨探讨！',
-	        		'',
 	        		'无论是我，还是子规老师，还是主人，都是会全力帮助你的，所以一定不要泄气！加油！',
+	        		'',      		
 	        		],
 	        	showcase:function(init){
 	        		if (init){
@@ -535,7 +535,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						dialog.style.top = "0px";
 						dialog.style.width = "100%";
 						dialog.style.height = "100%";
-						dialog.addText('请选择你想要了解的系统，'+lib.config.connect_nickname+'，我会尽力解答的！');
+						dialog.addText('如果你觉得文字太枯燥的话，图文介绍可以在<a href="game/guide.pdf">幻想乡最速体系介绍</a>读到。<br>如果你觉得文字和图片都不够提起兴趣的话，你可以去[场景-对战练习]找子规老师探讨探讨！<br>请选择你想要了解的系统，'+lib.config.connect_nickname+'，我会尽力解答的！');
 						dialog.classList.add('fixed');
 	        			dialog.noopen=true;
 	        			this.appendChild(dialog);
@@ -647,6 +647,11 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        					'忠臣 → 异变',
 	        					'反贼 → 自机',
 	        					'内奸 → 路人',
+	        					'',
+	        					'<u>明忠模式</u>',
+	        					'明忠模式就是，游戏开始时，主公不亮身份，而是改成一个忠臣亮身份。',
+	        					'亮出来的忠臣第一个进行回合，且体力值和体力上限+1。',
+	        					'其他部分都与身份模式相同。',
 				        		];
 	        				dialog.setCaption('<div><div style="text-align:left;font-size:16px">'+i.join('<br>'));
 	                    },{marginLeft:'6px'});
@@ -663,7 +668,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        						'<b>替补模式:</b> 选角色时从5选1改为8选2；第一个选的角色坠机后，换成替补角色继续游戏；一方坠机两名角色后失败。',
 	        						'<b>末位换牌：</b>四号位起手可以把所有手牌弃掉，重新摸4张。',
 	        						'',
-	        						'<u> 3v3 </u>',
+	        						'<u> 3v3统率 </u>',
 	        						'两队各三名玩家。选将方式为游戏开始时，双方从同一个将池中轮流选将，然后从选出来的中选三个。',
 	        						'双方的胜利条件均为击坠对方主帅。',
 	        						'回合顺序为双方轮流，然后由主帅选择己方进行回合的角色。',
