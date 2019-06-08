@@ -229,6 +229,12 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				});
 			}
 			"step 4"
+			lib.setPopped(ui.rules,function(){
+				var uiintro=ui.create.dialog('hidden');
+					uiintro.add('<div class="text left">1. 黑幕/异变胜利：击坠所有自机和路人<br>2. 自机胜利：击坠黑幕 <br>3. 路人胜利：击坠所有其他角色<br>4. 击坠自机后，摸3张牌<br>5. 黑幕击坠异变后，弃置所有牌。</div>');
+					uiintro.add(ui.create.div('.placeholder.slim'))
+				return uiintro;
+			},400);
 			if(_status.connectMode){
 				_status.mode=lib.configOL.identity_mode;
 				if(_status.mode=='zhong'){
@@ -289,33 +295,6 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					else{
 						game.zhong.addSkill('sheshen');
 					}
-				}
-				var enhance_zhu=false;
-				if(_status.connectMode){
-					enhance_zhu=(_status.mode!='zhong'&&lib.configOL.enhance_zhu&&get.population('fan')>=3);
-				}
-				else{
-					enhance_zhu=(_status.mode!='zhong'&&get.config('enhance_zhu')&&get.population('fan')>=3);
-				}
-				if(enhance_zhu){
-					var skill;
-					switch(game.zhu.name){
-						case 'liubei':skill='jizhen';break;
-						case 'dongzhuo':skill='hengzheng';break;
-						case 'sunquan':skill='batu';break;
-						case 'sp_zhangjiao':skill='tiangong';break;
-						case 'liushan':skill='shengxi';break;
-						case 'sunce':skill='ciqiu';break;
-						case 'yuanshao':skill='geju';break;
-						case 're_caocao':skill='dangping';break;
-						case 'caopi':skill='junxing';break;
-						case 'liuxie':skill='moukui';break;
-						default:skill='tianming';break;
-					}
-					game.broadcastAll(function(player,skill){
-						player.addSkill(skill);
-						player.storage.enhance_zhu=skill;
-					},game.zhu,skill);
 				}
 			}
 			game.syncState();
@@ -964,6 +943,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					for(i in lib.character){
 						if(chosen.contains(i)) continue;
 						if(lib.filter.characterDisabled(i)) continue;
+						if (!i || !lib.character[i]) continue;
 						event.list.push(i);
 						if(lib.character[i][4]&&lib.character[i][4].contains('zhu')){
 							list2.push(i);

@@ -36,6 +36,12 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        dialog.contentContainer.style.transition='all 0s';
 	        if(!lib.storage.directStage) dialog.open();
 	        var packnode=ui.create.div('.packnode',dialog);
+			lib.setPopped(ui.rules,function(){
+				var uiintro=ui.create.dialog('hidden');
+					uiintro.add('<div class="text left">选好了按下面那个大红按钮就行了</div>');
+					uiintro.add(ui.create.div('.placeholder.slim'))
+				return uiintro;
+			},400);
 	        lib.setScroll(packnode);
 	        var clickCapt=function(){
 	            var active=this.parentNode.querySelector('.active');
@@ -909,6 +915,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	                    player.node.avatar.show();
 	                    player.style.left='calc(50% - 75px)';
 	                    player.style.top='20px';
+						if (game.layout == 'nova') player.style.top='0px';
 	                    player.node.count.remove();
 	                    player.node.hp.remove();
 	                    player.node.lili.remove();
@@ -933,7 +940,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 		                    ui.create.node('span','<br>阿求老师来一起玩！ ',line2,{});
 		                    var akyuu=ui.create.node('input',line2,{});
 		                    akyuu.type='checkbox';
-		                    ui.create.div('.menubutton.large','确定',line3,{position:'relative'},function(){
+		                    ui.create.div('.menubutton.large','设置完毕',line3,{position:'relative'},function(){
 		                    	lib.config['library'] = [linked.checked,turn.checked,round.checked,akyuu.checked];
 		                    });
 	        			} else {
@@ -1373,6 +1380,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	                            discardPile:[],
 	                        };
 	                        for(var i=0;i<line7.childElementCount;i++){
+								console.log(line7.childNodes[i].info);
 	                            scene.players.push(line7.childNodes[i].info);
 	                        }
 	                        if(scene.players.length<2){
@@ -1698,11 +1706,11 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	                        player.info=info;
 	                        var name=info.name,name3=info.name2;
 	                        if(name=='random'){
-	                            name='re_caocao';
+	                            name='zigui';
 	                        }
 	                        if(name3!='none'){
 	                            if(name3=='random'){
-	                                name3='liubei';
+	                                name3='zigui';
 	                            }
 	                            player.init(name,name3);
 	                            if(info.name2=='random'){

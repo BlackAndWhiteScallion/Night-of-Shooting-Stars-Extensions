@@ -243,6 +243,12 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					}
 				});
 			}
+			lib.setPopped(ui.rules,function(){
+				var uiintro=ui.create.dialog('hidden');
+					uiintro.add('<div class="text left">1. 黑幕/异变胜利：击坠所有自机<br>2. 自机胜利：击坠黑幕<br>3. 异变牌胜利：达成异变牌上的胜利条件<br>4. 出牌阶段可以明置身份。明置身份效果：<br><span>黑幕：拿异变牌（明置）；<br>路人：拿异变牌（暗置）；<br>自机：令一名角色选择：被你弃一张，或明置身份；<br>异变：令一名角色摸一张牌。</span><br>5. 击坠角色奖励：一张技能牌和1点灵力。</div>');
+					uiintro.add(ui.create.div('.placeholder.slim'))
+				return uiintro;
+			},400);
 			// 如果是连接模式
 			// 这个是设置布局的好像
 			// 不太对吧，那联机模式就不选将了？？
@@ -318,36 +324,6 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						game.zhong.addSkill('sheshen');
 					}
 				}
-				// 这个是加强主公包的玩意……全删了吧？
-				/*
-				var enhance_zhu=false;
-				if(_status.connectMode){
-					enhance_zhu=(_status.mode!='zhong'&&lib.configOL.enhance_zhu&&get.population('fan')>=3);
-				}
-				else{
-					enhance_zhu=(_status.mode!='zhong'&&get.config('enhance_zhu')&&get.population('fan')>=3);
-				}
-				if(enhance_zhu){
-					var skill;
-					switch(game.zhu.name){
-						case 'liubei':skill='jizhen';break;
-						case 'dongzhuo':skill='hengzheng';break;
-						case 'sunquan':skill='batu';break;
-						case 'sp_zhangjiao':skill='tiangong';break;
-						case 'liushan':skill='shengxi';break;
-						case 'sunce':skill='ciqiu';break;
-						case 'yuanshao':skill='geju';break;
-						case 're_caocao':skill='dangping';break;
-						case 'caopi':skill='junxing';break;
-						case 'liuxie':skill='moukui';break;
-						default:skill='tianming';break;
-					}
-					game.broadcastAll(function(player,skill){
-						player.addSkill(skill);
-						player.storage.enhance_zhu=skill;
-					},game.zhu,skill);
-				}
-				*/
 			}
 			// 这里就游戏开始时了。
 			game.syncState();
@@ -1060,6 +1036,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						if(chosen.contains(i)) continue;
 						if(lib.filter.characterDisabled(i)) continue;
 						// 可以用的全部加入列表
+						if (!i || !lib.character[i]) continue;
 						event.list.push(i);
 						// 主公角色加入另外一个主公专属区
 						if(lib.character[i][4]&&lib.character[i][4].contains('zhu')){
@@ -2326,6 +2303,11 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				content:function(){
 					game.saveConfig('akyuu',true);
 					lib.config.gameRecord.incident.data['akyuu'] = 0;
+					lib.config.gameRecord.general.data['akyuu'] ++;
+					var data=lib.config.gameRecord.general.data;
+					 lib.config.gameRecord.general.str='总出牌张数：'+data['card']+'<br>总造成伤害值：'+data['damage']+'<br>总击坠角色数：'+data['kill']+'<br>阿求出场次数：'+data['akyuu'];
+					if (data['cong'] == 0) lib.config.gameRecord.general.str += '<br>???出场次数：0';
+					else lib.config.gameRecord.general.str += '<br>黑白葱出场次数：'+data['cong'];
 					game.saveConfig('gameRecord',lib.config.gameRecord);
 					var recent=get.config('recentCharacter');
 					var fav=lib.config.favouriteCharacter;
@@ -2497,9 +2479,14 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				},
 				content:function(){
 					"step 0"
-					lib.character['cong'] = ['female','100000',Infinity,['finalspark','mianyi'],[],[],Infinity];
+					lib.character['cong'] = ['female','100000',Infinity,['finalspark','mianyi'],[],[],'100000'];
 					lib.translate['cong']='黑白葱';
 					player.init('cong');
+					lib.config.gameRecord.general.data['cong'] ++;
+					var data=lib.config.gameRecord.general.data;
+					lib.config.gameRecord.general.str='总出牌张数：'+data['card']+'<br>总造成伤害值：'+data['damage']+'<br>总击坠角色数：'+data['kill']+'<br>阿求出场次数：'+data['akyuu'];
+					lib.config.gameRecord.general.str += '<br>黑白葱出场次数：'+data['cong'];
+					game.saveConfig('gameRecord',lib.config.gameRecord);
 					player.update();
 					game.pause();
 					player.say('居然击坠了管理员，你也是挺有勇气的呢。');
@@ -2529,6 +2516,8 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	                        player.init('akyuu');
 	                        game.resume();
 	                    },2500);
+					} else {
+						game.over();
 					}
 					"step 3"
 					trigger.cancel();

@@ -319,7 +319,7 @@ window.noname_skin_list={
     rumia:3,
     meiling:2,
     patchouli:3,
-    koakuma:2,
+    koakuma:3,
     sakuya:3,
     remilia:3,
     flandre:2,

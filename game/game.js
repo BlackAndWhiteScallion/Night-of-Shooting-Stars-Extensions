@@ -663,8 +663,9 @@
                             default:'旧版',
                             newlayout:'对称',
                             mobile:'默认',
-                            long:'新版',
+                            long:'宽屏',
                             long2:'手杀',
+                            nova:'最新版',
                         },
                         visualMenu:function(node,link){
                             node.className='button character themebutton '+lib.config.theme;
@@ -689,7 +690,7 @@
                                         me.style.bottom='4px';
                                     }
                                 }
-                                else if(link=='long2'){
+                                else if(link=='long2'||link=='nova'){
                                     me.style.display='none';
                                 }
                                 else{
@@ -716,6 +717,10 @@
                                         player.style.width='24px';
                                         player.style.height='29px';
                                     }
+                                    else if(link=='nova') {
+										player.style.width='20px';
+										player.style.height='24px';
+									}
                                     else{
                                         player.style.width='20px';
                                         player.style.height='34px';
@@ -780,7 +785,19 @@
                                             player.style.bottom='45px';
                                         }
                                     }
-
+                                    else if(link=='nova'){
+										if(i==0){
+											player.style.bottom='2px';
+											player.style.left='3px';
+										}
+										if(i==3){
+											player.style.left='calc(50% - 10px)';
+										}
+										if(i==1||i==2){
+											player.style.left='3px';
+											player.style.bottom=(i*30)+'px';
+										}
+									}
                                     if(i==0&&(link=='mobile'||link=='long')){
                                         player.classList.add('me');
                                         player.style.borderRadius='0px';
@@ -833,6 +850,30 @@
                             game.saveConfig('player_height',item);
                             ui.arena.dataset.player_height=item;
                         }
+                    },
+                    player_height_nova:{
+						name:'角色高度',
+						init:'long',
+						item:{
+							// auto:'自动',
+							short:'矮',
+							default:'中',
+							long:'高',
+						},
+						onclick:function(item){
+							game.saveConfig('player_height_nova',item);
+							// if(item=='auto'){
+							// 	if(parseInt(ui.arena.dataset.number)>=7){
+							// 		ui.arena.dataset.player_height_nova='short';
+							// 	}
+							// 	else{
+							// 		ui.arena.dataset.player_height_nova='default';
+							// 	}
+							// }
+							// else{
+								ui.arena.dataset.player_height_nova=item;
+							// }
+						}
                     },
                     // background_color_music:{
                     //  name:'背景色',
@@ -2479,7 +2520,7 @@
                                 linked=true;
                             }
                             game.saveConfig('cardshape',item);
-                            if(item=='oblong'&&(game.layout=='long'||game.layout=='mobile'||game.layout=='long2')){
+                            if(item=='oblong'&&(game.layout=='long'||game.layout=='mobile'||game.layout=='long2'||game.layout=='nova')){
                                 ui.arena.classList.add('oblongcard');
                                 ui.window.classList.add('oblongcard');
                             }
@@ -2659,7 +2700,7 @@
                         }
                         else{
                             map.textequip.hide();
-                            if(lib.config.layout=='long2'){
+                            if(lib.config.layout=='long2'||lib.config.layout=='nova'){
                                 map.phonelayout.show();
                                 map.cardshape.show();
                             }
@@ -2681,6 +2722,12 @@
                                 map.player_height.hide();
                             }
                         }
+                        if(lib.config.layout=='nova'){
+							map.player_height_nova.show();
+						}
+						else{
+							map.player_height_nova.hide();
+						}
                         if(lib.config.touchscreen){
                             map.cursor_style.hide();
                         }
@@ -7975,8 +8022,8 @@
                             node.addEventListener('mouseleave',upNode);
                         }
                         if (lib.config.all.mode[i] == 'identity' && lib.config.gameRecord.incident && lib.config.gameRecord.incident.data['akyuu'] > 2){
-                            node.style.boxShadow='rgba(125, 90, 178, 1) 0 0 3px 5px, rgba(125, 90, 178, 1) 0 3px 10px';
-                            node.style.background='rgba(125, 90, 178, 1)';
+                            node.style.boxShadow='rgba(125, 90, 178, 0.4) 0 0 3px 5px, rgba(125, 90, 178, 0.4) 0 3px 10px';
+                            node.style.background='rgba(125, 90, 178, 0.4)';
                         }
                         setTimeout((function(node){
                             return function(){
@@ -8208,7 +8255,7 @@
                     else{
                         ui.arena.classList.remove('mobile');
                     }
-                    if(game.layout=='mobile'||game.layout=='long'||game.layout=='long2'){
+                    if(game.layout=='mobile'||game.layout=='long'||game.layout=='long2'||game.layout=='nova'){
                         if(game.me&&game.me.node.handcards2.childNodes.length){
                             while(game.me.node.handcards2.childNodes.length){
                                 game.me.node.handcards1.appendChild(game.me.node.handcards2.firstChild);
@@ -8221,7 +8268,7 @@
                     else{
                         ui.arena.classList.remove('oldlayout');
                     }
-                    if(lib.config.cardshape=='oblong'&&(game.layout=='long'||game.layout=='mobile'||game.layout=='long2')){
+                    if(lib.config.cardshape=='oblong'&&(game.layout=='long'||game.layout=='mobile'||game.layout=='long2'||game.layout=='nova')){
                         ui.arena.classList.add('oblongcard');
                         ui.window.classList.add('oblongcard');
                     }
@@ -8505,10 +8552,8 @@
                 var mode=lib.config.all.mode.slice(0);
                 mode.remove('connect');
                 mode.remove('brawl');
-                var banned=['yxs_luzhishen','zhenji','shen_guanyu','shen_caocao','zhurong',
-                    'daqiao','lingcao','liuzan','lusu','luxun','yanwen','zhouyu','xiahouyuan',
-                    'zhuzhi','old_caozhen','guojia','simayi','sp_pangde','swd_kangnalishi','hs_siwangzhiyi'];
-                var bannedcards=['zengbin','toulianghuanzhu','huoshan','hongshui','guiyoujie','fengyinzhidan'];
+                var banned=[];
+                var bannedcards=[];
                 for(var i=0;i<mode.length;i++){
                     game.saveConfig(mode[i]+'_banned',banned);
                     game.saveConfig(mode[i]+'_bannedcards',bannedcards);
@@ -9007,20 +9052,8 @@
                 cheat.g('juedou');
             },
             z:function(name){
-                switch(name){
-                    case 'cc':name='re_caocao';break;
-                    case 'lb':name='re_liubei';break;
-                    case 'sq':name='sunquan';break;
-                    case 'dz':name='dongzhuo';break;
-                    case 'ys':name='re_yuanshao';break;
-                    case 'zj':name='sp_zhangjiao';break;
-                    case 'ls':name='liushan';break;
-                    case 'sc':name='sunce';break;
-                    case 'cp':name='caopi';break;
-                    case 'cr':name='caorui';break;
-                    case 'sx':name='sunxiu';break;
-                    case 'lc':name='liuchen';break;
-                    case 'sh':name='sunhao';break;
+                switch(name){  
+                    default:name='remilia';
                 }
                 game.zhu.init(name);
                 game.zhu.maxHp++;
@@ -13210,6 +13243,7 @@
                     for(var i=0;i<cards.length;i++){
                         cards[i].style.transform+=' scale(0.2)';
                         cards[i].classList.remove('glow');
+                        cards[i].classList.remove('unequip');
                         cards[i].recheck();
                         var info=lib.card[cards[i].name];
                         if(info.destroy||cards[i]._destroy){
@@ -13307,7 +13341,7 @@
                     }
                     else{
                         if(event.loseEquip){
-                            player.addEquipTrigger();
+                            //player.addEquipTrigger();
                         }
                         event.finish();
                     }
@@ -15360,7 +15394,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                     var i,j;
                     if(arg3!==false){
                         for(i=0;i<this.node.equips.childElementCount;i++){
-                            if(!this.node.equips.childNodes[i].classList.contains('removing')){
+                            if(!this.node.equips.childNodes[i].classList.contains('removing') && !this.node.equips.childNodes[i].classList.contains('unequip')){
                                 var equipskills=get.info(this.node.equips.childNodes[i]).skills;
                                 if(equipskills){
                                     es.addArray(equipskills);
@@ -15403,7 +15437,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                         var es=[];
                         if(arg3!==false){
                             for(i=0;i<this.node.equips.childElementCount;i++){
-                                if(!this.node.equips.childNodes[i].classList.contains('removing')){
+                                if(!this.node.equips.childNodes[i].classList.contains('removing') && !this.node.equips.childNodes[i].classList.contains('unequip')){
                                     var equipskills=get.info(this.node.equips.childNodes[i]).skills;
                                     if(equipskills){
                                         es.addArray(equipskills);
@@ -18523,6 +18557,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                                 this.addSkillTrigger(info.skills[j]);
                             }
                         }
+                        card.classList.remove('unequip');
                     }
                     else{
                         var es=this.getCards('e');
@@ -18540,6 +18575,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                                 this.removeSkillTrigger(info.skills[j]);
                             }
                         }
+                        card.classList.add('unequip');
                         if(info.clearLose&&typeof info.onLose=='function'){
                             var next=game.createEvent('lose_'+card.name);
                             next.setContent(info.onLose);
@@ -18579,7 +18615,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                         }
                         this.initedSkills.remove(skill);
                     }
-                    if(info.trigger){
+                    if(info.trigger&&this.playerid){
                         var playerid=this.playerid;
                         var removeTrigger=function(i,evt){
                             if(i=='global'){
@@ -20398,7 +20434,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                         }
                     }
                     */
-                    player.addEquipTrigger()
+                    player.addEquipTrigger();
                     return player;
                 },
                 $gain:function(card,log,init){
@@ -21350,7 +21386,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                         if(this._transform&&this.parentNode&&this.parentNode.parentNode&&
                             this.parentNode.parentNode.parentNode==ui.me&&
                             (!_status.mousedown||_status.mouseleft)&&
-                            (!this.parentNode.parentNode.classList.contains('scrollh')||game.layout=='long2')){
+                            (!this.parentNode.parentNode.classList.contains('scrollh')||(game.layout=='long2'||game.layout=='nova'))){
                             if(bool){
                                 this.style.transform=this._transform+' translateY(-20px)';
                             }
@@ -22255,6 +22291,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
 				return true;
 			},
             characterDisabled:function(i,libCharacter){
+                if (!i || !lib.character[i]) return false;
                 if(lib.character[i][4]&&lib.character[i][4].contains('forbidai')) return true;
                 if(lib.character[i][4]&&lib.character[i][4].contains('unseen')) return true;
                 if(lib.config.forbidai.contains(i)) return true;
@@ -23887,7 +23924,7 @@ if(this==game.me&&ui.fakeme&&fakeme!==false){
                 updaterooms:function(list,clients){
                     if(ui.rooms){
                         ui.window.classList.add('more_room');
-                        var list2=['re_caocao','re_liubei','sunquan','sp_zhangjiao','re_yuanshao','dongzhuo'];
+                        var list2=['','','','','',''];
                         for(var i=0;i<ui.rooms.length;i++){
                             ui.rooms[i].initRoom(list[i],list2[i]);
                         }
@@ -26767,7 +26804,7 @@ smoothAvatar:function(player,vice){
                 if(game.chess){
                     dialog.classList.add('center');
                 }
-                if(game.layout=='long2'&&!game.chess){
+                if((game.layout=='long2'||game.layout=='nova')&&!game.chess){
                     ui.arena.classList.add('choose-character');
                     if(ui.me) ui.me.hide();
                     if(ui.mebg) ui.mebg.hide()
@@ -28026,7 +28063,7 @@ smoothAvatar:function(player,vice){
     			if(ui.time3){
     				clearInterval(ui.time3.interval);
     			}
-                if(game.layout=='long2'&&!game.chess){
+                if((game.layout=='long2'||game.layout=='nova')&&!game.chess){
                     ui.arena.classList.add('choose-character');
                     ui.me.hide();
                     ui.mebg.hide()
@@ -28297,7 +28334,7 @@ smoothAvatar:function(player,vice){
                             num=0;
                             for(j=0;j<game.players[i].stat.length;j++){
                                 for(k in game.players[i].stat[j].card){
-                                    num+=game.players[i].stat[j].card[k];
+                                    if (!isNaN(game.players[i].stat[j].card[k])) num+=game.players[i].stat[j].card[k];
                                 }
                             }
                             td.innerHTML=num;
@@ -28449,14 +28486,22 @@ smoothAvatar:function(player,vice){
                 if (!data['card']){
                     data['card'] = 0;
                 }
+                if (!data['akyuu']){
+                    data['akyuu'] = 0;
+                }
+                if (!data['cong']){
+                    data['cong'] = 0;
+                }
                 for(j=0;j<game.me.stat.length;j++){
                     if(game.me.stat[j].kill!=undefined) data['kill']+=game.me.stat[j].kill;
                     if(game.me.stat[j].damage != undefined) data['damage'] += game.me.stat[j].damage;
                     for(k in game.me.stat[j].card){
-                        data['card']+=game.me.stat[j].card[k];
+                        if (!isNaN(game.me.stat[j].card[k])) data['card']+=game.me.stat[j].card[k];
                     }
                 }
-                lib.config.gameRecord.general.str='总出牌张数：'+data['card']+'<br>总造成伤害值：'+data['damage']+'<br>总击坠人数：'+data['kill'];
+                lib.config.gameRecord.general.str='总出牌张数：'+data['card']+'<br>总造成伤害值：'+data['damage']+'<br>总击坠角色数：'+data['kill']+'<br>阿求出场次数：'+data['akyuu'];
+                if (data['cong'] == 0) lib.config.gameRecord.general.str += '<br>???出场次数：0';
+                else lib.config.gameRecord.general.str += '<br>黑白葱出场次数：'+data['cong'];
                 game.saveConfig('gameRecord',lib.config.gameRecord);
                 
                 var clients=game.players.concat(game.dead);
@@ -29004,6 +29049,7 @@ smoothAvatar:function(player,vice){
 						player.node.equips.classList.add('popequip');
 						auto_confirm=false;
 					}
+                    // 等下来试试给技能牌搞个栏？
                 }
                 if(custom.add.card){
                     custom.add.card();
@@ -29124,7 +29170,10 @@ smoothAvatar:function(player,vice){
                         else if(typeof info.enable=='string') enable=(info.enable==event.name);
                         if(enable){
                             if(info.filter&&!info.filter(event,player)) enable=false;
-                            if(info.viewAs&&event.filterCard&&!event.filterCard(info.viewAs,player)) enable=false;
+                            // 强制0灵力不能开符卡
+                            if(info.spell&&player.lili == 0) enable=false;
+                            // ignoreviewas 用于无视卡牌限制
+                            if(info.viewAs&&event.filterCard&&!event.filterCard(info.viewAs,player)&&!player.hasSkillTag('ignoreviewas')) enable=false;
                             if(info.viewAs&&info.viewAsFilter&&info.viewAsFilter(player)==false) enable=false;
                             if(info.usable&&get.skillCount(skills2[i])>=info.usable) enable=false;
                             if(info.chooseButton&&_status.event.noButton) enable=false;
@@ -38690,7 +38739,6 @@ smoothAvatar:function(player,vice){
             characterDialog2:function(filter){
                 var list=[];
                 for(var i in lib.character){
-                    console.log(i);
                     if(lib.character[i][4].contains('minskin')) continue;
                     if(lib.character[i][4].contains('boss')||lib.character[i][4].contains('hiddenboss')){
                         if(lib.config.mode=='boss') continue;
@@ -39309,7 +39357,7 @@ smoothAvatar:function(player,vice){
                     _status.clicked2=true;
                 });
                 if(heightset){
-                    dialog.style.height=(game.layout=='long2'?380:350)+'px';
+                    dialog.style.height=((game.layout=='long2'||game.layout=='nova')?380:350)+'px';
                     dialog._scrollset=true;
                 }
                 dialog.getCurrentCapt=function(link,capt,noalph){
@@ -39807,7 +39855,7 @@ smoothAvatar:function(player,vice){
                 if(game.layout=='long'||game.layout=='mobile'){
                     if(lib.config.textequip=='text') ui.arena.classList.add('textequip');
                 }
-                if(game.layout=='long'||game.layout=='long2'||game.layout=='mobile'){
+                if(game.layout=='long'||game.layout=='long2'||game.layout=='mobile'||game.layout=='nova'){
                     if(lib.config.cardshape=='oblong'){
                         ui.window.classList.add('oblongcard');
                         ui.arena.classList.add('oblongcard');
@@ -39833,6 +39881,7 @@ smoothAvatar:function(player,vice){
                 lib.init.cssstyles();
 
                 ui.arena.dataset.player_height=lib.config.player_height||'default';
+                ui.arena.dataset.player_height_nova=lib.config.player_height_nova||'default';
                 ui.arena.dataset.target_shake=lib.config.target_shake||'off';
                 ui.backgroundMusic=document.createElement('audio');
                 ui.backgroundMusic.volume=lib.config.volumn_background/8;
@@ -40026,6 +40075,7 @@ smoothAvatar:function(player,vice){
                 ui.replay=ui.create.system('重来',game.reload,true);
                 ui.replay.id='restartbutton';
                 ui.config2=ui.create.system('选项',ui.click.config);
+                ui.config2.style.backgroundImage = 'linear-gradient(rgba(0, 133, 255, 0.8), rgba(0, 133, 255, 0.8))';
                 ui.pause=ui.create.system('暂停',ui.click.pause);
                 ui.pause.id='pausebutton';
                 if(!_status.video){
@@ -40134,6 +40184,8 @@ smoothAvatar:function(player,vice){
                     return uiintro;
                 }, 200);
                 if (lib.config.mode != 'identity') ui.incidents.style.display = 'none';
+                
+                ui.rules = ui.create.system('规则',null,true);
 
                 if(!lib.config.show_playerids||!game.showIdentity){
                     ui.playerids.style.display='none';
@@ -41915,6 +41967,13 @@ smoothAvatar:function(player,vice){
                     }
                     vol2.appendChild(span);
                 }
+
+                var off = ui.create.div('.menubutton','静音',{position:'relative'},function(){
+                        lib.config.volumn_background = 0;
+                        ui.backgroundMusic.volume = 0;
+                        lib.config.volumn_audio = 0;
+                    });
+                uiintro.add(off);
                 uiintro.add(ui.create.div('.placeholder'));
                 return uiintro;
             },
@@ -44468,7 +44527,7 @@ smoothAvatar:function(player,vice){
             }
             if(stayleft){
                 var fullwidth=0;
-                var fullright=(game.layout=='long'||game.layout=='long2'||game.chess||parseInt(ui.arena.dataset.number)<=5);
+                var fullright=(game.layout=='long'||game.layout=='long2'||game.chess||(game.layout!='nova'&&parseInt(ui.arena.dataset.number)<=5));
                 for(var i=0;i<widths.length;i++){
                     fullwidth+=widths[i]+6;
                     if(get.is.phoneLayout()) fullwidth+=6;
@@ -44483,7 +44542,7 @@ smoothAvatar:function(player,vice){
                 }
                 if(fullright){
                     fullwidth+=124;
-                    if(game.layout=='long2'&&ui.arena.dataset.number=='8'&&get.mode()!='boss'){
+                    if((game.layout=='long2'||game.layout=='nova')&&ui.arena.dataset.number=='8'&&get.mode()!='boss'){
                         fullwidth+=game.me.offsetLeft;
                     }
                 }
@@ -44494,7 +44553,7 @@ smoothAvatar:function(player,vice){
                     var current_offset=stayleft._offset;
                     if(fullright){
                         stayleft._offset=Math.ceil(-ui.arena.offsetWidth/2)+135;
-                        if(game.layout=='long2'&&ui.arena.dataset.number=='8'&&get.mode()!='boss'){
+                        if((game.layout=='long2'||game.layout=='nova')&&ui.arena.dataset.number=='8'&&get.mode()!='boss'){
                             stayleft._offset+=game.me.offsetLeft;
                         }
                     }
@@ -44804,11 +44863,11 @@ smoothAvatar:function(player,vice){
                         ui.dialog.classList.add('scroll1');
                         ui.dialog.classList.add('scroll2');
                         if(game.layout!='default'){
-                            ui.dialog.style.height=Math.min(height1,(game.layout=='long2'&&ui.arena.classList.contains('choose-character'))?380:350)+'px';
+                            ui.dialog.style.height=Math.min(height1,((game.layout=='long2'||game.layout=='nova')&&ui.arena.classList.contains('choose-character'))?380:350)+'px';
                             ui.dialog._scrollset=true;
                         }
                     }
-                    if(game.layout=='long2'){
+                    if(game.layout=='long2'||game.layout=='nova'){
                         if(height1+240>=ui.arena.offsetHeight){
                             ui.dialog.classList.add('scroll3');
                         }
@@ -44927,10 +44986,10 @@ smoothAvatar:function(player,vice){
             },
             phoneLayout:function(){
                 if(!lib.config.phonelayout) return false;
-                return (game.layout=='mobile'||game.layout=='long'||game.layout=='long2');
+                return (game.layout=='mobile'||game.layout=='long'||game.layout=='long2'||game.layout=='nova');
             },
             singleHandcard:function(){
-                if(game.singleHandcard||game.layout=='mobile'||game.layout=='long'||game.layout=='long2'){
+                if(game.singleHandcard||game.layout=='mobile'||game.layout=='long'||game.layout=='long2'||game.layout=='nova'){
                     return true;
                 }
                 return false;
@@ -44938,7 +44997,7 @@ smoothAvatar:function(player,vice){
             linked2:function(player){
                 if(lib.config.link_style2!='rotate') return true;
                 if(game.chess) return false;
-                if(game.layout=='long'||game.layout=='long2') return true;
+                if(game.layout=='long'||game.layout=='long2'||game.layout=='nova') return true;
                 if(player.dataset.position=='0'){
                     return ui.arena.classList.contains('oblongcard');
                 }
@@ -45140,7 +45199,8 @@ smoothAvatar:function(player,vice){
                 case 'shu':nature='soil';break;
                 case 'wu':nature='wood';break;
                 case 'qun':nature='metal';break;
-                default:return '';
+                //default:nature = ['thunder', 'water', 'soil', 'wood', 'metal'].randomGet();
+                default:nature = 'metal';
             }
             if(method=='raw'){
                 return nature;

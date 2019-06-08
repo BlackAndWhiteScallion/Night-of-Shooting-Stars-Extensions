@@ -159,6 +159,12 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        start.style.zIndex=3;
 	        start.style.transition='all 0s';
 	        start.hide();
+			lib.setPopped(ui.rules,function(){
+				var uiintro=ui.create.dialog('hidden');
+					uiintro.add('<div class="text left">阿求已经有主人了！不要想奇怪的事情！</div>');
+					uiintro.add(ui.create.div('.placeholder.slim'))
+				return uiintro;
+			},400);
 	        game.addScene=function(name,clear){
 	            var scene=lib.storage.scene[name];
 	            var brawl={
@@ -446,9 +452,14 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	    				'5. 如果你在游戏过程中，看到让你选择发动个什么字母+数字的技能，随便点一个就行了，这些是后台计数技能，人畜无害的。',
 	    				'<b>6. 其实，点击我是可以跟我说话的啦。就上方那个。</b>',
 	    				]; 
-	                	dialog.addText('<div><div style="display:block;left:180px;text-align:left;font-size:16px">'+i.join('<br>'));
-	                	dialog.addText('<div><div style="display:block;top:140px;text-align:left;font-size:16px">'+j.join('<br>'));
-	                }
+						if (!game.layout=='nova'){
+							dialog.addText('<div><div style="display:block;left:180px;text-align:left;font-size:16px">'+i.join('<br>'));
+							dialog.addText('<div><div style="display:block;top:140px;text-align:left;font-size:16px">'+j.join('<br>'));
+						} else {
+							dialog.addText('<div><div style="display:block;left:150px;text-align:left;font-size:16px">'+i.join('<br>'));
+							dialog.addText('<div><div style="display:block;top:160px;text-align:left;font-size:16px">'+j.join('<br>'));
+						}
+					}
 	        	},
 	    	},
 	    	/*
@@ -487,7 +498,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	    				'覆盖完毕后，需要重启流星夜程序！',
 	    				'',
 	    				'2. 游戏内更新，在<b>[选项-其他-更新]</b>下有多个更新选项',
-	    				'[检查游戏更新]是检查游戏的文件更新（需要把下方的更新地址换成github），有可能可以使用，也有可能不能使用。',
+	    				'[检查游戏更新]是检查游戏的文件更新，有可能可以使用，也有可能不能使用。',
 	    				'[检查素材更新]是检查游戏新加的素材。 但是只能检查新加的素材，无法更新被覆盖的旧素材。',
 	    				'检查素材更新在电脑和手机端都可以进行。',
 	    				'',
@@ -501,16 +512,15 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        				dialog.setCaption('<div><div style="text-align:left;font-size:16px">'+i.join('<br>'));
 	                    },{marginLeft:'6px'});
 	                    var versus=ui.create.node('button','已知BUG',line2,function(){
-	        				var i = ['<br>',
+	        				var i = [
 	    				'<u>已知bug列表：</u>',
 	    				'1. 永琳，紫妈，梅莉，还有莉格露观看牌堆时有时候会因不明原因卡住，暂停再取消暂停就行了。铃仙有时候也会卡住，使用同样方式解决。',
 	    				'2. 永琳使用符卡效果有时候会卡住，有时候可以通过暂停来解决，有时候就是卡死了。因原因不明，碰到的话请一定向制作组反馈情况。',
 	    				'3. 在[对称]布局下，玩家视角无法主动弃置技能牌，也不能查看自己的技能牌。',
-	    				'4. [场景-创建场景]后，第一次打开场景会导致游戏崩溃。第二次和之后不会出现问题。',
-	    				'5. 在[场景]的自创场景中，使用【魔导书塔】会装备10个魔导书而不是5个',
-	    				'6. 联机模式下异变胜利后的战果显示有错误',
-	    				'7. [挑战角色]和[闯关角色]扩展同时打开会导致其中一个不能使用。',
-	    				'8.使用【冰镇青蛙】会出现UI错误（只是暂时且不会对游戏造成影响）。',
+	    				'4. 在[场景]的自创场景中，使用【魔导书塔】会装备10个魔导书而不是5个',
+	    				'5. 联机模式下异变胜利后的战果显示有错误',
+	    				'6. [挑战角色]和[闯关角色]扩展同时打开会导致其中一个不能使用。',
+	    				'7. 使用【冰镇青蛙】会出现UI错误（只是暂时且不会对游戏造成影响）。',
 				        		];
 	        				dialog.setCaption('<div><div style="text-align:left;font-size:16px">'+i.join('<br>'));
 	                    },{marginLeft:'6px'});
@@ -753,7 +763,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						    		'主帅选项：开启后，双方各选择一名角色成为主将。主将体力上限加一，主将坠机后，若有副将，副将代替之成为主将，否则游戏结束<li>'+
 						    		'无尽模式：开启后，任何一方有角色坠机都将选择一名新角色重新加入战场，直到点击左上角的结束游戏按钮手动结束游戏。结束游戏时，击坠数更多的一方获胜<li>'+
 						    		'行动顺序：行动顺序为[指定]时，双方无论存活角色角色多少都将轮流进行行动。<li>'+
-						    		'回合结束摸牌：在一方所有角色行动完毕进行下一轮行动时，若其人数比另一方少，另一方可指定至多X名角色名摸一张牌，X为人数之差'+
+						    		'回合结束摸牌：在一方所有角色行动完毕进行下一轮行动时，若其人数比另一方少，另一方可指定至多X名角色名摸一张牌，X为人数之差<li>'+
 						    		'战场机关：开启后，游戏开始时，场上会出现一个机关；且每个轮次结束后，有一定机率出现一个机关。机关不参与战斗，并有一个影响周围或全体角色的效果。机关在出现后的3个轮次内消失<li>'+
 						    		'伤害击飞：开启后，当一名角色对距离两格以内的目标造成伤害后，受伤害角色将沿反方向移动一格<li>'+
 						    		'路障：角色不能移动到路障。当一名角色的周围四格有至少三格为路障或在战场外时，其可以在回合内清除一个相邻路障</ul>'+

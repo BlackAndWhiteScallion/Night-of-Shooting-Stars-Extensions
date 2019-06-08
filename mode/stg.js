@@ -121,7 +121,6 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 							_status.bosschoice.link=lib.boss[i].controlid||i;
 						}
 					}
-
 					// if(!get.config(cfg)){
 					// 	player.style.display='none';
 					// }
@@ -138,6 +137,14 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				event.current=bosslist.childNodes[1];
 				event.current.classList.add('highlight');
 			}
+			lib.setPopped(ui.rules,function(){
+				var uiintro=ui.create.dialog('hidden');
+
+					uiintro.add('<div class="text left">选择一个大关，然后选择你喜欢的自机来挑战 </div>');
+					uiintro.add(ui.create.div('.placeholder.slim'))
+
+				return uiintro;
+			},400);
 			_status.bosschoice = event.current;
 			ui.create.div(bosslist);
 			ui.create.cardsAsync();
@@ -412,14 +419,14 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 			},180);
 			ui.boss.style.display = 'none';
 
-			lib.setPopped(ui.create.system('规则',null,true),function(){
+			lib.setPopped(ui.rules,function(){
 				var uiintro=ui.create.dialog('hidden');
 
-					uiintro.add('<div class="text center">1. 击坠敌人后，来源摸一张牌，获得1点灵力 <br> 2. 准备阶段，场上敌人数小于2，会刷出下一个敌人 <br> 3. 通关时，摸一张技能牌，回复1点体力，并重置牌堆 <br> 4.手牌上限+X（X为已通关卡数量） </div>');
+					uiintro.add('<div class="text left">1. 击坠敌人后，来源摸一张牌，获得1点灵力 <br> 2. 准备阶段，场上敌人数小于2，会刷出下一个敌人 <br> 3. 通关时，摸一张技能牌，回复1点体力，并重置牌堆 <br> 4.手牌上限+X（X为已通关卡数量） </div>');
 					uiintro.add(ui.create.div('.placeholder.slim'))
 
 				return uiintro;
-			},180);
+			},400);
 
 			if(get.config('single_control')||game.me==game.boss){
 				ui.single_swap.style.display='none';
@@ -519,6 +526,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				type:'equip',
 				subtype:'equip4',
 				modeimage:'stg',
+				unique:true,
 				ai:{
 					basic:{
 						equipValue:6,
@@ -531,6 +539,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				type:'equip',
 				subtype:'equip4',
 				modeimage:'stg',
+				unique:true,
 				ai:{
 					basic:{
 						equipValue:6,
@@ -543,6 +552,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				type:'equip',
 				subtype:'equip4',
 				modeimage:'stg',
+				unique:true,
 				ai:{
 					basic:{
 						equipValue:6
@@ -555,6 +565,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				type:'equip',
 				subtype:'equip4',
 				modeimage:'stg',
+				unique:true,
 				ai:{
 					basic:{
 						equipValue:6
@@ -567,6 +578,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				type:'equip',
 				subtype:'equip4',
 				modeimage:'stg',
+				unique:true,
 				ai:{
 					basic:{
 						equipValue:6
@@ -579,6 +591,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				type:'equip',
 				subtype:'equip4',
 				modeimage:'stg',
+				unique:true,
 				ai:{
 					basic:{
 						equipValue:6

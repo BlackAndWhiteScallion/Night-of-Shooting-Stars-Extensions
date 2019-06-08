@@ -42,14 +42,10 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                                           game.trySkillAudio('jidong',player,true,3);
                                     }
                                     if (get.position(result.cards[0]) == 'e'){
-                                          var info=get.info(result.cards[0]);
-                                          if(info.skills){
-                                              for(var i=0;i<info.skills.length;i++){
-                                                  player.removeSkillTrigger(info.skills[i]);
-                                              }
-                                          }
+                                          event.target.removeEquipTrigger(result.cards[0], false);
                                     }
                               }
+                              'step 3'
                         },
                   },
                   jidong_2:{
@@ -283,7 +279,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             translate:{
                   cirno:'琪露诺',
                   jidong:'急冻',
-                  jidong_2:'急冻',
+                  jidong_2:'急冻（→轰）',
                   jidong_audio1:'就像青蛙一样！',
                   jidong_audio2:'接好这个大冰块！',
                   jidong_audio3:'大酱，你看！是青蛙！',
