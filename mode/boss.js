@@ -407,7 +407,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				boss_reimu:['female','0',8,['lingji','bianshen_reimu'],['boss'], 'shu'],
 				boss_reimu2:['female','0',4,['lingji','mengxiangtiansheng'],['hiddenboss'], 'shu'],
 				boss_zhaoyun:['male','0',1,['boss_juejing','longhun'],['shu','boss','bossallowed'],'shen'],
-				boss_nianshou:['male','0',10000,['boss_nianrui','boss_qixiang','boss_damagecount'],['boss'],'shu'],
+				boss_nianshou:['male','0',10000,['boss_nianrui','boss_qixiang','skipfirst','boss_damagecount'],['boss'],'shu','10000'],
 				boss_saitama:['male','0',Infinity,['punch','serious','skipfirst','boss_turncount'],['boss'],'shen','1'],
 			},
 		},
@@ -491,7 +491,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 							} else if (lib.character[list[i]][3].contains('boss_turncount')){
 								str+= lib.translate[list[i]] + ': <br> 最大轮次数：'+ data[list[i]][0] + '<br>';
 							} else {
-								str+=lib.translate[list[i]] + ': <br> 魔王：'+data[list[i]][0]+'胜 '+data[list[i]][1]+'负<br> 盟军：'+data[list[i]][2]+'胜  '+data[list[i]][3]+'负 <br>';
+								str+=lib.translate[list[i]] + ': <br> 魔王：'+data[list[i]][0]+'胜 '+data[list[i]][1]+'负<br> 勇者：'+data[list[i]][2]+'胜  '+data[list[i]][3]+'负 <br>';
 							}
 						}
 					}
@@ -609,7 +609,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						}
 						// 不在重整状态的玩家进行一个回合
 						// 在这里加入让玩家选顺序应该就可以
-						if (lib.config.free_turn && player != game.boss && game.me != game.boss && game.bossinfo.loopType==2){
+						if (get.config('free_turn') && player != game.boss && game.me != game.boss && game.bossinfo.loopType==2){
 							game.me.chooseTarget('选择下一名进行回合的我方角色',function(card,player,target){
                               return target.identity == 'cai';
                               }).set('ai',function(target){
@@ -945,10 +945,11 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					ui.damageCount=ui.create.system('伤害: 0',null,true);
 					lib.setPopped(ui.rules,function(){
 						var uiintro=ui.create.dialog('hidden');
-							uiintro.add('<div class="text left">[选项→通用]里可以提高游戏速度<br>关掉[回合顺序自选]和[单人控制]也可以显著提升游戏速度<br>不要想了，快点打上去！</div>');
+							uiintro.add('<div class="text left">[选项→游戏]里可以提高游戏速度<br>关掉[回合顺序自选]和[单人控制]也可以显著提升游戏速度<br>不要想了，快点打上去！</div>');
 							uiintro.add(ui.create.div('.placeholder.slim'))
 						return uiintro;
 					},400);
+					game.boss.say('嗷呜~~~~');
 				}
 			},
 			boss_patchy1:{
@@ -1004,7 +1005,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					lib.config.background_music = '';
 					lib.setPopped(ui.rules,function(){
 						var uiintro=ui.create.dialog('hidden');
-							uiintro.add('<div class="text left">[选项→挑战]里可以打开单人控制<br>光头在回合外不会使用牌<br>不要放弃治疗啊！</div>');
+							uiintro.add('<div class="text left">[选项→魔王]里可以打开单人控制<br>光头在回合外不会使用牌<br>不要放弃治疗啊！</div>');
 							uiintro.add(ui.create.div('.placeholder.slim'))
 						return uiintro;
 					},400);
@@ -1578,7 +1579,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 		},
 		translate:{
 			zhu:'魔王',
-			cai:'盟军',
+			cai:'勇者',
 			zhong:'从',
 			boss_reimu:'灵梦',
 			boss_reimu2:'灵梦',
@@ -1630,11 +1631,11 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 			serious_info:'锁定技，结束阶段，你摸X张牌，并将灵力和灵力上限补至X（X为游戏轮次数）。',
 			boss_saitama_die:'啊……就是这种感觉……',
 			boss_turncount:'存活挑战',
-			boss_turncount_info:'你在游戏失败前，能够撑多少轮呢？<br><br>注：建议在左上角[选项-开始-挑战]中将[单人控制]选项打开',
+			boss_turncount_info:'你在游戏失败前，能够撑多少轮呢？<br><br>注：建议在左上角[选项-开始-魔王]中将[单人控制]选项打开',
 		},
 		get:{
 			rawAttitude:function(from,to){
-				return (from.side===to.side?6:-6);
+				return (from.side===to.side?3:-3);
 			}
 		}
 	};
