@@ -21,11 +21,11 @@
     var lib={
         configprefix:'star_1.9_',
         versionOL:27,
-        updateURL:'https://raw.githubusercontent.com/BlackAndWhiteScallion/Night-of-Shooting-Stars',
-        //updateURL:'https://raw.githubusercontent.com/libccy/noname',
+        //updateURL:'https://raw.githubusercontent.com/BlackAndWhiteScallion/Night-of-Shooting-Stars',
+        updateURL:'https://dev.tencent.com/u/BWS/p/Night-of-Shooting-Stars/git/raw',
         extensionURL:'https://raw.githubusercontent.com/BlackAndWhiteScallion/Night-of-Shooting-Stars-Extensions/master/',
-        //mirrorURL:'',
-        mirrorURL:'https://dev.tencent.com/u/BWS/p/Night-of-Shooting-Stars/git/raw',
+        mirrorURL:'https://raw.githubusercontent.com/BlackAndWhiteScallion/Night-of-Shooting-Stars',
+        //mirrorURL:'https://dev.tencent.com/u/BWS/p/Night-of-Shooting-Stars/git/raw',
         //hallURL:'47.100.162.52',
         hallURL:'noname.pub',
         assetURL:'',
@@ -3424,7 +3424,8 @@
                 name:'音效',
                 config:{
                     update:function(config,map){
-                        if(lib.config.background_music=='music_custom'&&(lib.device||lib.node)){
+                        //if(lib.config.background_music=='music_custom'&&(lib.device||lib.node)){
+                        if(lib.config.background_music=='music_custom'){
                             map.import_music.show();
                         }
                         else{
@@ -6431,9 +6432,9 @@
                         lib.configMenu.appearence.config.image_background.item.default='默认';
                     }
                     if(pack.music){
-                        if(lib.device||typeof window.require=='function'){
+                        //if(lib.device||typeof window.require=='function'){
                             lib.configMenu.audio.config.background_music.item.music_custom='自定';
-                        }
+                        //}
                         lib.config.all.background_music=['music_default'];
                         for(i in pack.music){
                             lib.config.all.background_music.push(i);
@@ -32102,6 +32103,7 @@ smoothAvatar:function(player,vice){
                     var menu=ui.create.div('.main.menu.dialog.popped.static',config.position,function(e){
                         e.stopPropagation();
                     });
+                    if (lib.device) menu.classList.add('mobile');
                     if(connectMenu){
                         menu.classList.add('center');
                         menuContainer.classList.add('centermenu');
@@ -32475,6 +32477,7 @@ smoothAvatar:function(player,vice){
                             }
                         }
                     });
+                    if (lib.device) startButton.classList.add('mobile');
 
                     var clickMode=function(){
                         if(this.classList.contains('unselectable')) return;
@@ -33119,10 +33122,18 @@ smoothAvatar:function(player,vice){
                                     }
                                 }
                                 else if(j=='import_music'){
+                                    // 没弄完，过会儿再看
                                     cfgnode.querySelector('button').onclick=function(){
                                         var fileToLoad=this.previousSibling.files[0];
                                         if(fileToLoad){
-                                            game.saveConfig('background_music_src',fileToLoad.path);
+                                            if (fileToLoad.path){
+                                                game.saveConfig('background_music_src',fileToLoad.path);
+                                            } else {
+                                                var str = 'audio/background/music_custom';
+                                                str += fileToLoad.name.substring(fileToLoad.name.length, fileToLoad.name.length - 4);
+                                                game.writeFile(fileToLoad,str,function(){});
+                                                game.saveConfig('background_music_src',str);
+                                            }
                                             game.playBackgroundMusic();
                                         }
                                     }
@@ -33172,7 +33183,7 @@ smoothAvatar:function(player,vice){
                     (function(){
                         if(!game.download&&!lib.device) return;
                         var page=ui.create.div('#create-extension');
-                        var node=ui.create.div('.menubutton.large','文件',start.firstChild,clickMode);
+                        var node=ui.create.div('.menubutton.large','素材',start.firstChild,clickMode);
                         node.link=page;
                         node.mode='create';
                         var pageboard=ui.create.div(page);
@@ -37229,10 +37240,10 @@ smoothAvatar:function(player,vice){
                         var li3=document.createElement('li');
                         var trimurl=function(str){
                             if(str==lib.updateURL){
-                                return 'GitHub';
+                                return 'Coding';
                             }
                             if(str==lib.mirrorURL){
-                                return 'Gitee';
+                                return 'Github';
                             }
                             var index;
                             index=str.indexOf('://');
@@ -37377,7 +37388,7 @@ smoothAvatar:function(player,vice){
                                 // 似乎是在这里进行更新的
                                 if (!lib.config.updateURL || lib.config.updateURL.includes("github")){
                                     updateURL = lib.updateURL+'/master/';
-                                } else if (lib.config.updateURL.includes('gitee')){
+                                } else if (lib.config.updateURL.includes('coding')){
                                     updateURL = lib.mirrorURL+'/master/';
                                 } else {
                                     updateURL = lib.config.updateURL;
@@ -37641,9 +37652,7 @@ smoothAvatar:function(player,vice){
                                         p.appendChild(span7);
 
                                         var finish=function(){
-                                            if(n1==n2){
-                                                game.saveConfig('asset_version',asset_version);
-                                            }
+                                            game.saveConfig('asset_version',asset_version);
                                             span.innerHTML='素材更新完毕（'+n1+'/'+n2+'）';
                                             p.appendChild(document.createElement('br'));
                                             var button=document.createElement('button');
@@ -37670,6 +37679,7 @@ smoothAvatar:function(player,vice){
                             }
                             else{
                                 alert('此版本不支持游戏内更新素材，请手动更新');
+                                if(!lib.config.asset_version) game.saveConfig('asset_version','无');
                             }
                         };
 
@@ -37736,7 +37746,7 @@ smoothAvatar:function(player,vice){
                         // li3.lastChild.appendChild(button4);
 
                         var button6=document.createElement('button');
-                        button6.innerHTML='设为国内镜像';
+                        button6.innerHTML='改为国外镜像';
                         // button6.style.marginLeft='5px';
                         button6.onclick=function(){
                             game.saveConfig('updateURL',lib.mirrorURL);
@@ -37747,7 +37757,7 @@ smoothAvatar:function(player,vice){
                         li3.lastChild.appendChild(button6);
 
                         button5=document.createElement('button');
-                        button5.innerHTML='设为默认镜像';
+                        button5.innerHTML='改为国内镜像';
                         // button5.style.marginLeft='5px';
                         button5.onclick=function(){
                             game.saveConfig('updateURL');
@@ -39950,6 +39960,8 @@ smoothAvatar:function(player,vice){
 
                 ui.roundmenu=ui.create.div('#roundmenu.roundarenabutton.menubutton.round',ui.arena);
                 ui.roundmenu._position=[180,210];
+                ui.roundmenu.style.backgroundImage='linear-gradient(rgba(0, 133, 255, 0.8), rgba(0, 133, 255, 0.8))';
+                ui.roundmenu.classList.add('mobile');
                 ui.create.div(ui.roundmenu);
                 ui.create.div(ui.roundmenu);
                 ui.create.div(ui.roundmenu);
@@ -40347,22 +40359,31 @@ smoothAvatar:function(player,vice){
                 if(!lib.config.asset_version){
                     lib.onfree.push(function(){
                         setTimeout(function(){
+                            // game.download指的是，游戏需不需要下载
+                            // 比如，电脑版（自带资源）就会触发这段，而手机版不会。
                             if(!game.download){
                                 game.saveConfig('asset_version','无');
                             }
                             else{
+                                // 我应该把这个变成强制吗？
                                 var func=function(){
-                                    if(confirm('是否下载图片和字体素材？（约82MB）')){
+                                    alert('开始下载图片和字体素材（约82MB）');
+                                    game.pause();
+                                    /*
                                         if(!ui.arena.classList.contains('menupaused')){
                                             ui.click.configMenu();
                                             ui.click.menuTab('其它');
                                         }
-                                        setTimeout(game.checkForAssetUpdate,500);
-                                    }
+                                    */
+                                    setTimeout(game.checkForAssetUpdate,500);
+                                    //}
+                                    /*
                                     else{
                                         game.saveConfig('asset_version','无');
                                     }
+                                    */
                                 }
+                                
                                 if(_status.new_tutorial){
                                     _status.new_tutorial=func;
                                 }
@@ -48129,7 +48150,7 @@ smoothAvatar:function(player,vice){
         },
         attitude:function(from,to){
             if(!from||!to) return 0;
-            if(from == to) return 5;
+            if(from === to) return 5;
             if (from.name == 'eiki' && lib.config.eiki_silence && to == game.me) return -10000000;
             var att=get.rawAttitude.apply(this,arguments);
             if(from.hasSkill('mad')){
