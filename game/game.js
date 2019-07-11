@@ -3802,7 +3802,7 @@
 					}
 				},
                 intro:{
-                    name:'将已通关的闯关模式的一些角色追加到其他模式中。',
+                    name:'将已通关的闯关模式的一些角色追加到其他模式中。<br><br>关卡与解锁角色：<br>红魔乡：魔导书塔，蕾米莉亚（神枪装备）<br>红魔乡EX：帕秋莉（皇家烈焰）',
                     clear:true,
                     nopointer:true,
                 },
@@ -3857,7 +3857,7 @@
                     }
                 },
                 intro:{
-                    name:'将击败的挑战模式BOSS追加到其他模式中。',
+                    name:'将一些挑战模式的魔王追加到其他模式中。<br> <br>魔王解锁条件：<br> 琪露诺：击败琪露诺 <br> 灵梦：击败灵梦 <br> 高达一号：击败高达一号 <br>年兽：一次游戏中对年兽造成至少50点伤害<br>斗篷光头：一次游戏中与斗篷光头对战至少5轮',
                     clear:true,
                     nopointer:true,
                 },
@@ -3871,7 +3871,7 @@
                     onclick:function(){
                         if(this.firstChild.innerHTML=='隐藏此扩展'){
                             this.firstChild.innerHTML='此扩展将在重启后隐藏';
-                            lib.config.hiddenPlayPack.add('boss2');
+                            lib.config.hiddenPlayPack.add('boss1');
                             if(!lib.config.prompt_hidepack){
                                 alert('隐藏的扩展包可通过选项-其它-重置隐藏内容恢复');
                                 game.saveConfig('prompt_hidepack',true);
@@ -3879,7 +3879,7 @@
                         }
                         else{
                             this.firstChild.innerHTML='隐藏此扩展';
-                            lib.config.hiddenPlayPack.remove('boss2');
+                            lib.config.hiddenPlayPack.remove('boss1');
                         }
                         game.saveConfig('hiddenPlayPack',lib.config.hiddenPlayPack);
                     }
@@ -4585,7 +4585,7 @@
                     },
                     player_number:{
                         name:'游戏人数',
-                        init:'8',
+                        init:'2',
                         item:{
                             '2':'两人',
                             '3':'三人',
@@ -6236,6 +6236,7 @@
                         if(e.keyCode==116||((e.ctrlKey||e.metaKey)&&e.keyCode==82)){
                             if(e.shiftKey){
                                 if(confirm('是否重置游戏？')){
+                                    /*
                                     var noname_inited=localStorage.getItem('noname_inited');
 									var onlineKey=localStorage.getItem(lib.configprefix+'key');
 									localStorage.clear();
@@ -6246,6 +6247,7 @@
 										localStorage.setItem(lib.configprefix+'key',onlineKey);
 									}
                                     if(indexedDB) indexedDB.deleteDatabase(lib.configprefix+'data');
+                                    */
                                     game.reload();
                                     return;
                                 }
@@ -6295,6 +6297,7 @@
                         else if(e.keyCode==116||((e.ctrlKey||e.metaKey)&&e.keyCode==82)){
                             if(e.shiftKey){
                                 if(confirm('是否重置游戏？')){
+                                    /*
                                     var noname_inited=localStorage.getItem('noname_inited');
 									var onlineKey=localStorage.getItem(lib.configprefix+'key');
 									localStorage.clear();
@@ -6305,6 +6308,7 @@
 										localStorage.setItem(lib.configprefix+'key',onlineKey);
 									}
                                     if(indexedDB) indexedDB.deleteDatabase(lib.configprefix+'data');
+                                    */
                                     game.reload();
                                     return;
                                 }
@@ -7212,6 +7216,7 @@
                                          window.location.reload();
                                      }
                                      else if(index==3){
+                                         /*
                                         var noname_inited=localStorage.getItem('noname_inited');
 										var onlineKey=localStorage.getItem(lib.configprefix+'key');
 										localStorage.clear();
@@ -7222,6 +7227,7 @@
 											localStorage.setItem(lib.configprefix+'key',onlineKey);
                                         }
                                         if(indexedDB) indexedDB.deleteDatabase(lib.configprefix+'data');
+                                        */
                                         setTimeout(function(){
                                             window.location.reload();
                                         },200);
@@ -7233,19 +7239,21 @@
                         }
                         else{
                             if(confirm('游戏似乎未正常载入，是否重置游戏？')){
-                                localStorage.removeItem('noname_inited');
+                                //localStorage.removeItem('noname_inited');
                                 window.location.reload();
                             }
                         }
                     }
                     else{
                         if(confirm('游戏似乎未正常载入，是否重置游戏？')){
-							var onlineKey=localStorage.getItem(lib.configprefix+'key');
+							/*
+                            var onlineKey=localStorage.getItem(lib.configprefix+'key');
 							localStorage.clear();
 							if(onlineKey){
 								localStorage.setItem(lib.configprefix+'key',onlineKey);
 							}
                             if(indexedDB) indexedDB.deleteDatabase(lib.configprefix+'data');
+                            */
                             setTimeout(function(){
                                 window.location.reload();
                             },200);
@@ -9091,6 +9099,7 @@
             mad_bg:'乱',
             draw_card:'摸牌',
             discard_card:'弃牌',
+            discard:'弃牌',
             take_damage:'受伤害',
             reset_character:'复原角色牌',
             recover_hp:'回复体力',
@@ -13964,7 +13973,7 @@
                         return;
                     } */
                     if(lib.config.background_audio){
-                        game.playAudio('effect',get.subtype(card));
+                        game.playAudio('effect', get.subtype(card) == 'equip1' ? 'equip1':'equip2');
                     }
                     game.broadcast(function(type){
                         if(lib.config.background_audio){
@@ -16045,7 +16054,6 @@
                             var event=_status.event.getParent();
                             var to=(player==event.player?event.target:event.player);
                             var addi=(get.value(card)>=8&&get.type(card)!='equip')?-10:0;
-                            if(card.name=='du') addi+=5;
                             if(player==event.player){
                                 if(get.attitude(player,to)>0&&event.small){
                                     return -get.number(card)-get.value(card)/2+addi;
@@ -20453,6 +20461,12 @@
                     game.broadcast(function(player,card){
                         player.$equip(card);
                     },this,card);
+                    // 如果是用牌转化装备的话（限制一张）
+                    if (!card.style){
+                        var name = card.name;
+                        card = card.cards[0];
+                        card.name = name;
+                    }
                     card.fix();
                     card.style.transform='';
                     card.classList.remove('drawinghidden');
@@ -21111,7 +21125,7 @@
                     this.classList.remove('fullborder');
 					this.dataset.cardName=card[2];
 					this.dataset.cardType=info.type||'';
-					this.dataset.cardSubype=info.subtype||'';
+					this.dataset.cardSubtype=info.subtype||'';
 					this.dataset.cardMultitarget=info.multitarget?'1':'0';
 					this.node.name.dataset.nature='';
 					this.node.info.classList.remove('red');
@@ -21488,7 +21502,7 @@
                         dx=player.offsetLeft+player.offsetWidth/2-52-this.offsetLeft;
                         dy=player.offsetTop+player.offsetHeight/2-52-this.offsetTop;
                     }
-			if(get.is.mobileMe(player)){
+			        if(get.is.mobileMe(player)){
 						dx+=get.cardOffset();
 						if(ui.arena.classList.contains('oblongcard')){
 							dy-=16;
@@ -28095,7 +28109,7 @@ smoothAvatar:function(player,vice){
                 }
                 var step3=function(){
                     clear();
-                    ui.create.dialog('<div><div style="width:100%;text-align:right;font-size:18px">不过不用急，先慢慢来。<br>感觉不熟的话，多玩几把身份局<br>也没什么大不了的。<br>游戏人数可以在左上角设置哟。');
+                    ui.create.dialog('<div><div style="width:100%;text-align:right;font-size:18px">不过不用急，先慢慢来。<br>游戏的卡牌，模式介绍，都能在<br>【图鉴】模式里找到。<br>记得代我向阿求老师问个好。');
                     ui.create.div('.avatar',ui.dialog).setBackground('zigui','character');
                     ui.create.control('好的老师！',step4);
                 }
@@ -28107,7 +28121,7 @@ smoothAvatar:function(player,vice){
                 }
                 var step5=function(){
                     clear();
-                    ui.create.dialog('<div><div style="width:100%;text-align:right;font-size:18px">祝你在幻想乡玩的愉快！');
+                    ui.create.dialog('<div><div style="width:100%;text-align:right;font-size:18px">祝你在幻想乡游玩愉快！');
                     ui.create.div('.avatar',ui.dialog).setBackground('zigui','character');
                     setTimeout(function(){
                         clear();
@@ -28120,6 +28134,7 @@ smoothAvatar:function(player,vice){
                 game.pause();
                 step1();
 				game.saveConfig('show_splash','always');
+                game.saveConfig('player_number','5','old_identity');
             } else {
                 var i,j,k,num,table,tr,td,dialog;
                 _status.over=true;
@@ -28223,6 +28238,7 @@ smoothAvatar:function(player,vice){
                     }
                 if(result==undefined) result='战斗结束';
                 dialog=ui.create.dialog(result);
+                dialog.style.backgroundImage = 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4))';
                 dialog.forcebutton=true;
                 if(game.addOverDialog){
                     game.addOverDialog(dialog,result);
@@ -38260,6 +38276,7 @@ smoothAvatar:function(player,vice){
                                         case '三':num=3;break;
                                         case '四':num=4;break;
                                         case '五':num=5;break;
+                                        case '五十':num=50;break;
                                     }
                                 }
                                 var targets=[];
@@ -38365,7 +38382,8 @@ smoothAvatar:function(player,vice){
                         var nodex3=ui.create.div('.menubutton','三',row2,clickrow2);
                         var nodex4=ui.create.div('.menubutton','四',row2,clickrow2);
                         var nodex5=ui.create.div('.menubutton','五',row2,clickrow2);
-
+                        var nodex50=ui.create.div('.menubutton','五十',row2,clickrow2);
+                        
                         var row3=ui.create.div('.menu-buttons.leftbutton.commandbutton',page);
                         row3.style.marginTop='3px';
                         var clickrow3=function(){
@@ -40265,7 +40283,8 @@ smoothAvatar:function(player,vice){
                 }, 200);
                 if (lib.config.mode != 'identity') ui.incidents.style.display = 'none';
                 
-                ui.rules = ui.create.system('规则',null,true);
+                ui.rules = ui.create.system('帮助',null,true);
+                ui.rules.style.backgroundImage = 'linear-gradient(rgba(0, 133, 255, 0.8), rgba(0, 133, 255, 0.8))';
 
                 if(!lib.config.show_playerids||!game.showIdentity){
                     ui.playerids.style.display='none';

@@ -70,7 +70,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					game.delay();
 				}
 			}
-						// 这里是新手向导w
+			// 这里是新手向导w
 			// 或许可以换到图鉴那儿去？ 或者过程中切到图鉴那里。
 			// 反正是要设置的。就是不是现在。
 			"step 2"
@@ -207,7 +207,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						}, 2500);
 					})
 				};
-				if (lib.config.asset_version){
+				if (!lib.device || lib.config.asset_version){
 					game.pause();
 					step1();
 				}
@@ -1189,7 +1189,9 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						game.me.update();
 					}
 					if (!lib.config.new_tutorial){
+						game.saveConfig('show_splash','always');
 						event.list = ['koakuma','lilywhite','cirno','keine','chen','yuuka','hetate','wriggle'];
+						event.list.remove(game.zhu.name);
 						event.list.randomSort();
 						event.list[0] = 'zigui';
 					} else {
