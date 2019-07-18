@@ -56,7 +56,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 				},
 				content:function(){
 					var clear=function(){
-						ui.dialog.close();
+						if (ui.dialog) ui.dialog.close();
 						while(ui.controls.length) ui.controls[0].close();
 					};
 					var clear2=function(){
@@ -760,7 +760,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			aidoulu_3:{
 				trigger:{source:'damageBegin'},
 				filter:function(event){
-					return event.card&&event.card.name=='sha'&&event.notLink();
+					return event.card&&event.card.name=='sha';
 				},
 				forced:true,
 				content:function(){
@@ -1254,7 +1254,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 						player.gainlili(result.cards.length);
 					}
 					var list = [];
-					for (var i = 0; i < player.hp; i ++){
+					for (var i = 0; i <= player.hp; i ++){
 						list.push(i);
 					}
 					player.chooseControl(list, function(){

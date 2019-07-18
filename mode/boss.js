@@ -44,6 +44,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 			lib.setPopped(ui.rules,function(){
 				var uiintro=ui.create.dialog('hidden');
 					uiintro.add('<div class="text left">选3个角色，挑战大魔王！<br>也可以作为大魔王揍3个角色。<br>最右边两个是另类挑战，建议尝试。</div>');
+					uiintro.add('<div class="text left"><a href = "https://mp.weixin.qq.com/s/eEbCgLswPGXEhzl702FZzQ" target="_blank">了解更多的魔王</a></div>');
 					uiintro.add(ui.create.div('.placeholder.slim'))
 				return uiintro;
 			},400);
@@ -280,6 +281,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					var uiintro=ui.create.dialog('hidden');
 
 					uiintro.add('重整');
+					uiintro.add('');
 					var table=ui.create.div('.bosschongzheng');
 
 					var tr,td,added=false;
@@ -354,8 +356,10 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				} else {
 					uiintro.add('<div class="text left">回合顺序：魔王→勇者→勇者→勇者→魔王</div>');
 				}
-				if (game.bossinfo.chongzheng){
+				if (game.bossinfo.chongzheng !== false){
 					uiintro.add('<div class="text left">勇者坠机后进入重整状态<br>重整需要'+game.bossinfo.chongzheng+'个回合');
+				} else {
+					uiintro.add('<div class="text left">这个魔王不可以重整！');
 				}
 				uiintro.add(ui.create.div('.placeholder.slim'))
 				return uiintro;
@@ -394,7 +398,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				game.addRecentCharacter(game.me.name);
 			}
 			event.trigger('gameStart');
-			game.gameDraw(game.boss,game.bossinfo.gameDraw||4);
+			game.gameDraw(game.boss,game.bossinfo.gameDraw||8);
 			game.bossPhaseLoop();
 			setTimeout(function(){
 				ui.updatehl();
@@ -420,7 +424,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 		characterPack:{
 			mode_boss:{
 				boss_cirno:['female', '0', 9, ['jidong', 'bianshen_cirno'], ['boss'], 'wei','9'],
-				boss_cirno2:['female', '0', 4, ['jiqiang','zuanshi','jubing'], ['hiddenboss'], 'wei'],
+				boss_cirno2:['female', '0', 4, ['jiqiang','zuanshi','jubing'], ['hiddenboss'], 'wei', '9'],
 				boss_reimu:['female','0',8,['lingji','bianshen_reimu'],['boss'], 'shu'],
 				boss_reimu2:['female','0',4,['lingji','mengxiangtiansheng'],['hiddenboss'], 'shu'],
 				boss_zhaoyun:['male','0',1,['boss_juejing','longhun'],['shu','boss','bossallowed'],'shen'],
@@ -585,33 +589,38 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					"step 0"
 					if (result.bool) result.bool = false;
 					// 如果player重整，退出重整
-					// 这个重整似乎只有下面的looptype，如果是三连顺序的话会改成true，应该是用来强行减慢重整一轮的
+					// 这个重整的只有下面用，简单来说，轮到boss的回合了，boss头上的chongzheng是false
+					// 1->1的情况下，一名角色重整流程后，会把boss头上的chongzheng变成true
+					// 换句话来说，使用这个chongzheng可以检测本轮是否重整过了。
 					if(player.chongzheng){
 						player.chongzheng=false;
 					}
 					// 如果玩家不是重整（而是死亡）
 					// player.storage.boss_chongzheng就是重整回合的计数了
-					else if(player.isDead()){
+					else if(game.dead.length && !game.boss.chongzheng){
 						// 计数+1，血量补到0，如果血上限大于0，且这个BOSS让重整的话，开始重整
-						if(player.hp<0) player.hp=0;
-						player.storage.boss_chongzheng++;
-						if(player.maxHp>0&&game.bossinfo.chongzheng){
-							// 重整顺序：回血，摸牌
-							if(player.hp<player.maxHp){
-								player.hp++;
+						var players = game.dead;
+						for (var i = 0; i < players.length; i ++){
+							if(players[i].hp<0) players[i].hp=0;
+							players[i].storage.boss_chongzheng++;
+							if(players[i].maxHp>0&&game.bossinfo.chongzheng){
+								// 重整顺序：回血，摸牌
+								if(players[i].hp<players[i].maxHp){
+									players[i].hp++;
+								}
+								else if(players[i].countCards('h')<4){
+									var card=get.cards()[0];
+									var sort=lib.config.sort_card(card);
+									var position=sort>0?players[i].node.handcards1:players[i].node.handcards2;
+									card.fix();
+									card.animate('start');
+									position.insertBefore(card,position.firstChild);
+								}
+								players[i].update();
+								if(players[i].storage.boss_chongzheng>=game.bossinfo.chongzheng){
+									players[i].revive(players[i].hp);
+								}
 							}
-							else if(player.countCards('h')<4){
-								var card=get.cards()[0];
-								var sort=lib.config.sort_card(card);
-								var position=sort>0?player.node.handcards1:player.node.handcards2;
-								card.fix();
-								card.animate('start');
-								position.insertBefore(card,position.firstChild);
-							}
-							player.update();
-							if(player.storage.boss_chongzheng>=game.bossinfo.chongzheng){
-								player.revive(player.hp);
-							}				
 						}
 						// 如果是1→1，重整为true
 						if(game.bossinfo.loopType==2){
@@ -626,7 +635,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						}
 						// 不在重整状态的玩家进行一个回合
 						// 在这里加入让玩家选顺序应该就可以
-						if (get.config('free_turn') && player != game.boss && game.me != game.boss && game.bossinfo.loopType==2){
+						if (get.config('free_turn') && player != game.boss && game.me != game.boss && player.isAlive() && game.bossinfo.loopType==2){
 							game.me.chooseTarget('选择下一名进行回合的我方角色',function(card,player,target){
                               return target.identity == 'cai';
                               }).set('ai',function(target){
@@ -857,7 +866,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					if(!ui.cheat2&&get.config('free_choose'))
 					ui.create.cheat2();
 
-					event.asboss=ui.create.control('当BOSS',function(){
+					event.asboss=ui.create.control('我要当魔王！',function(){
 						event.boss=true;
 						event.enemy=[];
 						for(var i=0;i<ui.selected.buttons.length;i++){
@@ -962,7 +971,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					ui.damageCount=ui.create.system('伤害: 0',null,true);
 					lib.setPopped(ui.rules,function(){
 						var uiintro=ui.create.dialog('hidden');
-							uiintro.add('<div class="text left">[选项→游戏]里可以提高游戏速度<br>关掉[回合顺序自选]和[单人控制]也可以显著提升游戏速度<br>不要想了，快点打上去！</div>');
+							uiintro.add('<div class="text left">[选项→游戏]里可以提高游戏速度<br>关掉[回合顺序自选]和[单人控制]也可以显著提升游戏速度<br>不要想了，快点打上去！<br>勇者坠机后进入重整状态<br>重整需要0个回合</div>');
 							uiintro.add(ui.create.div('.placeholder.slim'))
 						return uiintro;
 					},400);
@@ -972,7 +981,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 			boss_patchy1:{
 				loopType:2,
 				gameDraw:function(player){
-					return player==game.boss?7:4;
+					return player==game.boss?8:4;
 				},
 				init:function(){
 					game.loadModeAsync('stg',function(mode){
@@ -1022,13 +1031,13 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					lib.config.background_music = '';
 					lib.setPopped(ui.rules,function(){
 						var uiintro=ui.create.dialog('hidden');
-							uiintro.add('<div class="text left">[选项→魔王]里可以打开单人控制<br>光头在回合外不会使用牌<br>不要放弃治疗啊！</div>');
+							uiintro.add('<div class="text left">[选项→魔王]里可以打开单人控制<br>光头在回合外不会使用牌<br>不要放弃治疗啊！<br>这个魔王不可以重整</div>');
 							uiintro.add(ui.create.div('.placeholder.slim'))
 						return uiintro;
 					},400);
 				},
 				gameDraw:function(player){
-					return player==game.boss?12:4;
+					return player==game.boss?8:4;
 				},
 			},
 			global:{
@@ -1196,7 +1205,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				content:function(){
 					trigger.player.damage('thunder');
 					player.draw();
-					player.chooseToUse(trigger.player, -1,'冰柱机枪：你可以对',trigger.player,'使用一张牌');
+					player.chooseToUse(trigger.player, -1,'冰柱机枪：你可以对'+get.translation(trigger.player)+'使用一张牌');
 				}
 			},
 			jiqiang1:{
@@ -1243,7 +1252,9 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				direct:true,
 				trigger:{player:'gainBegin'},
 				filter:function(event,player){
-					return _status.event.getParent('zuanshi');
+					console.log(event.getParent('zuanshi'));
+					if (!event.getParent('zuanshi')) return false;
+					return true;
 				},
 				content:function(){
 					player.showCards(trigger.cards);
@@ -1257,29 +1268,26 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				mod:{
 					cardEnabled:function(card,player){
 						if(_status.event.skill==undefined&&game.hasPlayer(function(current){
-							return current.hasSkill('zuanshi') && current.storage.zuanshi.contains(card.name);
+							return current.hasSkill('zuanshi') && current.storage.zuanshi.contains(card.name) && card.name != 'sha';
 						})) return false;
 					},
 					cardUsable:function(card,player){
 						if(_status.event.skill==undefined&&game.hasPlayer(function(current){
-							return current.hasSkill('zuanshi') && current.storage.zuanshi.contains(card.name);
+							return current.hasSkill('zuanshi') && current.storage.zuanshi.contains(card.name) && card.name != 'sha';
 						})) return false;
 					},
 					cardRespondable:function(card,player){
 						if(_status.event.skill==undefined&&game.hasPlayer(function(current){
-							return current.hasSkill('zuanshi') && current.storage.zuanshi.contains(card.name);
+							return current.hasSkill('zuanshi') && current.storage.zuanshi.contains(card.name) && card.name != 'sha';
 						})) return false;
 					},
 					cardSavable:function(card,player){
 						if(_status.event.skill==undefined&&game.hasPlayer(function(current){
-							return current.hasSkill('zuanshi') && current.storage.zuanshi.contains(card.name);
+							return current.hasSkill('zuanshi') && current.storage.zuanshi.contains(card.name) && card.name != 'sha';
 						})) return false;
 					},
 				},
 				enable:["chooseToUse",'chooseToRespond'],
-				filter:function(){
-					return true;
-				},
 				filterCard:function(card){
 					return game.hasPlayer(function(current){
 						return current.hasSkill('zuanshi') && current.storage.zuanshi.contains(card.name);
@@ -1287,7 +1295,6 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				},
 				viewAs:{name:"sha"},
 				prompt:"将【钻石风暴】指定的牌名当【轰！】使用",
-				sub:true,
 			},
 			jubing:{
 				trigger:{player:'phaseBegin'},
@@ -1301,6 +1308,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				content:function(){
 					player.awakenSkill('jubing');
 					var list = game.filterPlayer();
+					list.remove(player);
 					for (var i = 0; i < list.length; i ++){
 						list[i].damage(9, 'thunder');
 					};
@@ -1501,7 +1509,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				audio:true,
 				enable:['chooseToUse','chooseToRespond'],
 				prompt:function(){
-					return '将'+get.cnNumber(Math.max(1,_status.event.player.hp))+'张黑桃牌当作无懈可击使用';
+					return '将'+get.cnNumber(Math.max(1,_status.event.player.hp))+'张黑桃牌当作【请你住口！】使用';
 				},
 				position:'he',
 				check:function(card,event){
@@ -1616,7 +1624,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 			zuanshi_info:'锁定技，出牌阶段开始时，你摸X张牌并展示（X为你手牌中【轰！】的数量）：直到你的回合开始，与这些牌同名的牌均视为【轰！】，且你的手牌上限+X。',
 			zuanshi2:'钻石风暴（转化【轰！】）',
 			jubing:'巨冰破碎',
-			jubing_info:'限定技，锁定技，准备阶段，若你的体力为1，你对所有角色造成9点灵击伤害，然后视为使用了一张【冰域之宴】。',
+			jubing_info:'限定技，锁定技，准备阶段，若你的体力为1，你对所有其他角色造成9点灵击伤害，然后视为使用了一张【冰域之宴】。',
 			boss_nianshou:'年兽',
 			boss_nianrui:'年瑞',
 			boss_nianrui_info:'锁定技，摸牌阶段，你额外摸两张牌。',

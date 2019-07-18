@@ -141,6 +141,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				var uiintro=ui.create.dialog('hidden');
 
 					uiintro.add('<div class="text left">选择一个大关，然后选择你喜欢的自机来挑战 </div>');
+					uiintro.add('<div class="text left"><a href = "https://mp.weixin.qq.com/s/owQpDcBP0_OFPSlZMecPYQ" target="_blank">了解更多闯关技巧</a></div>');
 					uiintro.add(ui.create.div('.placeholder.slim'))
 
 				return uiintro;
@@ -423,6 +424,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				var uiintro=ui.create.dialog('hidden');
 
 					uiintro.add('<div class="text left">1. 击坠敌人后，来源摸一张牌，获得1点灵力 <br> 2. 准备阶段，场上敌人数小于2，会刷出下一个敌人 <br> 3. 通关时，摸一张技能牌，回复1点体力，并重置牌堆 <br> 4.手牌上限+X（X为已通关卡数量） </div>');
+					uiintro.add('<div class="text left"><a href = "https://mp.weixin.qq.com/s/owQpDcBP0_OFPSlZMecPYQ" target="_blank">了解更多闯关技巧</a></div>');
 					uiintro.add(ui.create.div('.placeholder.slim'))
 
 				return uiintro;
@@ -512,11 +514,10 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					if(game.bossinfo.checkResult&&game.bossinfo.checkResult(this)===false){
 						return;
 					}
-					if(this==game.boss || !game.boss.isAlive() ||!game.hasPlayer(function(current){
+					if(this==game.boss ||!game.hasPlayer(function(current){
 						return !current.side;
 					})){
-						if (game.bossinfo.checkResult) game.bossinfo.checkResult(this);
-						else game.checkResult();
+						game.checkResult();
 					}
 				},
 			}
@@ -691,7 +692,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 			reserveDead:true,
 			addBossFellow:function(position,name,cards){
 				var fellow=game.addFellow(position,name,'zoominanim');
-				fellow.draw(cards);
+				fellow.directgain(get.cards(cards));
 				fellow.side=true;
 				fellow.identity='zhong';
 				fellow.setIdentity('zhong');
@@ -1336,6 +1337,9 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 								} else {
 									var player = ui.create.div('.avatar',dialog).setBackground(name,'character');
 									dialog.add('<div><div style="width:100%;text-align:right;font-size:18px">'+game.me.storage.dialog[i][a[j]]+'</div></div>');
+									player.style.float = 'left';
+									dialog.style.height = '150px';
+									//dialog.style.overflow = 'auto';
 									a[j] ++;
 								}
 							}
@@ -2054,13 +2058,12 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				init:function(player){
 					var list = game.filterPlayer();
 					for (var i = 0; i < list.length; i ++){
-						if (list[i].name == 'flandre' && !list[i].hasSkill('zhihou')){
+						if (list[i] == game.boss){
 							list[i].classList.remove('turnedover');
 							list[i].removeSkill('starbow');
 							list[i].removeSkill('starbow1');
 							list[i].addSkill('zhihou');
 							list[i].useSkill('zhihou');
-							list[i].removeSkill('death_win');
 						}
 					}
 				},
