@@ -1014,8 +1014,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				loopType:1,
 				init:function(){
 					//lib.backgroundmusicURL = ui.backgroundMusic.src;
-                    ui.backgroundMusic.src = lib.assetURL+'audio/background/boss.mp3';
-                    lib.config.background_music = 'boss';
+					game.playBackgroundMusic('boss');
 				},
 			},
 			boss_saitama:{
@@ -1123,12 +1122,9 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						_status.event=_status.event.parent;
 					}
 					game.resetSkills();
-					if (lib.config.background_music != 'marisa'){
 						setTimeout(function(){
-						ui.backgroundMusic.src = lib.assetURL+'audio/background/reimu.mp3'
-                    	lib.config.background_music = 'reimu';
+							game.playBackgroundMusic('reimu');
                     	},500);
-                	}
 					_status.paused=false;
 					_status.event.player=player;
 					_status.event.step=0;
@@ -1180,12 +1176,9 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						_status.event=_status.event.parent;
 					}
 					game.resetSkills();
-					if (lib.config.background_music != 'marisa'){
-						setTimeout(function(){
-						ui.backgroundMusic.src = lib.assetURL+'audio/background/cirno.mp3'
-                    	lib.config.background_music = 'cirno';
-                    	},500);
-                	}
+					setTimeout(function(){
+						game.playBackgroundMusic('cirno');
+					},500);
 					_status.paused=false;
 					_status.event.player=player;
 					_status.event.step=0;
@@ -1230,7 +1223,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						var str = '视为【轰！】的牌：';
 						if (storage){
 							for (var i = 0; i < storage.length; i ++){
-								str += get.translation(storage[i]) + ',';
+								if (!str.includes(get.translation(storage[i]))) str += get.translation(storage[i]) + ',';
 							}
 						}
 						return str; 
@@ -1252,14 +1245,13 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				direct:true,
 				trigger:{player:'gainBegin'},
 				filter:function(event,player){
-					console.log(event.getParent('zuanshi'));
 					if (!event.getParent('zuanshi')) return false;
 					return true;
 				},
 				content:function(){
 					player.showCards(trigger.cards);
 					for(var i=0;i<trigger.cards.length;i++){
-						player.storage.zuanshi.add(trigger.cards[i].name);
+						player.storage.zuanshi.push(trigger.cards[i].name);
 					}
 					player.markSkill('zuanshi');
 				},
