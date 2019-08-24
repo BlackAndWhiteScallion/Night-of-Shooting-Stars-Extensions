@@ -620,6 +620,80 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
     			},
     		},
     		player:{
+                $dust:function(){
+                    game.broadcast(function(player){
+                        if(!lib.config.low_performance){
+                            player.$dust();
+                        }
+                    },this);
+                    game.addVideo('flame',this,'dust');
+                    var left=this.offsetLeft-ui.arena.offsetLeft;
+                    var top=this.offsetTop-ui.arena.offsetTop;
+                    if(this.classList.contains('minskin')){
+                        top+=15;
+                    }
+                    top-=25;
+                    game.animate.flame(left+this.offsetWidth/2,
+                        top+this.offsetHeight-30,700,'dust');
+                },
+                $coin:function(){
+                    game.broadcast(function(player){
+                        if(!lib.config.low_performance){
+                            player.$coin();
+                        }
+                    },this);
+                    game.addVideo('flame',this,'coin');
+                    var left=this.offsetLeft-ui.arena.offsetLeft;
+                    var top=this.offsetTop-ui.arena.offsetTop;
+                    if(this.classList.contains('minskin')){
+                        top+=15;
+                    }
+                    top-=25;
+                    game.animate.flame(left+this.offsetWidth/2,
+                        top+this.offsetHeight-30,700,'coin');
+                },
+                $epic:function(time){
+                    time=time||700;
+                    game.addVideo('flame',this,'epic');
+                    var left,top;
+                    if(game.chess){
+                        left=this.offsetLeft-ui.arena.offsetLeft;
+                        top=this.offsetTop-ui.arena.offsetTop;
+                    }
+                    else{
+                        left=this.offsetLeft;
+                        top=this.offsetTop;
+                    }
+                    if(this.classList.contains('minskin')){
+                        top+=15;
+                    }
+                    game.animate.flame(left+this.offsetWidth/2,
+                        top+this.offsetHeight-30,time,'epic');
+                },
+                $rare2:function(){
+                    game.addVideo('flame',this,'rare2');
+                    var rect=this.getBoundingClientRect();
+                    var left=rect.left;
+                    var top=rect.top+15;
+                    game.animate.flame(left+this.offsetWidth/2,
+                        top+this.offsetHeight-30,700,'rare');
+                },
+                $epic2:function(){
+                    game.addVideo('flame',this,'epic2');
+                    var rect=this.getBoundingClientRect();
+                    var left=rect.left;
+                    var top=rect.top+15;
+                    game.animate.flame(left+this.offsetWidth/2,
+                        top+this.offsetHeight-30,700,'epic');
+                },
+                $legend2:function(){
+                    game.addVideo('flame',this,'legend2');
+                    var rect=this.getBoundingClientRect();
+                    var left=rect.left;
+                    var top=rect.top+15;
+                    game.animate.flame(left+this.offsetWidth/2,
+                        top+this.offsetHeight-30,700,'legend');
+                },
     			createRangeShadow:function(num,move,glow){
     				num++;
     				var shadows=this.parentNode.getElementsByClassName('playergrid');
@@ -3500,16 +3574,11 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
     				var i;
     				var list=[];
     				var bosslist=[];
-    				var jiangelist=[];
     				event.list=list;
     				for(i in lib.character){
     					if(lib.character[i][4].contains('chessboss')){
     						bosslist.push(i);continue;
-    					}
-    					else if(lib.character[i][4].contains('jiangeboss')){
-    						// if(get.config('chess_jiange')) jiangelist.push(i);
-    						continue;
-    					}
+						}
     					if(i.indexOf('treasure_')==0) continue;
     					if(lib.character[i][4].contains('minskin')) continue;
     					if(lib.config.forbidchess.contains(i)) continue;
@@ -3525,9 +3594,6 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
     					_status.event.dialog.content.childNodes[1].innerHTML=
     					ui.selected.buttons.length+'/'+_status.event.selectButton();
     				};
-    				var jiange=ui.create.div('.buttons');
-    				event.jiange=jiange;
-    				var jiangebuttons=ui.create.buttons(jiangelist,'character',jiange);
 
     				var clickedBoss=false;
     				var clickBoss=function(){
@@ -3568,26 +3634,9 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
     					addToButton();
     				};
 
-    				var clickedJiange=false;
-    				var clickJiange=function(){
-    					clickedJiange=true;
-    					if(this.classList.contains('glow2')){
-    						this.classList.remove('glow2');
-    					}
-    					else{
-    						this.classList.add('glow2');
-    					}
-    					addToButton();
-    				};
-
-
-    				for(var i=0;i<bossbuttons.length;i++){
+					for(var i=0;i<bossbuttons.length;i++){
     					bossbuttons[i].classList.add('noclick');
     					bossbuttons[i].listen(clickBoss);
-    				}
-    				for(var i=0;i<jiangebuttons.length;i++){
-    					jiangebuttons[i].classList.add('noclick');
-    					jiangebuttons[i].listen(clickJiange);
     				}
 
     				if(get.config('reward')==undefined) game.saveConfig('reward',1,true);
@@ -3606,10 +3655,6 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
     				if(bossbuttons.length){
     					dialog.add('挑战魔王');
     					dialog.add(bosses);
-    				}
-    				if(jiangebuttons.length){
-    					dialog.add('守卫剑阁');
-    					dialog.add(jiange);
     				}
     				event.addConfig=function(dialog){
     					dialog.add('选项');
@@ -3654,9 +3699,6 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
     				for(var i=0;i<bosses.childNodes.length;i++){
     					bosses.childNodes[i].classList.add('squarebutton');
     				}
-    				for(var i=0;i<jiange.childNodes.length;i++){
-    					jiange.childNodes[i].classList.add('squarebutton');
-    				}
     				ui.control.style.transition='all 0s';
 
     				if(get.is.phoneLayout()){
@@ -3695,15 +3737,6 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
     						if(event.asboss){
     							event.asboss.close();
     							delete event.asboss;
-    						}
-    					}
-    					if(clickedJiange){
-    						clickedJiange=false;
-    					}
-    					else{
-    						for(var i=0;i<jiange.childElementCount;i++){
-    							jiange.childNodes[i].classList.remove('forbidden');
-    							jiange.childNodes[i].classList.remove('glow2');
     						}
     					}
     					var dialog=_status.event.dialog;
@@ -3758,25 +3791,6 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
     					_status.event.dialog.content.insertBefore(buttons,node);
     					buttons.animate('start');
     					node.remove();
-
-    					// _status.event.dialog.close();
-    					// var dialog=ui.create.dialog('选择出场角色','hidden');
-    					// _status.event.dialog=dialog;
-    					// dialog.classList.add('fullwidth');
-    					// dialog.classList.add('fullheight');
-    					// dialog.classList.add('fixed');
-    					// dialog.add('0/'+_status.event.selectButton());
-    					// dialog.add([list.slice(0,parseInt(get.config('battle_number'))*4+parseInt(get.config('replace_number'))+5),'character']);
-    					// if(bossbuttons.length){
-    					// 	dialog.add('挑战魔王');
-    					// 	dialog.add(bosses);
-    					// }
-    					// if(jiangebuttons.length){
-    					// 	dialog.add('守卫剑阁');
-    					// 	dialog.add(jiange);
-    					// }
-    					// event.addConfig(dialog);
-    					// dialog.open();
     					game.uncheck();
     					game.check();
     				};
@@ -3861,8 +3875,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
     				ui.control.style.transition='';
 
     				var glows=event.bosses.querySelectorAll('.glow');
-    				var glows2=event.jiange.querySelectorAll('.glow2');
-    				if(!glows.length&&!glows2.length){
+    				if(!glows.length){
     					if(!get.config('single_control')){
     						var addnum;
     						if(get.config('additional_player')){

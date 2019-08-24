@@ -301,8 +301,6 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                       usable:1,
                       audio:2,
                       filter:function(event,player){
-                        console.log(event.card);
-                        console.log(event);
                         var i = event;
                         var use = false;
                         while (i.name != 'phaseLoop'){
@@ -1192,7 +1190,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         if (result.control == '观看牌堆顶'){
                           cards = get.cards(player.storage.zhaixing.length);
                         } else if (result.control == '观看技能牌堆顶'){
-                            for(var i=0;i<3;i++){
+                            for(var i=0;i<player.storage.zhaixing.length;i++){
                                 cards.push(ui.skillPile.childNodes[i]);
                             }
                         }

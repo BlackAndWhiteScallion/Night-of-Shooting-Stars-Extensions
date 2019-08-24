@@ -120,6 +120,19 @@
                         unfrequent:true,
                         intro:'离开游戏前弹出确认对话框',
                     },
+                    auto_restart:{
+                        name:'自动重新开始',
+                        init:false,
+                        intro:'一局游戏结束后，自动重新开始游戏',
+                        onclick:function(bool){
+                            game.saveConfig('show_splash', bool?'off':'always');
+                        }
+                    },
+                    auto_auto:{
+                        name:'自动托管',
+                        init:false,
+                        intro:'一局游戏开始时，玩家自动托管',
+                    },
                     keep_awake:{
                         name:'屏幕常亮',
                         init:false,
@@ -810,25 +823,6 @@
                             }
                         }
                     },
-                    // fewplayer:{
-                    //     name:'启用人数',
-                    //  intro:'设置启用新版布局的最小人数（不足时切换至默认布局）',
-                    //     init:'3',
-                    //     // unfrequent:true,
-                    //     item:{
-                    //         '2':'两人',
-                    //         '3':'三人',
-                    //         '4':'四人',
-                    //         '5':'五人',
-                    //         '6':'六人',
-                    //         '7':'七人',
-                    //         '8':'八人',
-                    //     },
-                    //     onclick:function(item){
-                    //         game.saveConfig('fewplayer',item);
-                    //         if(ui.arena) ui.arena.setNumber(ui.arena.dataset.number);
-                    //     }
-                    // },
                     player_height:{
                         name:'角色高度',
                         init:'long',
@@ -867,42 +861,6 @@
 							// }
 						}
                     },
-                    // background_color_music:{
-                    //  name:'背景色',
-                    //  init:'black',
-                    //  item:{
-                    //      blue:'蓝色',
-                    //      black:'黑色',
-                    //  },
-                    //  onclick:function(color){
-                    //      game.saveConfig('background_color_music',color);
-                    //      document.body.dataset.background_color_music=color;
-                    //  }
-                    // },
-                    // background_color_wood:{
-                    //  name:'背景色',
-                    //  init:'blue',
-                    //  item:{
-                    //      blue:'蓝色',
-                    //      black:'黑色',
-                    //  },
-                    //  onclick:function(color){
-                    //      game.saveConfig('background_color_wood',color);
-                    //      document.body.dataset.background_color_wood=color;
-                    //  }
-                    // },
-                    // theme_color_music:{
-                    //  name:'主题色',
-                    //  init:'black',
-                    //  item:{
-                    //      blue:'蓝色',
-                    //      black:'黑色',
-                    //  },
-                    //  onclick:function(color){
-                    //      game.saveConfig('theme_color_music',color);
-                    //      document.body.dataset.theme_color_music=color;
-                    //  }
-                    // },
                     ui_zoom:{
                         name:'界面缩放',
                         unfrequent:true,
@@ -935,7 +893,7 @@
                     },
                     image_background:{
                         name:'游戏背景',
-                        init:'shengshi_bg',
+                        init:'ol_bg',
                         item:{},
                         visualBar:function(node,item,create){
                             if(node.created){
@@ -2482,21 +2440,6 @@
                             }
                         }
                     },
-					glass_ui:{
-						name:'玻璃主题',
-						intro:'为游戏主题打开玻璃效果（手机暂不支持）',
-						init:false,
-						unfrequent:true,
-						onclick:function(bool){
-							game.saveConfig('glass_ui',bool);
-							if(bool){
-								ui.window.classList.add('glass_ui');
-							}
-							else{
-								ui.window.classList.remove('glass_ui');
-							}
-						}
-					},
                     cardshape:{
                         name:'手牌显示',
                         intro:'将手牌设置为正方形或长方形',
@@ -2797,7 +2740,7 @@
                         }
                     },
                     show_splash:{
-                        name:'显示开始界面',
+                        name:'开始界面',
                         intro:'游戏开始前进入模式选择画面',
                         init:'off',
                         item:{
@@ -2826,14 +2769,14 @@
                         }
                     },
                     show_discardpile:{
-                        name:'暂停时显示弃牌堆',
+                        name:'暂停时弃牌堆',
                         init:true,
                         unfrequent:true,
                     },
                     show_history:{
                         name:'出牌记录栏',
                         init:'off',
-                        intro:'在屏幕左侧或右侧显示出牌记录',
+                        intro:'在屏幕左侧或右侧出牌记录',
                         unfrequent:true,
                         item:{
                             off:'关闭',
@@ -2866,7 +2809,7 @@
                     show_log:{
                         name:'历史记录栏',
                         init:'left',
-                        intro:'在屏幕中显示出牌文字记录',
+                        intro:'在屏幕中出牌文字记录',
                         unfrequent:true,
                         item:{
                             off:'关闭',
@@ -2896,11 +2839,11 @@
                         name:'历史记录高亮',
                         init:true,
                         unfrequent:true,
-                        intro:'开启后历史记录不同类别的信息将以不同颜色显示',
+                        intro:'开启后历史记录不同类别的信息将以不同颜色',
                     },
                     show_time:{
-                        name:'显示当前时间',
-                        intro:'在屏幕顶部显示当前时间',
+                        name:'当前时间',
+                        intro:'在屏幕顶部当前时间',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -2914,8 +2857,8 @@
                         }
                     },
                     show_time2:{
-                        name:'显示当前时间',
-                        intro:'在触屏按钮处显示当前时间',
+                        name:'当前时间',
+                        intro:'在触屏按钮处当前时间',
                         init:false,
                         unfrequent:true,
                         onclick:function(bool){
@@ -2942,12 +2885,12 @@
                         }
                     },
                     show_time3:{
-                        name:'显示游戏时间',
+                        name:'游戏时间',
                         init:false,
                         unfrequent:true
                     },
                     show_statusbar_android:{
-                        name:'显示手机状态栏',
+                        name:'手机状态栏',
                         init:false,
                         unfrequent:true,
                         content:function(bool){
@@ -2965,7 +2908,7 @@
                         }
                     },
                     show_statusbar_ios:{
-                        name:'显示手机状态栏',
+                        name:'手机状态栏',
                         init:'off',
                         unfrequent:true,
                         item:{
@@ -2998,7 +2941,7 @@
                     },
                     show_phaseuse_prompt:{
                         name:'出牌阶段提示',
-                        intro:'在你出牌时显示提示文字',
+                        intro:'在你出牌时提示文字',
                         init:true,
                         unfrequent:true,
                     },
@@ -3028,7 +2971,7 @@
                     },
                     remember_dialog:{
                         name:'记住对话框位置',
-                        intro:'移动对话框后新的对话框也将在移动后的位置显示',
+                        intro:'移动对话框后新的对话框也将在移动后的位置',
                         init:false,
                         unfrequent:true,
                         onclick:function(bool){
@@ -3073,8 +3016,8 @@
                         unfrequent:true
                     },
                     character_dialog_tool:{
-                        name:'自由选将显示',
-                        intro:'点击自由选将时默认显示的条目',
+                        name:'自由选将',
+                        intro:'点击自由选将时默认的条目',
                         init:'最近',
                         item:{
                             '收藏':'收藏',
@@ -3096,7 +3039,7 @@
                         unfrequent:true,
                     },
                     show_round_menu:{
-                        name:'显示触屏按钮',
+                        name:'触屏按钮',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -3112,61 +3055,61 @@
                         }
                     },
                     show_card_prompt:{
-                        name:'显示出牌信息',
-                        intro:'出牌时在使用者上显示卡牌名称',
+                        name:'出牌信息',
+                        intro:'出牌时在使用者上卡牌名称',
                         init:true,
                         unfrequent:true,
                     },
                     hide_card_prompt_basic:{
                         name:'隐藏基本牌信息',
-                        intro:'不显示基本牌名称',
+                        intro:'不基本牌名称',
                         init:false,
                         unfrequent:true,
                     },
                     hide_card_prompt_equip:{
                         name:'隐藏装备牌信息',
-                        intro:'不显示装备牌名称',
+                        intro:'不装备牌名称',
                         init:false,
                         unfrequent:true,
                     },
                     show_phase_prompt:{
-                        name:'显示阶段信息',
-                        intro:'在当前回合不同阶段开始时显示阶段名称',
+                        name:'阶段信息',
+                        intro:'在当前回合不同阶段开始时阶段名称',
                         init:true,
                         unfrequent:true,
                     },
                     show_charactercard:{
-                        name:'显示角色资料',
+                        name:'角色资料',
                         intro:'在角色界面单击时弹出角色资料卡',
                         init:true,
                         unfrequent:true
                     },
                     show_favourite:{
-                        name:'显示添加收藏',
-                        intro:'在角色的右键菜单中显示添加收藏',
+                        name:'添加收藏',
+                        intro:'在角色的右键菜单中添加收藏',
                         init:true,
                         unfrequent:true
                     },
                     show_favourite_menu:{
-                        name:'显示收藏菜单',
-                        intro:'在选项-角色中显示收藏一栏',
+                        name:'收藏菜单',
+                        intro:'在选项-角色中收藏一栏',
                         init:true,
                         unfrequent:true
                     },
                     show_ban_menu:{
-                        name:'显示禁将菜单',
-                        intro:'在选项-角色中显示禁将一栏',
+                        name:'禁将菜单',
+                        intro:'在选项-角色中禁将一栏',
                         init:true,
                         unfrequent:true
                     },
                     right_range:{
-                        name:'显示距离信息',
-                        intro:'在角色的右键菜单中显示距离等信息',
+                        name:'距离信息',
+                        intro:'在角色的右键菜单中距离等信息',
                         init:true,
                         unfrequent:true
                     },
                     show_name:{
-                        name:'显示角色名称',
+                        name:'角色名称',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -3180,7 +3123,7 @@
                         }
                     },
                     show_replay:{
-                        name:'显示重来按钮',
+                        name:'重来按钮',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -3194,7 +3137,7 @@
                         }
                     },
                     show_playerids:{
-                        name:'显示身份按钮',
+                        name:'身份按钮',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -3208,7 +3151,7 @@
                         }
                     },
                     show_pause:{
-                        name:'显示暂停按钮',
+                        name:'暂停按钮',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -3222,7 +3165,7 @@
                         }
                     },
                     show_auto:{
-                        name:'显示托管按钮',
+                        name:'托管按钮',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -3236,7 +3179,7 @@
                         }
                     },
                     show_volumn:{
-                        name:'显示音量按钮',
+                        name:'音量按钮',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -3250,7 +3193,7 @@
                         }
                     },
                     show_cardpile:{
-                        name:'显示牌堆按钮',
+                        name:'牌堆按钮',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -3264,7 +3207,7 @@
                         }
                     },
                     show_cardpile_number:{
-                        name:'显示剩余牌数',
+                        name:'剩余牌数',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -3278,8 +3221,8 @@
                         }
                     },
                     show_wuxie:{
-                        name:'显示住口按钮',
-                        intro:'在右上角显示不询问住口',
+                        name:'住口按钮',
+                        intro:'在右上角不询问住口',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -3298,7 +3241,7 @@
                         unfrequent:true,
                     },
                     show_handcardbutton:{
-                        name:'显示手牌按钮',
+                        name:'手牌按钮',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -3306,7 +3249,7 @@
                         }
                     },
                     show_giveup:{
-                        name:'显示投降按钮',
+                        name:'投降按钮',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -3321,12 +3264,12 @@
                         restart:true,
                     },
                     show_extensionmaker:{
-                        name:'显示制作扩展',
+                        name:'制作扩展',
                         init:true,
                         unfrequent:true,
                     },
                     show_extensionshare:{
-                        name:'显示分享扩展',
+                        name:'分享扩展',
                         init:true,
                         unfrequent:true,
                     }
@@ -3441,7 +3384,7 @@
                         init:true,
                     },
                     background_speak:{
-                        name:'人物配音',
+                        name:'播放角色台词',
                         init:true,
                     },
                     volumn_audio:{
@@ -3511,30 +3454,6 @@
             others:{
                 name:'文件',
                 config:{
-                    // reset_database:{
-                    //  name:'重置游戏',
-                    //  onclick:function(){
-                    //      var node=this;
-                    //      if(node._clearing){
-                    //          if(indexedDB) indexedDB.deleteDatabase(lib.configprefix+'data');
-                    //          game.reload();
-                    //          return;
-                    //      }
-                    //      node._clearing=true;
-                    //      node.innerHTML='单击以确认 (3)';
-                    //      setTimeout(function(){
-                    //          node.innerHTML='单击以确认 (2)';
-                    //          setTimeout(function(){
-                    //              node.innerHTML='单击以确认 (1)';
-                    //              setTimeout(function(){
-                    //                  node.innerHTML='重置游戏录像';
-                    //                  delete node._clearing;
-                    //              },1000);
-                    //          },1000);
-                    //      },1000);
-                    //  },
-                    //  clear:true
-                    // },
                     reset_game:{
                         name:'重置游戏设置',
                         onclick:function(){
@@ -3698,6 +3617,21 @@
                         },
                         unfrequent:true,
                     },
+                    movie:{
+                        name:'电影模式',
+                        intro:'随机背景，随机音乐，游戏速度较慢，自动托管，游戏结束后自动重新开始',
+                        init:false,
+                        onclick:function(bool){
+                            game.saveConfig('movie',bool);
+                            game.saveConfig('auto_auto', bool);
+                            game.saveConfig('auto_restart', bool);
+                            game.saveConfig('show_splash', bool?'off':'always');
+                            game.saveConfig('game_speed', 'mid');
+                            game.saveConfig('image_background_random', bool);
+                            game.saveConfig('background_music', 'music_random');                            
+                        },
+                        unfrequent:true,
+                    },
                     update:function(config,map){
                         if(lib.device||lib.node){
                             map.redownload_game.show();
@@ -3706,58 +3640,6 @@
                             map.redownload_game.hide();
                         }
                     }
-                    // trim_game:{
-                    //  name:'隐藏非官方扩展包',
-                    //  onclick:function(){
-                    //      if(this.innerHTML!='已隐藏'){
-                    //          this.innerHTML='已隐藏';
-                    //             var pack=lib.config.all.cards.slice(0);
-                    //             if(Array.isArray(lib.config.hiddenCardPack)){
-                    //                 for(var i=0;i<lib.config.hiddenCardPack.length;i++){
-                    //                     pack.add(lib.config.hiddenCardPack[i]);
-                    //                 }
-                    //             }
-                    //             for(var i=0;i<pack.length;i++){
-                    //                 if(lib.config.all.sgscards.contains(pack[i])){
-                    //                     pack.splice(i--,1);
-                    //                 }
-                    //             }
-                    //          game.saveConfig('hiddenCardPack',pack);
-                    //
-                    //             var pack=lib.config.all.characters.slice(0);
-                    //             if(Array.isArray(lib.config.hiddenCharacterPack)){
-                    //                 for(var i=0;i<lib.config.hiddenCharacterPack.length;i++){
-                    //                     pack.add(lib.config.hiddenCharacterPack[i]);
-                    //                 }
-                    //             }
-                    //             for(var i=0;i<pack.length;i++){
-                    //                 if(lib.config.all.sgscharacters.contains(pack[i])){
-                    //                     pack.splice(i--,1);
-                    //                 }
-                    //             }
-                    //          game.saveConfig('hiddenCharacterPack',pack);
-                    //
-                    //             var pack=lib.config.all.mode.slice(0);
-                    //             if(Array.isArray(lib.config.hiddenModePack)){
-                    //                 for(var i=0;i<lib.config.hiddenModePack.length;i++){
-                    //                     pack.add(lib.config.hiddenModePack[i]);
-                    //                 }
-                    //             }
-                    //             for(var i=0;i<pack.length;i++){
-                    //                 if(lib.config.all.sgsmodes.contains(pack[i])){
-                    //                     pack.splice(i--,1);
-                    //                 }
-                    //             }
-                    //          game.saveConfig('hiddenModePack',pack);
-                    //
-                    //          var that=this;
-                    //          setTimeout(function(){
-                    //              that.innerHTML='隐藏非官方扩展包';
-                    //          },500);
-                    //      }
-                    //  },
-                    //  clear:true
-                    // }
                 }
             }
         },
@@ -4001,16 +3883,7 @@
                     },
                     connect_free_choose:{
                         name:'自由选将',
-                        init:true,
-                        onclick:function(bool){
-                            game.saveConfig('free_choose',bool,this._link.config.mode);
-                            if(!_status.event.getParent().showConfig&&!_status.event.showConfig) return;
-                            if(!ui.cheat2&&get.config('free_choose')) ui.create.cheat2();
-                            else if(ui.cheat2&&!get.config('free_choose')){
-                                ui.cheat2.close();
-                                delete ui.cheat2;
-                            }
-                        }
+                        init:false,
                     },
                     /*
                     connect_ban_weak:{
@@ -4469,16 +4342,7 @@
                     },
                     connect_free_choose:{
                         name:'自由选将',
-                        init:true,
-                        onclick:function(bool){
-                            game.saveConfig('free_choose',bool,this._link.config.mode);
-                            if(!_status.event.getParent().showConfig&&!_status.event.showConfig) return;
-                            if(!ui.cheat2&&get.config('free_choose')) ui.create.cheat2();
-                            else if(ui.cheat2&&!get.config('free_choose')){
-                                ui.cheat2.close();
-                                delete ui.cheat2;
-                            }
-                        }
+                        init:false,
                     },
                     connect_special_identity:{
                         name:'特殊身份',
@@ -4934,16 +4798,7 @@
                     },
                     connect_free_choose:{
                         name:'2v2自由选将',
-                        init:true,
-                        onclick:function(bool){
-                            game.saveConfig('free_choose',bool,this._link.config.mode);
-                            if(!_status.event.getParent().showConfig&&!_status.event.showConfig) return;
-                            if(!ui.cheat2&&get.config('free_choose')) ui.create.cheat2();
-                            else if(ui.cheat2&&!get.config('free_choose')){
-                                ui.cheat2.close();
-                                delete ui.cheat2;
-                            }
-                        }
+                        init:false,
                     },
                     /*
                     connect_ban_weak:{
@@ -4970,8 +4825,6 @@
                                 map.ladder_monthly.hide();
                                 map.ladder_reset.hide();
                             }
-                            map.enable_all.show();
-                            map.enable_all_cards_four.show();
                             map.four_assign.show();
                             map.four_phaseswap.show();
                             map.expand_dialog.show();
@@ -4989,22 +4842,13 @@
                             map.expand_dialog.hide();
                             map.fouralign.hide();
                         }
-                        if(config.versus_mode=='three'||config.versus_mode=='one'){
-                            map.enable_all_three.show();
-                            map.enable_all_cards.show();
-                        }
-                        else{
-                            map.enable_all_three.hide();
-                            map.enable_all_cards.hide();
-                        }
                         if(config.versus_mode=='two'||config.versus_mode=='endless'||
-                            config.versus_mode=='three'||config.versus_mode=='one'||config.versus_mode=='siguo'){
+                            config.versus_mode=='three'||config.versus_mode=='one'){
                             map.free_choose.show();
                         }
                         else{
                             map.free_choose.hide();
                         }
-                        map.double_character_jiange.hide();
                         if(config.versus_mode=='two'){
                             map.replace_handcard_two.show();
                             map.replace_character_two.show();
@@ -5017,7 +4861,7 @@
                             map.two_assign.hide();
                             map.two_phaseswap.hide();
                         }
-                        if(config.versus_mode=='two'||config.versus_mode=='siguo'||config.versus_mode=='four'){
+                        if(config.versus_mode=='two'||config.versus_mode=='four'){
                             if(config.versus_mode=='four'&&(config.four_assign||config.four_phaseswap)){
                                 map.change_identity.hide();
                             }
@@ -5028,20 +4872,12 @@
                         else{
                             map.change_identity.hide();
                         }
-                        if(config.versus_mode=='siguo'){
-                            map.siguo_character.show();
-                        }
-                        else{
-                            map.siguo_character.hide();
-                        }
                     },
                     versus_mode:{
                         name:'游戏模式',
                         init:'two',
                         item:{
                             standard:'自由设定',
-                            //jiange:'剑阁',
-                            //siguo:'四国',
                             //one:'<span style="display:inline-block;width:100%;text-align:center">1v1</span>',
                             two:'<span style="display:inline-block;width:100%;text-align:center">2v2</span>',
                             three:'3v3统率',
@@ -5173,11 +5009,6 @@
                         },
                         frequent:true,
                     },
-                    double_character_jiange:{
-                        name:'双将模式',
-                        init:false,
-                        frequent:true,
-                    },
                     replace_handcard_two:{
                         name:'末位可换牌',
                         init:true,
@@ -5194,16 +5025,6 @@
                         name:'默认展开选将框',
                         intro:'选将框打开时直接显示全部角色（可能使游戏在开始时卡顿）',
                         init:false,
-                    },
-                    siguo_character:{
-                        name:'专属角色出场率',
-                        init:'increase',
-                        item:{
-                            increase:'大概率',
-                            normal:'默认概率',
-                            off:'不出现',
-                        },
-                        frequent:true
                     },
                     /*
                     ban_weak:{
@@ -5809,7 +5630,7 @@
         saveVideo:function(){
             if(_status.videoToSave){
                 game.export(lib.init.encode(JSON.stringify(_status.videoToSave)),
-                '无名杀 - 录像 - '+_status.videoToSave.name[0]+' - '+_status.videoToSave.name[1]);
+                '流星夜 - 录像 - '+_status.videoToSave.name[0]+' - '+_status.videoToSave.name[1]);
             }
         },
         init:{
@@ -7946,6 +7767,7 @@
                         }
                         splash.delete(1000);
                         dialog.delete();
+                        text.delete();
                         delete window.inSplash;
                         delete ui.dialog;
                         window.resetGameTimeout=setTimeout(lib.init.reset,5000);
@@ -7956,24 +7778,24 @@
                     }
                     var downNode=function(){
                         this.classList.add('glow');
-                        var mode = this.childNodes[1].style.backgroundImage.slice(18,-6); 
-                        if (mode == 'library'){
+                        var mode = this.childNodes[1].style.backgroundImage; 
+                        if (mode.includes('library')){
                             setDialog('啊，这里是阿求的家。阿求家里有很多的藏书，讲述着幻想乡的：幻想乡如何运作啊，现有角色啊，现有卡牌啊，这些看几次都有受益的资料。');
-                        } else if (mode == 'old_identity'){
+                        } else if (mode.includes('old_identity')){
                             setDialog('啊，都已经10年了吗？这无比熟悉的，令人智熄的超级无聊感……');
-                        } else if (mode == 'identity'){
+                        } else if (mode.includes('identity')){
                             setDialog('幻想乡几乎每个月都有大大小小的异变，异变模式就是讲述我们去解决这些异变的故事啦~');
-                        } else if (mode == 'versus'){
+                        } else if (mode.includes('versus')){
                             setDialog('如果只是想轻松的打把牌，对决模式最方便啦。这里支持2v2，3v3，4v4，还有看你喜好自由设定。这些在模式内，通过右上角[选项-对决-游戏模式]就可以设置了。');
-                        } else if (mode == 'connect'){
+                        } else if (mode.includes('connect')){
                             setDialog('你朋友欠你钱了？快把他叫来跟你1v1，把钱从他身上打出来！…………什么，这样做不行吗？');
-                        } else if (mode == 'boss'){
-                            setDialog('这里就是传说中的，必须3个人打1个才打的过的超绝极强大魔王！<br>我想跟她们单挑。');
-                        } else if (mode == 'stg'){
+                        } else if (mode.includes('boss')){
+                            setDialog('这里就是传说中的，必须3个人打1个才打的过的超绝超强超无敌的究极绝望大魔王！<br><br>……我想跟她们单挑。');
+                        } else if (mode.includes('stg')){
                             setDialog('这才是幻想乡的正确战斗方式！以一人之力，在杂鱼群里割草，然后与boss们展开华丽酷炫的弹幕战……啊啊啊，我手痒啦！走走走，闯关去！');
-                        } else if (mode == 'chess'){
+                        } else if (mode.includes('chess')){
                             setDialog('据说这个战棋模式里面有些很神奇的东西，你可以陪我一起去吗？');
-                        } else if (mode == 'brawl'){
+                        } else if (mode.includes('brawl')){
                             setDialog('打牌打累了，就搞点好玩的小场景休闲一下吧，打子规可是最最最减压的事情啦！而且，还可以自己创建场景玩哟。我就做了一个呢，是不是很棒⭐。');
                         }
                     }
@@ -7983,7 +7805,7 @@
                     var setDialog=function(text){
                         var date = new Date();
                         if (date.getHours() > 1 && date.getHours() < 8) text = 'Zzzzzz……';
-                        dialog.innerHTML = '<div><div style="width:450px;margin-left:120px; margin-top:12px;text-align:left;font-size:18px;writing-mode:horizontal-tb">'+text+'</div>';
+                        dialog.innerHTML = '<div><div style="width:500px;margin-left:120px; margin-top:12px;text-align:left;font-size:18px;overflow:scroll;display:block;">'+text+'</div>';
                         ui.create.div('.avatar',dialog).setBackground('marisa','character');
                     }
                     // 这里是开始界面
@@ -8019,6 +7841,10 @@
                             node.addEventListener('mouseup',upNode);
                             node.addEventListener('mouseleave',upNode);
                         }
+                        else {
+                            node.addEventListener('touchstart', downNode);
+                            node.addEventListener('touchend', upNode);
+                        }
                         if (lib.config.all.mode[i] == 'identity' && lib.config.gameRecord.incident && lib.config.gameRecord.incident.data['akyuu'] > 2){
                             node.style.boxShadow='rgba(125, 90, 178, 0.4) 0 0 3px 5px, rgba(125, 90, 178, 0.4) 0 3px 10px';
                             node.style.background='rgba(125, 90, 178, 0.4)';
@@ -8031,7 +7857,7 @@
                     }
                     var dialog = ui.create.div('.avatar', document.body);
                     dialog.style.height = '120px';
-                    dialog.style.width = '600px';
+                    dialog.style.width = '650px';
                     dialog.style.left = 'calc(25%)';
                     dialog.style.top = 'calc(75%)';
                     dialog.style.position = 'absolute';
@@ -8043,8 +7869,11 @@
                                 '哟，你来了啊⭐ 今天过的开心吗？有没有碰上什么好事~？快告诉我！',
                                 '对哪里有问题的话，右键点一下就行啦。这个界面的模式也好，游戏里，点一下自己手牌，点一下自己身份也行。很多可以点的地方啦。',
                                 ];
+                    var text = ui.create.div('', '点击继续', document.body);
+                    text.style.top = 'calc(75% + 120px)';
+                    text.style.left = 'calc(25% + 560px)';
                     if (!lib.config.gameRecord.stg){
-                        list.add('');
+                        list.add('都来幻想乡了，还不挑战一下红魔乡算个什么事嘛。走走走，去闯关模式！我可是在那里大放光彩的哟⭐');
                     }
                     if (!lib.config.gameRecord.boss){
                         list.add('据说啊，幻想乡里有一些强大到不敢想象的强者。有的还是从外界来的！是不是有点跃跃欲试了？走，去魔王模式吧！');
@@ -8058,18 +7887,37 @@
                         list.add('阿求又邀请我们去玩了。场景下的稗田教室里。我们一起去陪陪她吧？');
                     }
                     var date = new Date();
-					if (date.getHours() > 22){
-                        list.push('你知道吗，人类最具工作力和灵感的时候，就是三更大半夜！……至少我是这样。让我们来好好的享受这个夜晚吧！');
-                    } else if (date.getHours() > 7 && date.getHours() < 10){
-                        list.push('早上好！一日之计在于晨！我今天的计就是，再睡5分……Zzzzz…………');
+                    if (date.getMonth() == 11){
+                        setDialog('圣诞节快乐！那个红白色的家伙，今年也是买不起礼物送给我们呢。作为补偿，一会儿陪我一起去调戏她玩，怎么样？');
+                    } else if (date.getMonth() == 1 && date.getDate() == 14){
+                        setDialog('情人节快乐！<br>给，这是义理巧克力！……别这么沮丧的看着我啊，我的本命巧克力如果不是已经给别人了，就会给你了呢。');
+                    } else if (date.getMonth() == 5 && date.getDate() == 1){
+                        setDialog('儿童节快乐！我准备了气球，蛋糕，和……你说你已经不是儿童了？你有1000岁吗？没有？那你就是个儿童啦，来一起庆祝吧！');
+                    } else if (date.getMonth() == 3 && date.getDate() == 1){    
+                        setDialog('愚人节快乐！我和另外两位老师一起，给你准备了个 大·惊·喜 哟⭐');
+                    } else if (date.getHours() > 22){
+                        setDialog('你知道吗，人类最具工作力和灵感的时候，就是三更大半夜！……至少我是这样。让我们来好好的享受这个夜晚吧！');
+                    } else if (date.getHours() >= 7 && date.getHours() <= 8){
+                        setDialog('早上好！一日之计在于晨！我今天的计就是，再睡5分……Zzzzz…………');
+                    } else if (date.getHours() >= 11 && date.getHours() <= 12){
+                        setDialog('到吃午饭的时间了呢。我今天的午餐是蘑菇汤，你呢？');
+                    } else if (location.hostname){
+                        setDialog('网页版根据你的网速，可能会有图片或是音乐加载的比较慢。建议先去图鉴打开[角色一览]和[卡牌一览]预先加载下。');
+                    } else {
+                        setDialog(list.randomRemove());
                     }
-                    setDialog(list.randomRemove());
+                    list.add('【轰！】，【疾风骤雨】，【顺手牵羊】都是可以对自己使用的哟，所以，嘿嘿，咱们来想些很奇怪的操作吧？');
+                    list.add('你有看这期的“流星画园”吗？超级好玩的啦。<a href="https://mp.weixin.qq.com/s/eq1HewSJkujUNA4U1vEq3Q" target="_blank">在微信公众号上就可以找到哟。</a>');
+                    list.add('闲的没事的话，来支持东方project的正作吧！弹幕战和格斗作都是精品游戏，还有大量的很好看的周边哟！');
                     dialog.onclick = function(){
                         if (list.length == 0){
+                            setDialog('就我一个人说话很累的！你倒是回句话啊？不回你就快点打牌去！');
+                            text.delete();
                         } else {
                             setDialog(list.randomRemove());
                         }
                     }
+                    text.onclick = dialog.onclick;
                     if(lib.config.mousewheel){
                         splash.onmousewheel=ui.click.mousewheel;
                     }
@@ -12450,7 +12298,7 @@
 							else{
 								cards.splice(i--,1);
 							}
-						}
+						} else if (cards[i].name != cards[i].dataset.cardName) cards[i].name = cards[i].dataset.cardName;
 					}
                     if(cards.length==0){
                         event.finish();
@@ -12608,6 +12456,7 @@
                         cards[i].classList.remove('glow');
                         cards[i].classList.remove('unequip');
                         cards[i].recheck();
+                        if (cards[i].name != cards[i].dataset.cardName) cards[i].name = cards[i].dataset.cardName;
                         var info=lib.card[cards[i].name];
                         if(info.destroy||cards[i]._destroy){
 							cards[i].delete();
@@ -12795,10 +12644,7 @@
                         player.$damage(source);
                         game.broadcastAll(function(nature,player){
                             if(lib.config.animation&&!lib.config.low_performance){
-                                if(nature=='fire'){
-                                    player.$fire();
-                                }
-                                else if(nature=='thunder'){
+                                if(nature=='thunder'){
                                     player.$thunder();
                                 }
                             }
@@ -13577,7 +13423,6 @@
                         }
                     }
                     this.node.avatar.show();
-                    this.node.avatar.style.zIndex = -1;
                     this.node.count.show();
                     this.node.equips.show();
                     this.name=character;
@@ -14720,6 +14565,8 @@
                     for(var i in this.tempSkills){
                         skills.add(i);
                     }
+                    // 这个是把全场技能也数进技能里去。针对魔王模式的神灵复苏加的。鉴于平常询问量大幅度增加，限制为魔王模式专用。
+                    if (get.mode() == 'boss') skills.addArray(lib.skill.global);
                     if(arg2) skills.addArray(this.hiddenSkills);
                     if(arg3!==false) skills.addArray(es);
                     for(var i in this.forbiddenSkills){
@@ -15979,7 +15826,6 @@
                         next.targets=[];
                     }
                     if(next.card){
-                        next.card=get.autoViewAs(next.card,false,next.player);
                         var info=get.info(next.card);
                         if(info.changeTarget){
                             info.changeTarget(next.player,next.targets);
@@ -16188,9 +16034,6 @@
                     else if(next.card==undefined){
                         if(next.cards){
                             next.card=next.cards[0];
-                            if(!next.skill){
-                                next.card=get.autoViewAs(next.card,null,next.player);
-                            }
                         }
                     }
                     next.setContent('respond');
@@ -17414,11 +17257,6 @@
                     }
                     return this;
                 },
-				addSkillLog:function(skill){
-					this.addSkill(skill);
-					this.popup(skill);
-					game.log(this,'获得了技能','【'+get.translation(skill)+'】');
-				},
                 addSkill:function(skill,checkConflict,nobroadcast){
                     if(Array.isArray(skill)){
                         for(var i=0;i<skill.length;i++){
@@ -17910,7 +17748,6 @@
                     if(typeof card=='string'){
                         card={name:card};
                     }
-                    card=get.autoViewAs(card,null,player);
                     var num=get.info(card).usable;
                     if(typeof num=='function') num=num(card,player);
                     num=game.checkMod(card,player,num,'cardUsable',player);
@@ -18272,12 +18109,6 @@
                     }
                     return false;
                 },
-                isOffline:function(){
-                    if(this.ws&&lib.node&&this.ws.closed){
-                        return true;
-                    }
-                    return false;
-                },
 				checkShow:function(skill,showonly){
 					var sourceSkill=get.info(skill);
 					var noshow=false;
@@ -18333,41 +18164,6 @@
 				hasSkill:function(skill,arg2,arg3,arg4){
 					return game.expandSkills(this.getSkills(arg2,arg3,arg4)).contains(skill);
 				},
-				hasStockSkill:function(skill,arg1,arg2,arg3){
-					return game.expandSkills(this.getStockSkills(arg1,arg2,arg3)).contains(skill);
-				},
-                hasZhuSkill:function(skill,player){
-                    if(!this.hasSkill(skill)) return false;
-                    var mode=get.mode();
-                    if(mode=='identity'||(mode=='versus'&&_status.mode=='four')){
-                        if(mode!='identity'){
-                            if(player&&this.side!=player.side) return false;
-                        }
-                        if(this.isZhu) return true;
-                        for(var i in this.storage){
-                            if(i.indexOf('zhuSkill_')==0&&this.storage[i].contains(skill)) return true;
-                        }
-                    }
-                    return false;
-                },
-                hasGlobalTag:function(tag,arg){
-                    var skills=lib.skill.global.slice(0);
-                    game.expandSkills(skills);
-                    for(var i=0;i<skills.length;i++){
-                        var info=lib.skill[skills[i]];
-                        if(info&&info.ai){
-                            if(info.ai.skillTagFilter&&info.ai[tag]&&
-                                info.ai.skillTagFilter(this,tag,arg)===false) continue;
-                            if(typeof info.ai[tag]=='string'){
-                                if(info.ai[tag]==arg) return true;
-                            }
-                            else if(info.ai[tag]){
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
-                },
                 hasSkillTag:function(tag,hidden,arg,globalskill){
                     var skills=this.getSkills(hidden);
                     if(globalskill){
@@ -18470,10 +18266,6 @@
                     if(this.hasSkillTag('respondShan',true,null,true)) return true;
                     return false;
                 },
-				mayHaveShan:function(){
-					return this.hasShan();
-					// modify: later
-				},
                 hasCard:function(name,position){
                     if(typeof name=='function'){
                         var hs=this.getCards(position);
@@ -18492,13 +18284,6 @@
                     }
                     return false;
                 },
-				canEquip:function(name,replace){
-					if(get.type(name)=='card'){
-						name=get.equiptype(name);
-					}
-					if(!replace&&this.getEquip(name)) return false;
-					return true;
-				},
                 getEquip:function(name){
                     var es=this.getCards('e');
                     if(typeof name=='object'&&get.info(name)){
@@ -18707,8 +18492,12 @@
                 $compareMultiple:function(card1,targets,cards){
                     game.broadcast(function(player,card1,targets,cards){
                         player.$compareMultiple(card1,targets,cards);
-                    },this,card1,targets,cards);
-                    game.addVideo('compareMultiple',this,[get.cardInfo(card1),get.targetsInfo(targets),get.cardsInfo(cards)]);
+                    },this,card1,targets,cards);                    
+                    var info=[];
+                    for(var i=0;i<targets.length;i++){
+                        info.push(targets[i].dataset.position);
+                    }
+                    game.addVideo('compareMultiple',this,[get.cardInfo(card1),info,get.cardsInfo(cards)]);
                     var player=this;
                     var node1=player.$throwxy2(card1,
                         'calc(50% - 52px)','calc(50% + 10px)','perspective(600px) rotateY(180deg)',true
@@ -19214,104 +19003,6 @@
                     lib.listenEnd(node);
                     return node;
                 },
-                throwDice:function(num){
-					if(typeof num!='number'){
-						num=get.rand(6)+1;
-						_status.event.num=num;
-					}
-					if(!game.online){
-						game.pause();
-					}
-					game.broadcastAll(function(num){
-						var diceContainer=ui.create.div('.fullsize.dice-container',ui.window);
-						ui.window.classList.add('dicepaused');
-						var dice=ui.create.div('.dice');
-						var side;
-
-						side=ui.create.div('.side.front',dice);
-						ui.create.div('.dot.center',side);
-						ui.create.div('.side.front.inner',dice);
-
-						side=ui.create.div('.side.top',dice);
-						ui.create.div('.dot.dtop.dleft',side);
-						ui.create.div('.dot.dbottom.dright',side);
-						ui.create.div('.side.top.inner',dice);
-
-						side=ui.create.div('.side.right',dice);
-						ui.create.div('.dot.dtop.dleft',side);
-						ui.create.div('.dot.center',side);
-						ui.create.div('.dot.dbottom.dright',side);
-						ui.create.div('.side.right.inner',dice);
-
-						side=ui.create.div('.side.left',dice);
-						ui.create.div('.dot.dtop.dleft',side);
-						ui.create.div('.dot.dtop.dright',side);
-						ui.create.div('.dot.dbottom.dleft',side);
-						ui.create.div('.dot.dbottom.dright',side);
-						ui.create.div('.side.left.inner',dice);
-
-						side=ui.create.div('.side.bottom',dice);
-						ui.create.div('.dot.center',side);
-						ui.create.div('.dot.dtop.dleft',side);
-						ui.create.div('.dot.dtop.dright',side);
-						ui.create.div('.dot.dbottom.dleft',side);
-						ui.create.div('.dot.dbottom.dright',side);
-						ui.create.div('.side.bottom.inner',dice);
-
-						side=ui.create.div('.side.back',dice);
-						ui.create.div('.dot.dtop.dleft',side);
-						ui.create.div('.dot.dtop.dright',side);
-						ui.create.div('.dot.dbottom.dleft',side);
-						ui.create.div('.dot.dbottom.dright',side);
-						ui.create.div('.dot.center dleft',side);
-						ui.create.div('.dot.center dright',side);
-						ui.create.div('.side.back.inner',dice);
-
-						ui.create.div('.side.cover.x',dice);
-						ui.create.div('.side.cover.y',dice);
-						ui.create.div('.side.cover.z',dice);
-
-						var map={
-							1:[75,0,45],
-							2:[-15,45,0],
-							3:[165,-45,90],
-							4:[345,-45,90],
-							5:[345,-45,180],
-							6:[255,0,135]
-						};
-						dice.roll=function(deg){
-							if(typeof deg=='number'){
-								dice.current[0]+=deg;
-								deg=dice.current;
-							}
-							deg=deg.slice(0);
-							dice.current=deg;
-							this.style.transform='rotateX('+deg[0]+'deg) rotateY('+deg[1]+'deg) rotateZ('+deg[2]+'deg)';
-						};
-						dice.roll(map[num]);
-						diceContainer.appendChild(dice);
-						ui.refresh(dice);
-						dice.roll(1025);
-
-						dice.addEventListener('webkitTransitionEnd',function(){
-							if(!dice.over){
-								dice.style.transition='transform 0.8s ease';
-								dice.roll(-20);
-								dice.over=true;
-							}
-							else if(!dice.resumed){
-								setTimeout(function(){
-									diceContainer.delete();
-									ui.window.classList.remove('dicepaused');
-								},300);
-								if(!game.online){
-									setTimeout(game.resume,800);
-								}
-								dice.resumed=true;
-							}
-						});
-					},num);
-				},
                 $giveAuto:function(card,player){
                     if(Array.isArray(card)&&card.length==0) return;
                     var args=Array.from(arguments);
@@ -19642,21 +19333,6 @@
 						},that,type,name,color,avatar);
                     },avatar?0:300);
                 },
-                $fire:function(){
-                    game.addVideo('flame',this,'fire');
-                    var left,top;
-                    if(game.chess){
-                        var rect=this.getBoundingClientRect();
-                        left=rect.left;
-                        top=rect.top;
-                    }
-                    else{
-                        left=this.offsetLeft;
-                        top=this.offsetTop;
-                    }
-                    game.animate.flame(left+this.offsetWidth/2,
-                        top+this.offsetHeight-20,700,'fire');
-                },
                 $thunder:function(){
                     game.addVideo('flame',this,'thunder');
                     var left,top;
@@ -19671,30 +19347,6 @@
                     }
                     game.animate.flame(left+this.offsetWidth/2,
                         top+this.offsetHeight-30,700,'thunder');
-                },
-                $rare2:function(){
-                    game.addVideo('flame',this,'rare2');
-                    var rect=this.getBoundingClientRect();
-                    var left=rect.left;
-                    var top=rect.top+15;
-                    game.animate.flame(left+this.offsetWidth/2,
-                        top+this.offsetHeight-30,700,'rare');
-                },
-                $epic2:function(){
-                    game.addVideo('flame',this,'epic2');
-                    var rect=this.getBoundingClientRect();
-                    var left=rect.left;
-                    var top=rect.top+15;
-                    game.animate.flame(left+this.offsetWidth/2,
-                        top+this.offsetHeight-30,700,'epic');
-                },
-                $legend2:function(){
-                    game.addVideo('flame',this,'legend2');
-                    var rect=this.getBoundingClientRect();
-                    var left=rect.left;
-                    var top=rect.top+15;
-                    game.animate.flame(left+this.offsetWidth/2,
-                        top+this.offsetHeight-30,700,'legend');
                 },
                 $rare:function(time){
                     time=time||700;
@@ -19714,24 +19366,6 @@
                     game.animate.flame(left+this.offsetWidth/2,
                         top+this.offsetHeight-30,time,'rare');
                 },
-                $epic:function(time){
-                    time=time||700;
-                    game.addVideo('flame',this,'epic');
-                    var left,top;
-                    if(game.chess){
-                        left=this.offsetLeft-ui.arena.offsetLeft;
-                        top=this.offsetTop-ui.arena.offsetTop;
-                    }
-                    else{
-                        left=this.offsetLeft;
-                        top=this.offsetTop;
-                    }
-                    if(this.classList.contains('minskin')){
-                        top+=15;
-                    }
-                    game.animate.flame(left+this.offsetWidth/2,
-                        top+this.offsetHeight-30,time,'epic');
-                },
                 $legend:function(time){
                     time=time||700;
                     game.addVideo('flame',this,'legend');
@@ -19749,38 +19383,6 @@
                     }
                     game.animate.flame(left+this.offsetWidth/2,
                         top+this.offsetHeight-30,time,'legend');
-                },
-                $coin:function(){
-                    game.broadcast(function(player){
-                        if(!lib.config.low_performance){
-                            player.$coin();
-                        }
-                    },this);
-                    game.addVideo('flame',this,'coin');
-                    var left=this.offsetLeft-ui.arena.offsetLeft;
-                    var top=this.offsetTop-ui.arena.offsetTop;
-                    if(this.classList.contains('minskin')){
-                        top+=15;
-                    }
-                    top-=25;
-                    game.animate.flame(left+this.offsetWidth/2,
-                        top+this.offsetHeight-30,700,'coin');
-                },
-                $dust:function(){
-                    game.broadcast(function(player){
-                        if(!lib.config.low_performance){
-                            player.$dust();
-                        }
-                    },this);
-                    game.addVideo('flame',this,'dust');
-                    var left=this.offsetLeft-ui.arena.offsetLeft;
-                    var top=this.offsetTop-ui.arena.offsetTop;
-                    if(this.classList.contains('minskin')){
-                        top+=15;
-                    }
-                    top-=25;
-                    game.animate.flame(left+this.offsetWidth/2,
-                        top+this.offsetHeight-30,700,'dust');
                 },
                 $recover:function(){
                     game.addVideo('flame',this,'recover');
@@ -20788,6 +20390,9 @@
                             ui.cardPileButton.style.display='';
                         }
                         _status.gameStarted=true;
+                        if (lib.config.auto_auto && !_status.auto){
+                            ui.click.auto();
+                        }
                         game.showHistory();
                     }
                     if(!lib.hookmap[name]&&!lib.config.compatiblemode) return;
@@ -21382,7 +20987,6 @@
 				return true;
 			},
             cardEnabled:function(card,player,event){
-                card=get.autoViewAs(card,null,player);
                 if(player==undefined) player=_status.event.player;
                 if(event==='forceEnable'){
                     var mod=game.checkMod(card,player,'unchanged','cardEnabled',player);
@@ -21413,7 +21017,6 @@
                 return true;
             },
             cardUsable:function(card,player,event){
-                card=get.autoViewAs(card,null,player);
                 if(player!=_status.event.player) return true;
                 event=event||_status.event;
                 if(event.getParent().name!='phaseUse') return true;
@@ -22000,14 +21603,6 @@
                 ai:{
                     effect:{
                         player:function(card,player,target,current){
-                            //console.log(card);
-                            /*
-                            console.log(card);
-                            console.log(get.bonus(card));
-                            console.log(player);
-                            console.log(target);
-                            console.log(current);
-                            */
                             if (get.bonus(card) < 0){
                                 if (player.lili == 0) return [1, 1];
                                 if (player.isTurnedOver()){
@@ -22157,8 +21752,8 @@
                     }
                     game.syncState();
                     game.addVideo('phaseChange',player);
-                    game.log();
                     game.log(player,'的回合结束');
+                    game.log('————————————————————');
                     player._noVibrate=true;
                 },
             },
@@ -23442,8 +23037,8 @@
                 next.setContent('replaceHandcards');
             }
         },
-        // 这是……删除卡牌？
-        removeCard:function(name){
+        // 这里是从游戏和牌堆中移除卡牌（按名字查找）。追加了replace（替换，这里输入牌名会改成把删除的牌换成这个牌）
+        removeCard:function(name, replace){
             for(var i=0;i<lib.card.list.length;i++){
                 if(lib.card.list[i][2]==name){
                     lib.card.list.splice(i--,1);
@@ -23452,7 +23047,11 @@
             var list=[];
             for(var i=0;i<ui.cardPile.childElementCount;i++){
                 if(ui.cardPile.childNodes[i].name==name){
-                    list.push(ui.cardPile.childNodes[i]);
+                    if (replace){
+                        ui.cardPile.replaceChild(game.createCard(replace, ui.cardPile.childNodes[i].suit, ui.cardPile.childNodes[i].number), ui.cardPile.childNodes[i]);
+                    } else {
+                        list.push(ui.cardPile.childNodes[i]);
+                    }
                 }
             }
             for(var i=0;i<list.length;i++){
@@ -23982,21 +23581,18 @@
                     url = 'https://dev.tencent.com/u/BWS/p/Night-of-Shooting-Stars/git/raw/master/';
                 }
                 if (!music) music = lib.config.background_music;
-                if (music != lib.config.background_music) lib.config.background_music = music;
+                else lib.config.background_music = music;
 
                 if(music=='music_random'){
-                    music=lib.config.all.background_music.randomGet('music_off','music_random',_status.currentMusic);
+                    music=lib.config.all.background_music.randomGet(_status.currentMusic);
                 }
 
                 _status.currentMusic=music;
-
                 if(music=='music_custom'){
                     if(lib.config.background_music_src){
                         ui.backgroundMusic.src=lib.config.background_music_src;
                     }
-                }
-
-                if (music == 'music_default'){
+                } else if (music == 'music_default'){
                     ui.backgroundMusic.src=url+'audio/background/'+music+'.mp3';
                     ui.backgroundMusic.currentTime = [137, 693, 1338, 1970, 2715, 3463, 3982].randomGet();
                 }
@@ -25062,8 +24658,12 @@
                 }
             },
             compareMultiple:function(player,info){
-                if(player&&info){
-                    player.$compareMultiple(get.infoCard(info[0]),get.infoTargets(info[1]),get.infoCards(info[2]));
+                if(player&&info){            
+                    var targets=[];
+                    for(var i=0;i<info.length;i++){
+                        targets.push(game.playerMap[info[i]]);
+                    }
+                    player.$compareMultiple(get.infoCard(info[0]),targets,get.infoCards(info[2]));
                 }
                 else{
                     console.log(player);
@@ -26706,8 +26306,8 @@
                 nature=name.nature;
                 number=name.number;
                 suit=name.suit;
+                bonus=name.bonus;
                 name=name.name;
-                bonus=name.bouns;
             }
             if(typeof name!='string'){
                 name='sha';
@@ -26872,6 +26472,15 @@
                         if (p[i].storage._tanpai[j].name == 'death' && p.length > 1) return;
                     }
                 }*/
+                if (p[i].hasSkill('time') && p[i].storage.time){
+                    var player = p[i];
+                    var homura = [];
+					for (var j = 0; j < player.storage.time.length; j ++){
+						homura.push({name:player.storage.time[j].name, suit:player.storage.time[j].suit, number:player.storage.time[j].number, nature:player.storage.time[j].nature, bonus:player.storage.time[j].bonus});	
+					}
+					lib.config.gameRecord.homura = homura;
+					game.saveConfig('gameRecord',lib.config.gameRecord);
+                }
                 if (p[i].hasSkill('death_win') && p.length > 1){
                     return ;
                 }
@@ -26892,31 +26501,31 @@
                 };
                 var step1=function(){
                     ui.auto.hide();
-                    ui.create.dialog('<div><div style="width:100%;margin-left:120px;font-size:18px">恭喜你打完你的第一局游戏！感觉怎么样？');
+                    ui.create.dialog('<div><div style="width:280px;margin-left:120px;font-size:18px">恭喜你打完你的第一局游戏！感觉怎么样？');
                     ui.create.div('.avatar',ui.dialog).setBackground('zigui','character');
                     ui.create.control('还挺不错的',step2);
                 }
                 var step2=function(){
                     clear();
-                    ui.create.dialog('<div><div style="width:100%;margin-left:120px;font-size:18px">流星夜还有很多好玩的模式！全新的异变模式，3人组队打BOSS的挑战模式，1人连续无双的闯关模式，2v2 3v3 和4v4的对决模式，还有好几个小场景。');
+                    ui.create.dialog('<div><div style="width:280px;margin-left:120px;font-size:18px">流星夜还有很多好玩的模式！全新的异变模式，3人组队打BOSS的挑战模式，1人连续无双的闯关模式，2v2 3v3 和4v4的对决模式，还有好几个小场景。');
                     ui.create.div('.avatar',ui.dialog).setBackground('zigui','character');
                     ui.create.control('东西可真多',step3);
                 }
                 var step3=function(){
                     clear();
-                    ui.create.dialog('<div><div style="width:100%;margin-left:120pxt;font-size:18px">不过不用急，先慢慢来。游戏的卡牌，模式介绍，都能在【图鉴】模式里找到。记得代我向阿求老师问个好。');
+                    ui.create.dialog('<div><div style="width:280px;margin-left:120pxt;font-size:18px">不过不用急，先慢慢来。游戏的卡牌，模式介绍，都能在【图鉴】模式里找到。记得代我向阿求老师问个好。');
                     ui.create.div('.avatar',ui.dialog).setBackground('zigui','character');
                     ui.create.control('好的老师！',step4);
                 }
                 var step4=function(){
                     clear();
-                    ui.create.dialog('<div><div style="width:100%;margin-left:120px;font-size:18px">如果还不太懂，或者想练习角色，欢迎来【场景】→【对战练习】！如果哪个模式不熟的话，可以在那模式用自由选将召唤我！');
+                    ui.create.dialog('<div><div style="width:280px;margin-left:120px;font-size:18px">如果还不太懂，或者想练习角色，欢迎来【场景】→【对战练习】！如果哪个模式不熟的话，可以在那模式用自由选将召唤我！');
                     ui.create.div('.avatar',ui.dialog).setBackground('zigui','character');
                     ui.create.control('谢谢，再见！',step5);
                 }
                 var step5=function(){
                     clear();
-                    ui.create.dialog('<div><div style="width:100%;margin-left:120px;font-size:18px">祝你在幻想乡游玩愉快！');
+                    ui.create.dialog('<div><div style="width:280px;margin-left:120px;font-size:18px">祝你在幻想乡游玩愉快！');
                     ui.create.div('.avatar',ui.dialog).setBackground('zigui','character');
                     setTimeout(function(){
                         clear();
@@ -26932,6 +26541,7 @@
 				game.saveConfig('show_splash','always');
                 game.saveConfig('player_number','5','old_identity');
             } else {
+                
                 var i,j,k,num,table,tr,td,dialog;
                 _status.over=true;
                 ui.control.show();
@@ -27482,7 +27092,9 @@
                     ui.giveup.remove();
                     delete ui.giveup;
                 }
-
+                if (lib.config.auto_restart){
+                    setTimeout(game.reload(), 10000);
+			    }
                 if(lib.config.test_game&&!_status.connectMode){
                     if(lib.config.test_game!='single'){
                         switch(lib.config.mode){
@@ -29393,18 +29005,6 @@
                 var card=lib.card[i];
                 if(card.filterTarget&&card.selectTarget==undefined){
                     card.selectTarget=1;
-                }
-                // autoviewas 好像是指自动当作别的卡处理？
-                if(card.autoViewAs){
-                    if(!card.ai){
-                        card.ai={};
-                    }
-                    if(!card.ai.order){
-                        card.ai.order=lib.card[card.autoViewAs].ai.order;
-                        if(!card.ai.order&&lib.card[card.autoViewAs].ai.basic){
-                            card.ai.order=lib.card[card.autoViewAs].ai.basic.order;
-                        }
-                    }
                 }
                 if(card.type=='equip'){
                     if(card.enable==undefined) card.enable=true;
@@ -38745,9 +38345,6 @@
                 if(lib.config.blur_ui){
                     ui.window.classList.add('blur_ui');
                 }
-				if(lib.config.glass_ui){
-					ui.window.classList.add('glass_ui');
-				}
                 if(lib.config.custom_button){
                     lib.configMenu.appearence.config.custom_button.onclick('skip');
                 }
@@ -38768,7 +38365,8 @@
                 ui.backgroundMusic.volume=lib.config.volumn_background/8;
                 game.playBackgroundMusic();
                 ui.backgroundMusic.autoplay=true;
-                ui.backgroundMusic.addEventListener('ended',game.playBackgroundMusic);
+                ui.backgroundMusic.loop=true;
+                //ui.backgroundMusic.addEventListener('ended',game.playBackgroundMusic);
                 ui.window.appendChild(ui.backgroundMusic);
                 if(lib.config.cursor_style=='pointer'){
                     ui.window.classList.add('nopointer');
@@ -38955,7 +38553,7 @@
                 ui.system1=ui.create.div('#system1',ui.system);
                 ui.system2=ui.create.div('#system2',ui.system);
 
-                ui.replay=ui.create.system('重来',game.reload,true);
+                ui.replay=ui.create.system('菜单',game.reload,true);
                 ui.replay.id='restartbutton';
                 ui.config2=ui.create.system('选项',ui.click.config);
                 ui.config2.style.backgroundImage = 'linear-gradient(rgba(0, 133, 255, 0.8), rgba(0, 133, 255, 0.8))';
@@ -38993,7 +38591,7 @@
                     });
                 }
                 ui.auto.id='autobutton';
-                ui.autonode=ui.create.div('#autonode','<div>少女托管中...</div>',ui.arena);
+                ui.autonode=ui.create.div('#autonode','<div>少女代打中...</div>',ui.arena);
                 ui.autonode.listen(ui.click.auto);
                 if(lib.config.mode=='connect'){
                     ui.auto.hide();
@@ -39158,7 +38756,7 @@
                 ui.shortcut=ui.create.div('#shortcut.hidden',ui.window);
                 ui.shortcut.listen(ui.click.shortcut);
                 ui.create.div(ui.shortcut,function(e){e.stopPropagation()});
-                ui.create.div('.menubutton.round','<span>重来</span>',ui.shortcut,game.reload).dataset.position=1;
+                ui.create.div('.menubutton.round','<span>菜单</span>',ui.shortcut,game.reload).dataset.position=1;
                 ui.create.div('.menubutton.round','<span>退出</span>',ui.shortcut,game.exit).dataset.position=3;
                 ui.create.div('.menubutton.round','<span>记录</span>',ui.shortcut,ui.click.pause).dataset.position=4;
                 ui.shortcut.autobutton=ui.create.div('.menubutton.round','<span>托管</span>',ui.shortcut,ui.click.auto);
@@ -39740,7 +39338,7 @@
                     ui.handcards2Container.appendChild(ui.handcards2);
                     // ui.updatehl();
                 }
-                lib.setIntro(ui.handcards1Container);
+                if (!lib.device) lib.setIntro(ui.handcards1Container);
             },
             card:function(position,info,noclick){
                 var node=ui.create.div('.card',position);
@@ -39828,31 +39426,6 @@
             },
         },
         click:{
-         	identitycircle:function(){
-				var list=[];
-				this.classList.toggle('transparent');
-				for(var i=0;i<this.parentNode.childNodes.length;i++){
-					if(!this.parentNode.childNodes[i].classList.contains('transparent')){
-						list.add(this.parentNode.childNodes[i].link[2]);
-					}
-				}
-				var info=this.link;
-				if(list.length==1){
-					for(var i=0;i<this.parentNode.childNodes.length;i++){
-						if(!this.parentNode.childNodes[i].classList.contains('transparent')){
-							var info2=this.parentNode.childNodes[i].link;
-							info[0].firstChild.innerHTML=info2[1];
-							info[0].dataset.color=info2[2];
-						}
-					}
-				}
-				else{
-					info[0].firstChild.innerHTML='';
-					info[0].dataset.color='';
-					ui.create.identitycircle(list,info[0].firstChild);
-				}
-				this._source._guozhanguess=list;
-			},
 			connectEvents:function(){
 				if(this.info){
                     var button=this;
@@ -40138,15 +39711,15 @@
 
                         for(var i=0;i<button.info.length;i++){
                             var node=ui.create.div('.menubutton.videonode.pointerdiv',uiintro.content);
-                            ui.create.div('.menubutton.videoavatar',node).setBackground(button.info[i][1]||'caocao','character');
+                            ui.create.div('.menubutton.videoavatar',node).setBackground(button.info[i][1]||'reimu','character');
                             if(button.info[i][4]==game.wsid){
-                                ui.create.div('.name','<span class="thundertext thunderauto">'+(button.info[i][0]||'无名玩家'),node);node.isme=true;
+                                ui.create.div('.name','<span class="thundertext thunderauto">'+(button.info[i][0]||'黑白葱fans'),node);node.isme=true;
                             }
                             else if(button.info[i][2]){
-                                ui.create.div('.name',(button.info[i][0]||'无名玩家'),node);
+                                ui.create.div('.name',(button.info[i][0]||'黑白葱fans'),node);
                             }
                             else{
-                                ui.create.div('.name','<span style="opacity:0.6">'+(button.info[i][0]||'无名玩家'),node);
+                                ui.create.div('.name','<span style="opacity:0.6">'+(button.info[i][0]||'黑白葱fans'),node);
                             }
                             if(button.info[i][3]){
                             	ui.create.div('.videostatus',node,button.info[i][3].slice(0,80));
@@ -40887,47 +40460,6 @@
                     }
                 }
             },
-            dieswap:function(){
-                if(game.me.isDead()){
-                    _status.clicked=true;
-                    var i,translation,intro,str;
-                    if(ui.intro){
-                        ui.intro.close();
-                        if(ui.intro.source=='dieswap'){
-                            delete ui.intro;
-                            ui.control.show();
-                            game.resume2();
-                            return;
-                        }
-                    }
-                    game.pause2();
-                    ui.control.hide();
-                    ui.intro=ui.create.dialog();
-                    ui.intro.source='dieswap';
-
-                    var players=[];
-                    for(var i=0;i<game.players.length;i++){
-                        if(game.players[i].isAlive()){
-                            players.push(game.players[i]);
-                        }
-                    }
-                    ui.intro.add(players,true);
-                    var buttons=ui.intro.querySelectorAll('.button');
-                    for(var i=0;i<buttons.length;i++){
-                        buttons[i].addEventListener(lib.config.touchscreen?'touchend':'click',ui.click.dieswap2);
-                    }
-                }
-                else{
-                    if(ui.swap){
-                        ui.swap.close();
-                        delete ui.swap;
-                    }
-                }
-            },
-            dieswap2:function(){
-                if(_status.dragged) return;
-                game.swapPlayer(this.link);
-            },
             touchconfirm:function(){
                 _status.touchconfirmed=true;
                 document.removeEventListener('touchstart',ui.click.touchconfirm);
@@ -41318,7 +40850,9 @@
             windowmousemove:function(e){
                 if(window.inSplash) return;
                 if(_status.tempunpopup){
-                    if(get.evtDistance(_status.tempunpopup,e)>5){
+                    var dx=(_status.tempunpopup.clientX-e.clientX)/game.documentZoom;
+                    var dy=(_status.tempunpopup.clientY-e.clientY)/game.documentZoom;
+                    if(Math.sqrt(dx*dx+dy*dy)>5){
                         delete _status.tempunpopup;
                     }
                 }
@@ -43646,13 +43180,6 @@
                 }
             }
         },
-        recycle:function(node,key){
-            if(!ui._recycle) ui._recycle={};
-            if(typeof node=='string'){
-                return ui._recycle[node]
-            }
-            ui._recycle[key]=node;
-        },
     };
     var get={
         is:{
@@ -43819,43 +43346,6 @@
                 else{
                     next.prompt=str;
                 }
-            }
-        },
-        autoViewAs:function(card,cards){
-            var info=get.info(card);
-            if(info.autoViewAs){
-                if(cards===false){
-                    return {
-                        name:info.autoViewAs
-                    };
-                }
-                else if(Array.isArray(cards)){
-                    return {
-                        name:info.autoViewAs,
-                        cards:cards.slice(0)
-                    };
-                }
-                else if(get.itemtype(card)=='card'){
-                    return {
-                        name:info.autoViewAs,
-                        cards:[card]
-                    };
-                }
-                else{
-                    return {
-                        name:info.autoViewAs,
-                        suit:card.suit,
-                        number:card.number,
-                        nature:card.nature
-                    };
-                }
-            }
-            else{
-                if(get.is.object(card)&&get.itemtype(cards)=='cards'&&!card.cards){
-                    card=get.copy(card);
-                    card.cards=cards.slice(0);
-                }
-                return card;
             }
         },
         max:function(list,func,type){
@@ -44059,48 +43549,6 @@
                 num=get.config('player_number');
             }
             return parseInt(num)||2;
-        },
-        benchmark:function(func1,func2,iteration,arg){
-            var tic,toc;
-            var key1,key2;
-            if(!arg) arg=[];
-            if(Array.isArray(func2)){
-                key1=func2[0];
-                key2=func2[1];
-            }
-            else if(typeof func2=='string'){
-                key1=func2;
-                func2=iteration||100;
-            }
-            else if(typeof func2=='number'){
-                arg=iteration||arg;
-                iteration=func2;
-            }
-            tic=get.utc();
-            for(var i=0;i<iteration;i++){
-                if(key1){
-                    func1[key1](arg.randomGet());
-                }
-                else{
-                    func1(arg.randomGet());
-                }
-            }
-            toc=get.utc();
-            if(typeof func2=='number'){
-                return toc-tic;
-            }
-            console.log('time1: '+(toc-tic));
-            tic=get.utc();
-            for(var i=0;i<iteration;i++){
-                if(key2){
-                    func1[key2](arg.randomGet());
-                }
-                else{
-                    func2(arg.randomGet());
-                }
-            }
-            toc=get.utc();
-            console.log('time2: '+(toc-tic));
         },
         stringify:function(obj,level){
             level=level||0;
@@ -44435,87 +43883,6 @@
             }
             return num?Math.round(9*(num-1)/8+1):'x';
         },
-       	skillRank:function(skill,type,grouped){
-			var info=lib.skill[skill];
-			var player=_status.event.skillRankPlayer||_status.event.player;
-			if(!info) return 0;
-			if(info.ai){
-				if(info.ai.halfneg) return 0;
-				if(typeof info.ai.combo=='string'&&player&&!player.hasSkill(info.ai.combo)){
-					return 0;
-				}
-				if(info.ai.neg) return -1;
-			}
-			var num=1;
-			var threaten=1;
-			if(info.ai&&info.ai.threaten){
-				if(typeof info.ai.threaten=='number'){
-					threaten=info.ai.threaten;
-				}
-				else if(typeof info.ai.threaten=='function'&&player){
-					threaten=info.ai.threaten(player,player);
-				}
-			}
-			if(type=='in'){
-				if(info.enable=='phaseUse') num+=0.5;
-				if(info.trigger&&['phaseBegin','phaseDrawBegin','phaseUseBegin','phaseEnd'].contains(info.trigger.player)){
-					num+=0.5;
-				}
-				if(info.trigger&&((typeof info.trigger.player=='string'&&info.trigger.player.indexOf('use')==0)||info.trigger.source)){
-					num+=0.3;
-				}
-				if(num>1&&threaten>1){
-					num+=Math.sqrt(threaten)-1;
-				}
-			}
-			else if(type=='out'){
-				if(threaten<1){
-					num=1/Math.sqrt(threaten);
-				}
-				if(info.trigger&&(info.trigger.global||info.trigger.target||(typeof info.trigger.player=='string'&&
-				(info.trigger.player.indexOf('damage')==0||info.trigger.player.indexOf('lose')==0)))) num+=0.1;
-				if(info.ai){
-					if(info.ai.maixie||info.ai.maixie_hp||info.ai.maixie_defend){
-						num+=0.5;
-					}
-					if(info.ai.nolose||info.ai.noh||info.ai.noe||info.ai.nodiscard){
-						num+=0.3;
-					}
-				}
-			}
-			if(!grouped){
-				var groups=game.expandSkills([skill]);
-				groups.remove(skill);
-				var ggt=[];
-				for(var i=0;i<groups.length;i++){
-					var gi=get.skillRank(groups[i],type,true);
-					if(gi<0){
-						num-=0.5;
-					}
-					else if(gi>1){
-						ggt.push(gi);
-					}
-				}
-				if(ggt.length){
-					num+=Math.max.apply(this,ggt)-1+ggt.length/20;
-				}
-			}
-			return num;
-        },
-        targetsInfo:function(targets){
-            var info=[];
-            for(var i=0;i<targets.length;i++){
-                info.push(targets[i].dataset.position);
-            }
-            return info;
-        },
-        infoTargets:function(info){
-            var targets=[];
-            for(var i=0;i<info.length;i++){
-                targets.push(game.playerMap[info[i]]);
-            }
-            return targets;
-        },
         cardInfo:function(card){
             return [card.suit,card.number,card.name,card.nature,card.bonus];
         },
@@ -44759,17 +44126,6 @@
 			}
 			return str2;
 		},
-		rawName2:function(str){
-			var str2=lib.translate[str];
-			if(!str2) return '';
-			if(str2.indexOf('sp')==0){
-				str2=str2.slice(2);
-			}
-			else if(str2.indexOf('界sp')==0){
-				str2=str2.slice(3);
-			}
-			return str2;
-		},
         slimName:function(str){
             var str2=lib.translate[str];
             if(!str2) return '';
@@ -44791,11 +44147,6 @@
         },
         utc:function(){
             return (new Date()).getTime();
-        },
-        evtDistance:function(e1,e2){
-            var dx=(e1.clientX-e2.clientX)/game.documentZoom;
-            var dy=(e1.clientY-e2.clientY)/game.documentZoom;
-            return Math.sqrt(dx*dx+dy*dy);
         },
         xyDistance:function(from,to){
             return Math.sqrt((from[0]-to[0])*(from[0]-to[0])+(from[1]-to[1])*(from[1]-to[1]));
@@ -44868,12 +44219,8 @@
 			if(typeof obj=='string') obj={name:obj};
 			if(typeof obj!='object') return;
 			if(!lib.card[obj.name]) return;
+            if(!lib.card[obj.name].subtype) return null;
 			return lib.card[obj.name].subtype;
-		},
-		equiptype:function(card){
-			var subtype=get.subtype(card);
-			if(subtype.indexOf('equip')==0) return parseInt(subtype[5]);
-			return 0;
 		},
         suit:function(card){
             if(get.itemtype(card)=='cards'){
@@ -45089,7 +44436,7 @@
             if(_status.event.skill){
                 var card=get.info(_status.event.skill).viewAs;
                 if(card){
-                    return get.autoViewAs(card,ui.selected.cards,_status.event.player);
+                    return card
                 }
             }
             if(_status.event._get_card){
@@ -45097,9 +44444,6 @@
             }
             var card=ui.selected.cards[0];
             if(original) return card;
-            if(card){
-                card=get.autoViewAs(card,ui.selected.cards,_status.event.player);
-            }
             return card;
         },
         player:function(){
@@ -45179,6 +44523,7 @@
              replace(/觉醒技/g,'<span style="color:#800080">觉醒技</span>').
              replace(/一回合一次/g,'<span class="greentext">一回合一次</span>').
              replace(/一回合两次/g,'<span class="greentext">一回合两次</span>').
+             replace(/一回合三次/g,'<span class="greentext">一回合三次</span>').
              //replace(/符卡技/g,'<span class="firetext">符卡技</span>').
              replace(/符卡技（X）/g,'<span class="firetext">符卡技（X）</span>').
              replace(/符卡技（0）/g,'<span class="firetext">符卡技（0）</span>').
@@ -45795,15 +45140,6 @@
                 uiintro.addText('攻击范围：' + node.parentNode.getAttackRange());
                 if (node.parentNode.lili == 0) uiintro.addText('因灵力为0，不能造成伤害。');
             }
-            else if (node.classList.contains('count')){
-                uiintro.addText('手牌数：' + node.innerHTML);
-                uiintro.addText('手牌上限：' + node.parentNode.getHandcardLimit());
-            }
-            else if (node.id == 'handcards1'){
-                uiintro.addText('手牌区');
-                uiintro.addText('手牌数：' + game.me.countCards('h'));
-                uiintro.addText('手牌上限：' + game.me.getHandcardLimit());
-            }
             else if (node.classList.contains('hp')){
                 uiintro.addText('体力值：' + node.parentNode.hp +' / ' + node.parentNode.maxHp);
             }
@@ -46333,22 +45669,6 @@
                                 uiintro.add('<div class="text center">灵力：'+ get.bonus(node) +'</div>');
                             }
                             // 跳过整个武器部分。
-                            /*
-                            if(get.subtype(node)=='equip1'){
-                                var added=false;
-                                if(lib.card[node.name]&&lib.card[node.name].distance){
-                                    var dist=lib.card[node.name].distance;
-                                    if(dist.attackFrom){
-                                        added=true;
-                                        uiintro.add('<div class="text center">攻击范围：'+(-dist.attackFrom+1)+'</div>');
-                                    }
-                                }
-                                if(!added){
-                                    //uiintro.add('<div class="text center">攻击范围：1</div>');
-                                }
-                            }
-                            else
-                            */ 
                             if(get.subtype(node)){
                                 //uiintro.add('<div class="text center">'+get.translation(get.subtype(node))+'</div>');
                                 uiintro.add('<div class="text center">'+get.translation(get.type(node))+'/'+get.translation(get.subtype(node))+'</div>');
@@ -46394,6 +45714,15 @@
                     }
                     uiintro.add(ui.create.div('.placeholder.slim'));
                 }
+            }
+            else if (node.classList.contains('count')){
+                uiintro.addText('手牌数：' + node.innerHTML);
+                uiintro.addText('手牌上限：' + node.parentNode.getHandcardLimit());
+            }
+            else if (node.id == 'handcards1'){
+                uiintro.addText('手牌区');
+                uiintro.addText('手牌数：' + game.me.countCards('h'));
+                uiintro.addText('手牌上限：' + game.me.getHandcardLimit());
             }
             else if(node.classList.contains('character')){
                 var character=node.link;
@@ -46879,6 +46208,7 @@
 			var aii=get.info(card).ai;
             if(aii&&aii.value) value=aii.value;
             else if(aii&&aii.basic) value=aii.basic.value;
+            if (get.bonus(card) > 0) value += 2;
             if(value==undefined) return 0;
             if(player==undefined||get.itemtype(player)!='player') player=_status.event.player;
             // geti返还的是角色手里这张卡的数量/和位置
@@ -47175,11 +46505,12 @@
             // 来源不能打出伤害
             if (player.hasSkillTag('nodamagesource')) return 0;
             // 对无限体力的角色攻击没有意义
-            if (target.hp == Infinity) return 0; 
+            if (target.hp == Infinity && nature != 'thunder') return -10; 
             // 对0灵力的角色打出灵击伤害没有意义
-            if (target.lili == 0 && nature == 'thunder') return 0; 
+            if (target.lili == 0 && nature == 'thunder') return 0;
+            // 打灵力太高的角色也没有意义了 （其实这里应该检测符卡技消耗的，但是我懒） 
+            if (target.lili > 3 && nature == 'thunder') return 0;
             var eff=get.effect(target,{name:name},player,viewer);
-            // 护甲究竟是什么鬼呢……
             return eff;
         },
         recoverEffect:function(target,player,viewer){

@@ -9,7 +9,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             koakuma:['female','4',3,['qishu','anye']],
             patchouli:['female','2',3,['qiyao','riyin','xianzhe']],
             sakuya:['female','2',3,['huanzang','shijing','world']],
-            remilia:['female','5',4,['mingyun','feise','feise_start']],
+            remilia:['female','5',4,['mingyun','feise']],
             flandre:['female','1',4,['kuangyan','zhihou']],
 		},
 		characterIntro:{
@@ -798,7 +798,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         trigger.cancel();
                     }
                 },
-                check:function(){
+                check:function(event, player){
+                    if (get.subtype(event.card) == 'support') return false;
                     return true;
                 },
             },
@@ -997,7 +998,9 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     if (player.countCards('h', 'sha') >= 3) game.trySkillAudio('mingyun',player,true,3);
                     if (num != 0){
                         player.chooseCard(num,'he',true,'按顺序将卡牌置于牌堆顶（先选择的在上）').set('ai',function(card){
-                            return get.value(card);
+                            if (get.subtype(card) == 'attack' || get.subtype(card) == 'disrupt' && _status.currentPhase == player) return true;
+                            else if (get.subtype(card) == 'attack' && _status.currentPhase != player) return false;
+                            return get.value(card) < 6;
                         });
                     }
                     'step 1'
@@ -1025,6 +1028,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 },
                 check:function(event,player){
                     if (event.name == 'damage') return true;
+                    if (player.countCards('h', {name:'tao'}) && player.hp < player.maxHp) return false;
+                    if (player.countCards('h', {name:'wuzhong'})) return false;
                     return player.getAttackRange() > 2;
                 },
                 ai:{
@@ -1042,14 +1047,32 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 content:function(){
                     "step 0"
                     trigger.cancel();
+                    if (trigger.target){
+                        game.log('命运：', trigger.player, '对', trigger.target,'使用的', trigger.card, '取消目标');
+                    } else {
+                        game.log('命运：', trigger.player, '使用的', trigger.card, '取消目标');
+                    }
                     trigger.player.judge();
                     "step 1"
-                     //if (trigger.target && trigger.player.canUse(result.card,trigger.target,false,true)){
-                         
                     if (trigger.target && lib.filter.targetEnabled2(result.card,trigger.player,trigger.target)){
                         trigger.player.useCard(result.card,trigger.target,'mingyun2');
-                     }
-                }
+                    }
+                },
+                ai:{
+                    effect:{
+                        player:function(card,player,target,current){
+                            return 0;
+                        },
+                        target:function(card, player, target, current){
+                            var card1 = ui.cardPile.childNodes[0];
+                            if (get.type(card1) == 'equip' || get.subtype(card1) == 'support'){
+                                return [1,10];
+                            } else if (get.subtype(card1) == 'attack' || get.subtype(card1) == 'disrupt'){
+                                return [1, -10];
+                            }
+                        },
+                    },
+                },
             },
             feise:{
                 audio:2,
@@ -1066,7 +1089,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 },
                 check:function(event, player){
                     return game.countPlayer(function(current){
-                        return current.hp == 1 && get.attitude(player, current) > 0;
+                        return current.hp == 1 && get.attitude(player, current) < 0;
                     });
                 },
                 ai:{
@@ -1372,7 +1395,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             mingyun_audio3:'…………喂，等下，这什么牌啊！',
             feise:'绯色幻想乡',
             feise2:'绯色幻想乡',
-            feise_info:'符卡技（4）<永续><u>你的第一回合开始时，若灵力足够：须发动此符卡；</u>你和与你同阵营的角色攻击范围+3；其他角色的结束阶段，若其对其以外的角色使用过牌，你可以：对其造成1点弹幕伤害。',
+            feise_info:'符卡技（4）<永续>你和与你同阵营的角色攻击范围+3；其他角色的结束阶段，若其对其以外的角色使用过牌，你可以：对其造成1点弹幕伤害。',
             feise_audio1:'「紅色の幻想郷」！',
             feise_audio2:'在如此鲜红的月亮下，我真的会杀掉你哦？',
             remilia_die:'唔唔唔……',

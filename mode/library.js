@@ -381,7 +381,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 								var f = get.rand(4);
 		                    	p.onclick = function(){
 		                    		if (counter > 6) return;
-		                    		var h = [['其实流星夜有个四格漫画系列，可以在贴吧和群里找到哟。',
+		                    		var h = [['其实流星夜有个四格漫画系列，可以在贴吧，公众号上和群里找到哟。',
 		                    					'主人没事做的时候，不仅会做漫画，也会做表情呢。所以，有有趣的情况请说给他听吧。',
 		                    					'别看主人那个样子，该忙的时候他还是会忙的啦。',
 		                    					'除了忙以外，灵感缺失也是一大问题呢。',
@@ -491,8 +491,8 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        			this.appendChild(dialog);
 	        			var incident=ui.create.node('button','电脑端下载',line2,function(){
 	        			var i = ['下载链接：',
-								'国外镜像：https://github.com/BlackAndWhiteScallion/Night-of-Shooting-Stars/archive/master.zip',
-								'国内镜像：https://dev.tencent.com/u/BWS/p/Night-of-Shooting-Stars/git/archive/master',
+								'国外镜像：<a herf = "https://github.com/BlackAndWhiteScallion/Night-of-Shooting-Stars/archive/master.zip">https://github.com/BlackAndWhiteScallion/Night-of-Shooting-Stars/archive/master.zip</a>',
+								'国内镜像：<a herf = https://dev.tencent.com/u/BWS/p/Night-of-Shooting-Stars/git/archive/master>https://dev.tencent.com/u/BWS/p/Night-of-Shooting-Stars/git/archive/master</a>',
 								'',
 								'国内镜像因神奇腾讯有可能炸了，还请大家注意。',
 	    					];
@@ -502,8 +502,8 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        				var i = [
 								'手机端目前只支持安卓系统。为您带来的不便表达万分歉意。',
 								'',
-								'百度网盘链接：https://pan.baidu.com/s/1oZRuEzNt2TYx2-8aDVs58Q',
-								'直接下载链接：https://dev.tencent.com/api/share/download/6df3f820-1f20-4d27-9fd8-a6649eea99ac',
+								'百度网盘链接：<a href = "https://pan.baidu.com/s/1oZRuEzNt2TYx2-8aDVs58Q">https://pan.baidu.com/s/1oZRuEzNt2TYx2-8aDVs58Q</a>',
+								'直接下载链接：<a href = "https://dev.tencent.com/api/share/download/6df3f820-1f20-4d27-9fd8-a6649eea99ac">https://dev.tencent.com/api/share/download/6df3f820-1f20-4d27-9fd8-a6649eea99ac</a>',
 				        		];
 	        				dialog.setCaption('<div><div style="text-align:left;font-size:16px">'+i.join('<br>'));
 	                    },{marginLeft:'6px'});
@@ -844,7 +844,6 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	            ],
 	            showcase:function(init){
 	            	if (init){
-		            	//var i;
 		            	var list=[];
 		            	for(var i in lib.character){
 		            		list.push(i);

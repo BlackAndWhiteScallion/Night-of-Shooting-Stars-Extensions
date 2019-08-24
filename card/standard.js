@@ -340,16 +340,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				},
 				result:{
 					target:function(player,target){
-						var es=target.get('e');
-						var nh=target.num('h');
-						/*
-						var noe=(es.length==0||target.hasSkillTag('noe'));
-						var noe2=(es.length==1&&es[0].name=='baiyin'&&target.hp<target.maxHp);
-						var noh=(nh==0||target.hasSkillTag('noh'));
-						if(noh&&noe) return 0;
-						if(noh&&noe2) return 0.01;
-						*/
-						if(ai.get.attitude(player,target)<=0) return (target.num('he'))?-1.5:1.5;
+						if(ai.get.attitude(player,target)<=0) return (target.num('hej'))?-1.5:1;
 						return -1.5;
 					},
 				},
@@ -549,8 +540,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			type:'trick',
 			subtype:'attack',
 			enable:true,
-			filterTarget:function(card,player,target){
-				return target!=player;
+            selectTarget:1,
+            filterTarget:function(card,player,target){
+				return true;
 			},
 			content:function(){
 				"step 0"
@@ -616,8 +608,8 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 						if(ai.get.damageEffect(target,player,target)>0&&ai.get.attitude(player,target)>0&&ai.get.attitude(target,player)>0){
 							return 0;
 						}
-						var hs1=target.get('h','sha');
-						var hs2=player.get('h','sha');
+						var hs1=target.countCards('h', {name:'sha'});
+						var hs2=player.countCards('h',{name:'sha'});
 						if(hs1.length>hs2.length+1){
 							return -2;
 						}
@@ -688,7 +680,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				result:{
 					target:function(player,target){
 						if (!target.identityShown) return -1;
-						if(ai.get.attitude(player,target)<=0) return (target.num('h'))?-1.5:-0.5;
+						if(ai.get.attitude(player,target)<=0) return (target.num('h'))?-1.5:0;
 						return -get.attitude(player,target);
 					}
 				},
@@ -974,6 +966,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			fullskin:true,
 			type:'jinji',
 			enable:true,
+			selectTarget:1,
 			filterTarget:function(card,player,target){
 				return target!=player;
 			},	
@@ -1510,7 +1503,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				if(!player.num('he',{color:'red'})) return false;
 			},
 			position:'he',
-			prompt:'将一张红色牌当没中使用或打出',
+			prompt:'将一张红色牌当躲～使用或打出',
 			check:function(card){return 6-ai.get.value(card)},
 			ai:{
 				respondShan:true,
@@ -1564,7 +1557,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		windfan_skill:{
 			audio:true,
 			usable:1,
-			enable:['chooseToUse'],
+			enable:'chooseToUse',
 			filterCard:function(card){
 				return get.color(card)=='red';
 			},
@@ -1735,7 +1728,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 					var evt=_status.event.getParent();
 					if(evt.target)
 					if(ai.get.damageEffect(evt.target,evt.player,evt.player,'thunder')>0){
-						return 7-ai.get.value(card,evt.player);
+						return ai.get.value(card,evt.player) < 6;
 					}
 					return -1;
 				}).prompt=false;
@@ -1744,42 +1737,40 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				if(result.bool){
 					target.damage('thunder');
 				}
-				else{
-					target.addTempSkill('huogong2','phaseBegin');
-				}
 				event.dialog.close();
 				game.addVideo('cardDialog',null,event.videoId);
 				game.broadcast('closeDialog',event.videoId);
 			},
 			ai:{
-					basic:{
-						order:10,
-						value:[3,1],
-						useful:1,
+				basic:{
+					order:10,
+					value:[3,1],
+					useful:1,
+				},
+				result:{
+					player:function(player){
+						return 3;
 					},
-					result:{
-						player:function(player){
-							return 3;
-						},
-						target:function(player,target){
-							if(target.countCards('h')==0) return 0;
-							if(target.lili == 0) return -0.5;
-							if(target.lili == 1) return -2;
-							if(player.countCards('h')<=1) return 0;
-							if(target==player){
-									return -1.5;
-								if(_status.event.skill){
-									var viewAs=get.info(_status.event.skill).viewAs;
-								}
-								return 0;
+					target:function(player,target){
+						if(target.countCards('h')==0) return 0;
+						if(target.lili == 0) return -0.5;
+						if(target.lili == 1) return -2;
+						if(player.countCards('h')<=1) return 0;
+						if(target==player){
+								return -1.5;
+							if(_status.event.skill){
+								var viewAs=get.info(_status.event.skill).viewAs;
 							}
-							return -1.5;
+							return 0;
 						}
-					},
-					tag:{
-						thunderDamage:1,
+						return -1.5;
 					}
+				},
+				tag:{
+					thunderDamage:1,
+					order:7,
 				}
+			}
 		},
 		book_skill:{
 			audio:2,
@@ -2058,7 +2049,6 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			trigger:{target:'useCardToBegin'},
 			filter:function(event,player){
 				return get.subtype(event.card) == 'attack' && player.countCards('e', {name:'hourai'});
-				//return event.card.name == 'sha';
 			},
 			content:function(){
 				var cards = player.getCards('e');
@@ -2106,39 +2096,19 @@ game.import('card',function(lib,game,ui,get,ai,_status){
     				},
     				*/
     				check:function(button){
-    					var player=_status.event.player;
-    					var recover=0,lose=1,players=game.filterPlayer();
-    					for(var i=0;i<players.length;i++){
-    						if(!players[i].isOut()){
-    							if(players[i].hp<players[i].maxHp){
-    								if(get.attitude(player,players[i])>0){
-    									if(players[i].hp<2){
-    										lose--;
-    										recover+=0.5;
-    									}
-    									lose--;
-    									recover++;
-    								}
-    								else if(get.attitude(player,players[i])<0){
-    									if(players[i].hp<2){
-    										lose++;
-    										recover-=0.5;
-    									}
-    									lose++;
-    									recover--;
-    								}
-    							}
-    							else{
-    								if(get.attitude(player,players[i])>0){
-    									lose--;
-    								}
-    								else if(get.attitude(player,players[i])<0){
-    									lose++;
-    								}
-    							}
-    						}
-    					}
-    					return (button.link[2]=='wuzhong')?1:-1;
+ 						var player=_status.event.player;
+                        var recover=0,lose=1,players=game.filterPlayer();
+                        for(var i=0;i<players.length;i++){
+                            if(!players[i].isOut()){
+                                if (get.attitude(player, players[i]) >= 0) recover ++;
+                                if (get.attitude(player, players[i]) < 0 ){
+                                    if (players[i].hp == 1 && get.effect(players[i],{name:'juedou'},player,player)) return (button.link[2] == 'juedou')?2:-1;
+                                    lose ++;
+                                }
+                            }
+                        }
+                        if (recover - 2 >= lose) return (button.link[2] == 'reidaisai')?2:-1;
+                        return (button.link[2]=='wuzhong')?1:-1;
     				},
     				backup:function(links,player){
     					return {
@@ -2235,7 +2205,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
     		forced:true,
     		priority:15,
     		intro:{
-    			content:'防止所有角色造成的所有伤害<br>所有角色跳过弃牌阶段',
+    			content:'防止所有角色造成的所有伤害',
     		},
     		content:function(){
     			trigger.untrigger();
@@ -2262,7 +2232,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
     		}
 		},
 		bingyu2:{
-			global:['bingyu1','bingyu3'],
+			global:['bingyu1'],
 			trigger:{player:['phaseBegin', 'dieBegin']},
 			forced:true,
 			init:function(player){
@@ -2283,16 +2253,11 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				var players = game.filterPlayer();
 				for (var i = 0; i < players.length; i++){
 					players[i].removeSkill('bingyu1');
+					players[i].node.framebg.dataset.auto=players[i].storage.bingyu;
+					delete players[i].storage.bingyu;
 				}
 				player.removeSkill('bingyu2');
 			},
-		},
-		bingyu3:{
-			trigger:{player:'phaseDiscardBefore'},
-			forced:true,
-			content:function(){
-				trigger.cancel();
-			}
 		},
 		_wuxie:{
 			trigger:{player:'useCardToBefore'},
@@ -2609,9 +2574,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 						player:function(player,target){
 							return game.countPlayer(function(current){
 								if (current.hp == current.maxHp) return 0;
-								if (ai.get.attitude(player,current)< 0) return -2;
-								if (ai.get.attitude(player,current) >= 0) return 2;
-								return 1;
+								if (ai.get.attitude(player,current) <= 0) return -2;
+								if (ai.get.attitude(player,current) > 0) return 2;
+								return 0;
 							});
 						}
 					},
@@ -2643,7 +2608,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
                             player.gain(ui.skillPile.childNodes[i]);
                             break;
                           } else if (i == ui.skillPile.childNodes.length -1){
-                              result.targets[0].say('没找到【潜行】');                      
+                            player.say('没找到【潜行】');                      
                           }
                         }
 					player.logSkill('_jingxia');
@@ -2659,18 +2624,19 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		},
 		// 如果明置就有急冻
 		_bingyu:{
-			forced:true,
-			popup:false,
-			trigger:{player:'phaseBegin'},
+			direct:true,
+			trigger:{player:'phaseDiscardBegin'},
 			filter:function(event,player){
-				if (!player.storage.mingzhi) return false;
-				for (var i = 0; i < player.storage.mingzhi.length; i ++){
-					if (player.storage.mingzhi[i].name == 'bingyu') return true;
-				}
-				return false;
+				return player.countCards('h', {name:'bingyu'});
 			},
 			content:function(){
-				player.useSkill('jidong');
+				'step 0'
+				player.chooseToDiscard(1,{name:'bingyu'},'h','你可以弃置【冰域之宴】，跳过弃牌阶段');
+				'step 1'
+				if (result.bool){
+					player.skip('phaseDiscard');
+					trigger.cancel();
+				}
 			},
 		},
 		_zuiye:{
@@ -2771,6 +2737,8 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				var players=game.filterPlayer();
 				for(var i=0;i<players.length;i++){
 					players[i].removeSkill('lingbi1');
+					players[i].node.framebg.dataset.auto=players[i].storage.lingbi;
+					delete players[i].storage.lingbi;
 				}
 				player.removeSkill('lingbi2');
 				player.storage.lingbi2 = [];
@@ -2876,6 +2844,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			direct:true,
 			trigger:{player:'phaseBegin'},
 			filter:function(event,player){
+				if (get.mode() == 'boss') return false;
 				if (player.hasSkill('kedan')) return true;
 				return player.countCards('h',{name:'bingyu'}) > 0|| player.countCards('h',{name:'lingbi'}) > 0;
 			},
@@ -2889,7 +2858,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 	translate:{
 		sha:'轰！',
 		sha_info:'出牌阶段，对攻击范围内的一名角色使用；对目标造成1点弹幕伤害。',
-		shan:'没中',
+		shan:'躲～',
 		shan_info:'你成为【轰！】的目标后，对那张牌使用；该牌对你无效。',
 		tao:'葱',
 		tao_info:'出牌阶段，对你使用；或角色处于决死状态时，对其使用；目标回复1点体力。',
@@ -2901,7 +2870,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		wuzhong_bg:'生',
 		wuzhong_info:'出牌阶段，对你使用：目标摸两张牌。</br><u>强化(-1)：再摸一张技能牌。</u>',
 		juedou:'决斗',
-		juedou_info:'出牌阶段，对一名其他角色使用。由其开始，其与你轮流打出一张【轰！】，直到其中一方未打出【轰！】为止。未打出【轰！】的一方受到另一方对其造成的1点弹幕伤害。',
+		juedou_info:'出牌阶段，对一名角色使用。由其开始，其与你轮流打出一张【轰！】，直到其中一方未打出【轰！】为止。未打出【轰！】的一方受到另一方对其造成的1点弹幕伤害。',
 		juedou_bg:'斗',
 		shunshou:'顺手牵羊',
 		shunshou_info:'出牌阶段，对攻击范围内的一名角色使用：获得其区域内的一张牌，然后若你本回合没有对其使用过牌，你消耗1点灵力。',
@@ -2945,9 +2914,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		saiqianxiang_info:'一回合一次，其他角色的出牌阶段，其可以交给你一张牌;一回合一次，你可以将一张手牌当作【例大祭】使用。',
 		yinyangyu:'阴阳玉',
 		yinyangyu_skill:'阴阳玉',
-		yinyangyu_skill_1:'阴阳玉（没中）',
+		yinyangyu_skill_1:'阴阳玉（躲～）',
 		yinyangyu_skill_2:'阴阳玉（轰！）',
-		yinyangyu_info:'你可以将一张红色牌当做【没中】使用/打出; 你可以将一张黑色牌当做【轰！】使用/打出',
+		yinyangyu_info:'你可以将一张红色牌当做【躲～】使用/打出; 你可以将一张黑色牌当做【轰！】使用/打出',
 		zhiyuu:'净颇梨之镜',
 		zhiyuu_skill:'亮胖次！',
 		zhiyuu_info:'一回合一次，出牌阶段，你可以令一名角色展示一张手牌；然后你可以弃置一张与展示的牌相同花色的手牌，对其造成1点灵击伤害。',
@@ -3036,7 +3005,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		bingyu1:'冰域之宴',
 		bingyu3:'冰域之宴',
 		bingyu1_bg:'冰',
-		bingyu_info:'准备阶段，对所有角色使用：目标不能造成伤害，跳过弃牌阶段，直到你的回合开始，或你坠机时。</br> <u>追加效果：若此牌在你区域内明置，你视为持有【急冻】。</u>',
+		bingyu_info:'准备阶段，对所有角色使用：目标不能造成伤害，直到你的回合开始，或你坠机时。</br> <u>追加效果：你可以弃置此牌，跳过你的弃牌阶段。</u>',
 		jingxia:'惊吓派对',
 		_jingxia:'惊吓派对（→潜行）',
 		jingxia_bg:'潜',
