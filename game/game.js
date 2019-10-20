@@ -3726,7 +3726,7 @@
                     }
                 },
                 intro:{
-                    name:'将一些挑战模式的魔王追加到其他模式中。<br> <br>魔王解锁条件：<br> 琪露诺：击败琪露诺 <br> 灵梦：击败灵梦 <br> 高达一号：击败高达一号 <br>年兽：一次游戏中对年兽造成至少50点伤害<br>斗篷光头：一次游戏中与斗篷光头对战至少5轮',
+                    name:'将一些挑战模式的魔王追加到其他模式中。<br> <br>魔王解锁条件：<br> 琪露诺：击败琪露诺 <br> 灵梦：击败灵梦 <br> 高达一号：击败高达一号 <br>年兽：一次游戏中对年兽造成至少50点伤害<br>斗篷光头：一次游戏中与斗篷光头对战至少5轮<br>发牌姬：一次游戏中与发牌姬对战至少5轮',
                     clear:true,
                     nopointer:true,
                 },
@@ -3770,7 +3770,7 @@
                     }
                 },
                 intro:{
-                    name:'每完成一次对局，可获得一定数量的金币；金币可用于购买游戏特效',
+                    name:'每完成一次对局，可获得一定数量的金币；金币可用于购买游戏特效。<br>追加角色：氪金姬，勇者。<br>追加卡牌：天赐圣剑',
                     clear:true,
                     nopointer:true,
                 },
@@ -8783,9 +8783,6 @@
                     "step 3"
 					_status.imchoosing=false;
                     if(event.bool){
-                        if(game.changeCoin){
-                            game.changeCoin(-3);
-                        }
                         var hs=game.me.getCards('h');
 						game.addVideo('lose',game.me,[get.cardsInfo(hs),[],[]]);
 						for(var i=0;i<hs.length;i++){
@@ -9501,7 +9498,7 @@
                 },
                 chooseToUse:function(){
                     "step 0"
-					if(game.modeSwapPlayer&&!_status.auto&&player.isUnderControl()&&!lib.filter.wuxieSwap(trigger)){
+					if(game.modeSwapPlayer&&player.isUnderControl()&&!lib.filter.wuxieSwap(trigger)){
 						game.modeSwapPlayer(player);
 					}
                     var skills=player.getSkills(true);
@@ -9748,7 +9745,7 @@
                         event.result={bool:false};
                     }
                     else{
-						if(game.modeSwapPlayer&&!_status.auto&&player.isUnderControl()&&!lib.filter.wuxieSwap(trigger)){
+						if(game.modeSwapPlayer&&player.isUnderControl()&&!lib.filter.wuxieSwap(trigger)){
 							game.modeSwapPlayer(player);
 						}
                         game.check();
@@ -9810,7 +9807,7 @@
                         }
                     }
                     else{
-						if(game.modeSwapPlayer&&!_status.auto&&player.isUnderControl()&&!lib.filter.wuxieSwap(trigger)){
+						if(game.modeSwapPlayer&&player.isUnderControl()&&!lib.filter.wuxieSwap(trigger)){
 							game.modeSwapPlayer(player);
 						}
                         event.rangecards=player.getCards(event.position);
@@ -21047,16 +21044,6 @@
                     if(double_character&&lib.config.forbiddouble.contains(i)){
                         return true;
                     }
-                    if(get.config('ban_weak')){
-						if(lib.config.replacecharacter[i]&&lib.character[lib.config.replacecharacter[i]]) return true;
-                        if(lib.config.forbidall.contains(i)) return true;
-                        if(!double_character&&get.rank(i,true)<=2){
-                            return true;
-                        }
-                    }
-                    if(get.config('ban_strong')&&get.rank(i,true)>=8){
-                        return true;
-                    }
                 }
             },
             characterDisabled2:function(i){
@@ -21621,9 +21608,13 @@
 				locked:true,
                 init:function(player){
                     game.log(player,'进入混乱状态');
+                    player.markSkill('mad');
+                },
+                onremove:function(player){
+                    player.unmarkSkill('mad');
                 },
                 intro:{
-                    content:'对角色随机态度',
+                    content:'对角色态度相反',
                     name:'混乱',
                     onunmark:function(storage,player){
                         game.log(player,'解除混乱状态');
@@ -21753,7 +21744,7 @@
                     } else if (card.name == 'wuxie') {
                         return false;
                     } else if (card.name == 'danmakucraze'){
-                        return player.countCards('h') < player.hp;
+                        return (player.countCards('h') < player.hp) || player.countCards('h', {name:'sha'}) || player.hp >= 2;
                     } else if (card.name == 'caifang'){
                         if (get.mode()!='identity') return false;
                         return (event.targets[0].identityShown != true);
@@ -26798,9 +26789,9 @@
                     _status.coin=Math.ceil(_status.coin);
                     dialog.add(ui.create.div('','获得'+_status.coin+'金'));
                     if(betWin){
-                        game.changeCoin(20);
+                        game.changeCoin(40);
                         dialog.content.appendChild(document.createElement('br'));
-                        dialog.add(ui.create.div('','（下注赢得10金）'));
+                        dialog.add(ui.create.div('','（下注赢得20金）'));
                     }
                     game.changeCoin(_status.coin);
                 }
@@ -33473,7 +33464,7 @@
                                 str+=',package:'+get.stringify({
                                     character:dash1.content.pack,
                                     card:dash2.content.pack,
-                                   skill:dash3.content.pack,
+                                    skill:dash3.content.pack,
 									intro:introExtLine.querySelector('input').value||'',
 									author:authorExtLine.querySelector('input').value||'',
 									diskURL:diskExtLine.querySelector('input').value||'',
@@ -35701,12 +35692,20 @@
                     playButton.style.transition='opacity 0.3s';
                     var deleteButton=ui.create.div('.menubutton.round.highlight.hidden','删',start);
                     deleteButton.style.display='none';
-                    deleteButton.style.left='275px';
+                    deleteButton.style.left='330px';
                     deleteButton.style.transition='opacity 0.3s';
                     var saveButton=ui.create.div('.menubutton.round.highlight.hidden','存',start);
                     saveButton.style.display='none';
                     saveButton.style.transition='opacity 0.3s';
-
+                    if (lib.device){
+                        cheatButton.classList.add('mobile');
+                        runButton.classList.add('mobile');
+                        clearButton.classList.add('mobile');
+                        playButton.classList.add('mobile');
+                        deleteButton.classList.add('mobile');
+                        deleteButton.style.left='275px';
+                        saveButton.classList.add('mobile');
+                    }
 
                     var clickMode=function(){
                         if(this.classList.contains('off')) return;
@@ -36762,9 +36761,6 @@
                                             break;
                                         }
                                     }
-                                }
-                                if(ui.coin){
-                                    game.changeCoin(-20);
                                 }
                                 clickContainer.call(menuContainer);
                             }
@@ -46205,7 +46201,7 @@
             if (from.name == 'eiki' && lib.config.eiki_silence && to == game.me) return -10000000;
             var att=get.rawAttitude.apply(this,arguments);
             if(from.hasSkill('mad')){
-                att = Math.floor(Math.random() * 2) - 1;
+                att = -att;
             };
             /*
             if(to.hasSkill('mad')&&att>0){
