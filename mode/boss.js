@@ -113,6 +113,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					// }
 				}
 			}
+			lib.character['aya'][3] = ['longjuan', 'fengmi'];
 			if(!list.length){
 				alert('没有可挑战的BOSS');
 				event.finish();
@@ -560,7 +561,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					'step 0'
 					target.showCards(target.get('h'));
 					'step 1'
-					player.chooseCard('你可以用一张牌交换'+get.translation(target)+'一张不同类型的牌', 1, function(card){
+					player.chooseCard('你可以用一张牌交换'+get.translation(target)+'一张不同类型的牌', 1, 'hej', function(card){
 						return target.countCards('h') > target.countCards('h', {type: get.type(card)})
 					}).ai=function(card){
 						var val=get.value(card);
@@ -723,6 +724,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				//boss_saitama:['male','0',Infinity,['punch','serious','skipfirst','boss_turncount'],['boss'],'shen','1'],
 				boss_saitama:['male','0',Infinity,['punch','skipfirst','boss_turncount'],['boss'],'shen'],
 				boss_fapaiji:['female', '5', 3, ['huanri', 'toutian', 'boss_turncount'], ['boss'], 'shen'],
+				yuri:['female', '3', 3, ['chongzou', 'moxin1'], []],
 			},
 		},
 		characterIntro:{
@@ -734,6 +736,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 			boss_zhaoyun:'幻想乡是一切皆有可能的地方。<br>即使是那个只存在于传说中的男人……！',
 			boss_saitama:'买菜时因走错路偶然路过幻想乡的光头<br>………等等，什么？<br>画师：',
 			boss_fapaiji:'本次四轰鬼抽由Love Live!赞助提供。<br>谢谢来自μ\'s的东条希的友情出演！<br>………等等，什么？<br>画师：醐味屑',
+			yuri:'全名仲村由理，死后世界的学校中，死后世界战线的领导者，旨在与神，与神的天使对抗。<br>出自：angel beats! 画师：戦-G',
 		},
 		cardPack:{
 			mode_boss:['dianche', 'shenlin', 'reidaisai2', 'tancheng'],
@@ -932,12 +935,26 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						}
 						// 不在重整状态的玩家进行一个回合
 						// 在这里加入让玩家选顺序应该就可以
-						if (get.config('free_turn') && player != game.boss && game.me != game.boss && player.isAlive() && game.bossinfo.loopType==2){
-							game.me.chooseTarget('选择下一名进行回合的我方角色',function(card,player,target){
-                              return target.identity == 'cai';
-                              }).set('ai',function(target){
-                                    return get.attitude(game.me,target);
-                              });
+						if (game.bossinfo.loopType == 2){
+							for (var i = 0; i < game.players.length; i ++){
+								if (game.players[i].identity == 'cai'){
+									if (game.players[i].isTurnedOver()){
+										if (game.players[i].storage.spell){
+											var info = lib.skill[game.players[i].storage.spell];
+											if (info.spell){
+												if (!info.infinite) game.players[i].turnOver();
+											}
+										}
+									}
+								}
+							}
+							if (get.config('free_turn') && player != game.boss && game.me != game.boss && player.isAlive()){
+								game.me.chooseTarget('选择下一名进行回合的我方角色',function(card,player,target){
+								return target.identity == 'cai';
+								}).set('ai',function(target){
+										return get.attitude(game.me,target);
+								});
+							}
 						}
 					}
 					"step 1"
@@ -2031,7 +2048,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 									choices.push('sha');
 								}
 								if (trigger.getParent('huazhi_skill') || _status.currentPhase != player){
-									choices = ['bailou', 'moondial', 'mirror', 'dianche', 'tao'];
+									choices = ['bailou', 'lunadial', 'mirror', 'dianche', 'tao'];
 								}
 							} else {
 								choices = ['sha', 'tancheng'];
@@ -2051,7 +2068,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 									choices = ['tianguo', 'sijing', 'dianche'];
 								}
 								if (trigger.getParent('huazhi_skill') || _status.currentPhase != player){
-									choices = ['bailou', 'moondial', 'mirror', 'dianche', 'tao', 'book', 'hourai'];
+									choices = ['bailou', 'lunadial', 'mirror', 'dianche', 'tao', 'book', 'hourai'];
 								}
 							} else {
 								choices = ['shan', 'louguan', 'bailou', 'pantsu', 'yuzhi', 'gungnir', 'tancheng'];
@@ -2061,7 +2078,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						if (get.attitude(player, trigger.player) > 0){
 							if (trigger.player.hp < trigger.player.maxHp && !trigger.player.countCards('h', {name:'tao'})) choices = ['tao'];
 							else if (choices[2] > 0) choices = ['wuzhong'];
-							else if (trigger.player.countCards('he', {type:'equip'}) < 3) choices = ['mirror', 'book', 'moondial', 'hourai', 'pantsu', 'stone', 'windfan', 'lantern'];
+							else if (trigger.player.countCards('he', {type:'equip'}) < 3) choices = ['mirror', 'book', 'lunadial', 'hourai', 'pantsu', 'stone', 'windfan', 'lantern'];
 							else if (_status.currentPhase != trigger.player || trigger.getParent('huazhi_skill')) choices = ['shan', 'bingyu'];
 							else choices = ['shunshou', 'guohe', 'lingbi', 'sha', 'huazhi'];
 						}
@@ -2185,11 +2202,11 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						lib.translate[i]=lib.translate[i]||mode.translate[i];
 						}
 						for(var i in mode.skill){
-							lib.skill[i]=mode.skill[i];
+							if (!lib.skill[i]) lib.skill[i]=mode.skill[i];
 							game.finishSkill(i);
 						}
 						for(var i in mode.card){
-							lib.card[i]=mode.card[i];
+							if (!lib.card[i]) lib.card[i]=mode.card[i];
 							game.finishCards();
 						}
 					});
@@ -2248,6 +2265,167 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						}
 					},
 				}
+			},
+			longjuan:{
+				audio:2,
+				trigger:{player:'phaseAfter'},
+				group:'longjuan_count',
+				direct:true,
+				content:function(){
+					'step 0'
+					if (player.storage.longjuan_count <= 0) event.turn = true; 
+					player.storage.longjuan_count = 6;
+					player.chooseTarget(event.turn?'龙卷：令一名角色进行一个额外回合':'龙卷：令一名角色进行一个额外的出牌阶段').set('ai',function(target){
+						return get.attitude(player, target) > 0;
+					});
+					'step 1'
+					if (result.bool){
+						if (event.turn){
+							result.targets[0].insertPhase();
+						} else {
+							result.targets[0].phaseUse();
+						}
+					}
+					'step 2'
+					player.syncStorage('longjuan_count');
+				},
+			},
+			longjuan_count:{
+				direct:true,
+				trigger:{global:'phaseBegin'},
+				mark:true,
+				intro:{
+					marktext:'卷',
+					content:function(storage,player){
+						return '还有'+player.storage.longjuan_count+'回合升级';
+					}
+				},
+				init:function(player){
+					player.storage.longjuan_count = 6;
+					player.markSkill('longjuan_count');
+				},
+				filter:function(event, player){
+					return event.player != player;
+				},
+				content:function(){
+					if (player.storage.longjuan_count > 0) player.storage.longjuan_count -= 1;
+					player.syncStorage('longjuan_count');
+				}
+			},
+			chongzou:{
+				enable:'phaseUse',
+				group:'chongzou_1',
+				init:function(player){
+					player.storage.chongzou = [];
+				},
+				selectTarget:1,
+				filterTarget:function(card,player,target){
+					return true;
+				},
+				filter:function(event, player){
+					return player.storage.chongzou.length < 3 && player.lili > 0;
+				},
+				content:function(){
+					'step 0'
+					var control = ['获得【潜行】并暗置', '获得【雨至】一次', '使用攻击牌指定目标后，对目标造成1点灵击伤害，直到其回合结束'];
+					if (player.storage.chongzou.contains(1)) control.remove('获得【潜行】并暗置');
+					if (player.storage.chongzou.contains(2)) control.remove('获得【雨至】一次');
+					if (player.storage.chongzou.contains(3)) control.remove('使用攻击牌指定目标后，对目标造成1点灵击伤害，直到其回合结束');
+					if (control.length == 0) event.finish();
+					event.controlList = control;
+					player.chooseControlList(control, function(event, player){
+						return '获得【雨至】一次';
+					}).set('prompt','重奏：为'+get.translation(target)+'选择一项效果：');
+					'step 1'
+					if (result.control){
+						player.loselili();
+						if (event.controlList[result.index] == '获得【潜行】并暗置'){
+							for(var i=0;i<ui.skillPile.childNodes.length;i++){
+								if (ui.skillPile.childNodes[i].name == 'qianxing'){
+									target.gain(ui.skillPile.childNodes[i]);
+									target.addSkill('qianxing_skill2');
+									break;
+								} else if (i == ui.skillPile.childNodes.length -1){
+									player.say('没找到【潜行】');                      
+								}
+							}
+							player.storage.chongzou.push(1);
+						} else if (event.controlList[result.index] == '获得【雨至】一次'){
+							target.addSkill('kc_yuzhi');
+							target.addSkill('chongzou_2');
+							player.storage.chongzou.push(2);
+						} else if (event.controlList[result.index] == '使用攻击牌指定目标后，对目标造成1点灵击伤害，直到其回合结束'){
+							target.addTempSkill('chongzou_3',{player:'phaseAfter'});
+							player.storage.chongzou.push(3);
+						}
+					}
+				},
+			},
+			chongzou_1:{
+				direct:true,
+				trigger:{player:'phaseBegin'},
+				content:function(){
+					player.storage.chongzou=[];
+				},
+			},
+			chongzou_2:{
+				direct:true,
+				trigger:{player:'useSkillAfter'},
+				filter:function(event, player){
+					return event.skill == 'kc_yuzhi_2';
+				},
+				content:function(){
+					if (player.name != 'shigure') player.removeSkill('kc_yuzhi');
+					player.removeSkill('chongzou_1');
+				}
+			},
+			chongzou_3:{
+				forced:true,
+				trigger:{player:'useCardToBefore'},
+				filter:function(event, player){
+					return get.subtype(event.card) == 'attack';
+				},
+				content:function(){
+					trigger.target.damage('thunder');
+				},
+			},
+			moxin1:{
+				trigger:{global:'phaseEnd'},
+				//direct:true,
+				filter:function(event,player){
+					return event.player.isAlive() && event.player.getStat('damage');
+				},
+				check:function(event,player){
+					return get.attitude(player,event.player) >= 0;
+				},
+				content:function(){
+					'step 0'
+					var list = [];
+					if (trigger.player.lili<trigger.player.maxlili){
+						list.push(get.translation(trigger.player)+'获得灵力');
+					}
+					list.push('摸一张牌，交给'+get.translation(trigger.player)+'一张牌');
+					player.chooseControl(list,function(event,player){
+						if (!_status.currentPhase.isTurnedOver() && _status.currentPhase.lili < 3) return get.translation(trigger.player)+'恢复灵力';
+						return '摸一张牌，交给'+get.translation(trigger.player)+'一张牌';
+					});
+					'step 1'
+					if (result.control == get.translation(trigger.player)+'获得灵力'){
+						trigger.player.gainlili();
+					} else if (result.control == '摸一张牌，交给'+get.translation(trigger.player)+'一张牌'){
+						player.draw();
+						if (trigger.player != player){
+							player.chooseCard('hej','交给'+get.translation(trigger.player)+'一张牌',true).set('ai',function(card){
+								return 5-get.value(card);
+							});
+						}
+					}
+					'step 2'
+					if(result.bool){
+						trigger.player.gain(result.cards[0]);
+						player.$give(1,trigger.player);
+					}
+				},
 			},
 		},
 		translate:{
@@ -2323,6 +2501,15 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 			huanri_judge_info:'一名角色摸一张牌时，或判定时，你可以观看牌堆，将其中一张牌置于牌堆顶。',
 			boss_turncount:'存活挑战',
 			boss_turncount_info:'锁定技，你在游戏失败前，能够撑多少轮呢？<br><br>注：建议在左上角[选项-开始-魔王]中将[单人控制]选项打开',
+			longjuan:'龙卷',
+			longjuan_count:'龙卷（计数）',
+			longjuan_count_bg:'卷',
+			longjuan_info:'结束阶段，你可以令一名角色于回合结束后进行一个额外的出牌阶段；若你在本回合前的6回合内没有进行过回合，改为令其进行一个额外的回合。',
+			yuri:'由理',
+			chongzou:'重奏',
+			chongzou_info:'一回合每项限一次，出牌阶段，你可以消耗1点灵力，令一名角色：获得一张【潜行】并暗置之；获得【雨至】，该技能发动后失去；直到其回合结束，其使用攻击牌指定目标时，对目标造成1点灵击伤害。',
+			moxin1:'齐心',
+			moxin1_info:'一名角色的结束阶段，若其本回合造成过伤害，你可以令其获得一点灵力，或摸一张牌然后交给其一张牌。',
 		},
 		get:{
 			rawAttitude:function(from,to){
