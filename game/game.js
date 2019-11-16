@@ -5801,6 +5801,9 @@
                     if(ext=='noskin'){
                         ext='.jpg';
                     }
+                    if (type == 'card'){
+                        ext='.png';
+                    }
                     ext=ext||'.jpg';
                     subfolder=subfolder||'default'
                     if(type){
@@ -5809,17 +5812,7 @@
                         var mode=get.mode();
                         if(type=='character'){
                             if(lib.characterPack['mode_'+mode]&&lib.characterPack['mode_'+mode][name]){
-                                if(mode=='guozhan'){
-                                    if(name.indexOf('gz_shibing')==0){
-                                        name=name.slice(3,11);
-                                    }
-                                    else{
-                                        name=name.slice(3);
-                                    }
-                                }
-                                else{
                                     modeimage=mode;
-                                }
                             }
                             else if(lib.character[name]){
                                 nameinfo=lib.character[name];
@@ -5829,22 +5822,25 @@
                                 modeimage=name[0];
                                 name=name[1];
                             }
-                        }
-                        if(!modeimage&&nameinfo&&nameinfo[4]){
-                            for(var i=0;i<nameinfo[4].length;i++){
-                                if(nameinfo[4][i].indexOf('ext:')==0){
-                                    extimage=nameinfo[4][i];break;
+                            if(!modeimage&&nameinfo&&nameinfo[4]){
+                                for(var i=0;i<nameinfo[4].length;i++){
+                                    if(nameinfo[4][i].indexOf('ext:')==0){
+                                        extimage=nameinfo[4][i];break;
+                                    }
+                                    else if(nameinfo[4][i].indexOf('db:')==0){
+                                        dbimage=nameinfo[4][i];break;
+                                    }
+                                    else if(nameinfo[4][i].indexOf('mode:')==0){
+                                        modeimage=nameinfo[4][i].slice(5);break;
+                                    }
+                                    else if(nameinfo[4][i].indexOf('character:')==0){
+                                        name=nameinfo[4][i].slice(10);break;
+                                    }
                                 }
-                                else if(nameinfo[4][i].indexOf('db:')==0){
-                                    dbimage=nameinfo[4][i];break;
-                                }
-                                else if(nameinfo[4][i].indexOf('mode:')==0){
-                                    modeimage=nameinfo[4][i].slice(5);break;
-                                }
-								else if(nameinfo[4][i].indexOf('character:')==0){
-									name=nameinfo[4][i].slice(10);break;
-								}
                             }
+                        }
+                        else if (type == 'card'){
+                            modeimage = lib.card[name].modeimage;
                         }
                         if(extimage){
                             src=extimage.replace(/ext:/,'extension/');
@@ -5854,14 +5850,16 @@
                             return this;
                         }
                         else if(modeimage){
-                            src='image/mode/'+modeimage+'/character/'+name+ext;
+                            src='image/mode/'+modeimage+'/'+type+'/'+name+ext;
                         }
-                        else if(type=='character'&&lib.config.skin[name]&&arguments[2]!='noskin'){
+                        else if((type=='character' || type == 'card')&&lib.config.skin[name]&&arguments[2]!='noskin'){
                             src='image/skin/'+name+'/'+lib.config.skin[name]+ext;
                         }
                         else{
                             if(type=='character'){
                                 src='image/character/'+name+ext;
+                            } else if (type == 'card'){
+                                src = 'image/card/'+name+ext;
                             }
                             else{
                                 src='image/'+type+'/'+subfolder+'/'+name+ext;
@@ -9130,6 +9128,7 @@
                     next.setContent(info.content);
                     next.skillHidden=event.skillHidden;
                     next.skill=event.skill;
+                    console.log(next);
                     if(info.popup!=false&&!info.direct){
                         if(info.popup){
                             player.popup(info.popup);
@@ -19708,14 +19707,6 @@
             card:{
                 init:function(card){
                     if(Array.isArray(card)){
-                        if(card[2]=='huosha'){
-                            card[2]='sha';
-                            card[3]='fire';
-                        }
-                        if(card[2]=='leisha'){
-                            card[2]='sha';
-                            card[3]='thunder';
-                        }
                     }
 					else if(typeof card=='object'){
 						card=[card.suit,card.number,card.name,card.nature];
@@ -19801,7 +19792,8 @@
                                 this.node.image.setBackgroundImage('image/mode/'+lib.card[bg].modeimage+'/card/'+bg+'.png');
                             }
                             else{
-                                this.node.image.setBackgroundImage('image/card/'+bg+'.png');
+                                //this.node.image.setBackgroundImage('image/card/'+bg+'.png');
+                                this.node.image.setBackground(bg, 'card');
                             }
                         }
                     }
@@ -26789,9 +26781,9 @@
                     if(result=='战斗胜利'){
                         if(_status.betWin){
                             betWin=true;
-                            _status.coin+=10;
+                            _status.coin+=50;
                         }
-                        _status.coin+=20;
+                        _status.coin+=50;
                         if(_status.additionalReward){
                             _status.coin+=_status.additionalReward();
                         }
@@ -26852,9 +26844,9 @@
                     _status.coin=Math.ceil(_status.coin);
                     dialog.add(ui.create.div('','获得'+_status.coin+'金'));
                     if(betWin){
-                        game.changeCoin(40);
+                        game.changeCoin(200);
                         dialog.content.appendChild(document.createElement('br'));
-                        dialog.add(ui.create.div('','（下注赢得20金）'));
+                        dialog.add(ui.create.div('','（下注赢得200金）'));
                     }
                     game.changeCoin(_status.coin);
                 }
@@ -30732,13 +30724,7 @@
                     node._link={config:config};
                     if(!config.clear){
                         if(config.name!='开启'){
-                            if(config.name=='屏蔽弱将'){
-                                config.intro='强度过低的角色（孙策除外）不会出现在选将框，也不会被AI选择'
-                            }
-                            else if(config.name=='屏蔽强将'){
-                                config.intro='强度过高的角色不会出现在选将框，也不会被AI选择'
-                            }
-                            else if(!config.intro){
+                            if(!config.intro){
                                 config.intro='设置'+config.name;
                             }
                             lib.setIntro(node,function(uiintro){
@@ -43946,6 +43932,7 @@
             return lib.config.mode_config[mode][item];
         },
         coinCoeff:function(list){
+            /*
             var num=0;
             for(var i=0;i<list.length;i++){
                 var rank=get.rank(list[i]);
@@ -43962,7 +43949,8 @@
                     case 'd':num+=1.8;break;
                 }
             }
-            return num/list.length;
+            */
+            return 2.5;
         },
         rank:function(name,num){
             if(typeof name=='object'&&name.name){
@@ -45821,12 +45809,7 @@
                                 }
                             }
                             if(lib.card[name].unique&&lib.card[name].type=='equip'){
-                                if(lib.cardPile.guozhan&&lib.cardPack.guozhan.contains(name)){
-                                    uiintro.add('<div class="text center">专属装备</div>').style.marginTop='-5px';
-                                }
-                                else{
-                                    uiintro.add('<div class="text center">特殊装备</div>').style.marginTop='-5px';
-                                }
+                                uiintro.add('<div class="text center">特殊装备</div>').style.marginTop='-5px';
                             }
                         }
                         if(lib.translate[name+'_info']){
@@ -45839,6 +45822,75 @@
 						if(lib.translate[name+'_append']){
 							uiintro.add('<div class="text" style="display:inline">'+lib.translate[name+'_append']+'</div>');
 						}
+                         if(!simple||get.is.phoneLayout()){
+                            if(lib.config.change_skin||lib.skin){
+                                var num=1;
+                                var introadded=false;
+                                var createButtons=function(num,avatar2){
+                                    if(!introadded){
+                                        introadded=true;
+                                        uiintro.add('<div class="text center">更改皮肤</div>');
+                                    }
+                                    var buttons=ui.create.div('.buttons.smallzoom.scrollbuttons');
+                                    lib.setMousewheel(buttons);
+                                    var nameskin=name;
+                                    for(var i=0;i<=num;i++){
+                                        var button=ui.create.div('.button.card.pointerdiv',buttons,function(){
+                                            if(this._link){
+                                                lib.config.skin[nameskin]=this._link;
+                                                //node.node.avatar.style.backgroundImage=this.style.backgroundImage;
+                                                node.node.image.setBackground(nameskin, 'card');
+                                            }
+                                            else{
+                                                delete lib.config.skin[nameskin];
+                                                node.node.image.setBackground(nameskin,'card');
+                                            }
+                                            game.saveConfig('skin',lib.config.skin);
+                                        });
+                                        button._link=i;
+                                        if(i){
+                                            button.setBackgroundImage('image/skin/'+nameskin+'/'+i+'.png');
+                                        }
+                                        else{
+                                            button.setBackground(nameskin,'card','noskin');
+                                        }
+                                    }
+                                    uiintro.add(buttons);
+                                };
+                                var loadImage=function(avatar2){
+                                    var img=new Image();
+                                    img.onload=function(){
+                                        num++;
+                                        loadImage(avatar2);
+                                    }
+                                    img.onerror=function(){
+                                        num--;
+                                        if(num){
+                                            createButtons(num,avatar2);
+                                        }
+                                        if(!avatar2){
+                                            if(!node.classList.contains('unseen2')&&node.name2){
+                                                num=1;
+                                                loadImage(true);
+                                            }
+                                        }
+                                    }
+                                    var nameskin=node.name;
+                                    img.src=lib.assetURL+'image/skin/'+nameskin+'/'+num+'.png';
+                                }
+                                if(lib.config.change_skin){
+                                    loadImage();
+                                }
+                                else{
+                                    setTimeout(function(){
+                                        var nameskin1=node.name;
+                                        if(lib.skin[nameskin1]){
+                                            createButtons(lib.skin[nameskin1]);
+                                        }
+                                    });
+                                }
+                            }
+                        }
                     }
                     uiintro.add(ui.create.div('.placeholder.slim'));
                 }
