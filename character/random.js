@@ -187,14 +187,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 				trigger:{global:"gameStart"},
 				content:function(){
 					'step 0'
-					for(var i=0;i<ui.skillPile.childNodes.length;i++){
-						if (ui.skillPile.childNodes[i].name == 'shenyou'){
-							player.gain(ui.skillPile.childNodes[i]);
-							break;
-						} else if (i == ui.skillPile.childNodes.length -1){
-							player.say('技能牌堆里并没有【神佑】，呵呵——');					  
-						}
-					}
+					player.drawSkill('shenyou', '啊嘞，没有【神佑】了吗……');
 				},
 			},
 			kc_yuzhi_2:{
@@ -295,14 +288,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 					'step 1'
 					if(player.countCards('h')<3)player.draw(3-player.countCards('h'));
 					'step 2'
-					for(var i=0;i<ui.skillPile.childNodes.length;i++){
-						if (ui.skillPile.childNodes[i].name == 'shenyou'){
-							player.gain(ui.skillPile.childNodes[i]);
-							break;
-						} else if (i == ui.skillPile.childNodes.length -1){
-							player.say('啊，没有【神佑】了吗……');					  
-						}
-					}
+					player.drawSkill('shenyou', '啊嘞，没有【神佑】了吗……');
 				},
 			},
 			zuoshibao_2:{
@@ -696,14 +682,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 					}
 					player.turnOver();
 					'step 1'
-					for(var i=0;i<ui.skillPile.childNodes.length;i++){
-						if (ui.skillPile.childNodes[i].name == 'lianji'){
-							player.gain(ui.skillPile.childNodes[i]);
-							break;
-						} else if (i == ui.skillPile.childNodes.length -1){
-							player.say('技能牌堆里居然没有【连击】了poi？');					  
-						}
-					}
+					player.drawSkill('lianji', '居然没有【连击】了poi？');
 					'step 2'
 					game.log(player,'更改了','【轰袭】','的描述');
 					player.markSkill('hongxi');
@@ -1146,14 +1125,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 								return get.value(card) < 6 && player.countCards('j') < 3;
 							},
   							content:function(event,player){
-  								for(var i=0;i<ui.skillPile.childNodes.length;i++){
-		                          if (ui.skillPile.childNodes[i].name == event.getParent().getParent()._result.links[0][2]){
-		                            player.gain(ui.skillPile.childNodes[i]);
-		                            break;
-		                          } else if (i == ui.skillPile.childNodes.length -1){
-		                              player.say('什么，余居然没有这种技能？');                      
-		                          }
-		                        }
+								player.drawSkill(event.getParent().getParent()._result.links[0][2], '什么，余居然没有这种技能？');
   							}
                         }
                     },
@@ -1896,7 +1868,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 					var list = [];
 					for (var i = 0; i < event.cards.length; i ++){
 						if (get.suit(event.cards[i]) == 'spade'){
-							if (!list.contains('♠：获得1点灵力')) list.push('♠：获得1点灵力');
+							if (!list.contains('♠：获得2点灵力')) list.push('♠：获得2点灵力');
 						} else if (get.suit(event.cards[i]) == 'club'){
 							if (!list.contains('♣：将一名角色的一张牌置于牌堆顶')) list.push('♣：将一名角色的一张牌置于牌堆顶');
 						} else if (get.suit(event.cards[i]) == 'diamond'){
@@ -1908,17 +1880,17 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 					'step 4'
 					if (event.list.length == 0) event.finish();
 					var str = '选择一项效果执行';
-					if (player.hasSkill('mojing1')) str = '选择下一项执行的效果';
+					if (player.hasSkill('mojing0')) str = '选择下一项执行的效果';
 					player.chooseControl(event.list).set('ai',function(){
-						if (event.list.contains('♠：获得1点灵力') && player.lili < 2) return '♠：获得1点灵力';
+						if (event.list.contains('♠：获得2点灵力') && player.lili < 2) return '♠：获得2点灵力';
                     	if (event.list.contains('♣：将一名角色的一张牌置于牌堆顶')) return '♣：将一名角色的一张牌置于牌堆顶';
                     	if (event.list.contains('♢：视为使用一张【轰！】')) return '♢：视为使用一张【轰！】';
                 		return event.list.randomGet();
                 	}).set('prompt',str);
                     'step 5'
                     event.control = result.control;
-                    if (result.control == '♠：获得1点灵力'){
-                    	player.gainlili();
+                    if (result.control == '♠：获得2点灵力'){
+                    	player.gainlili(2);
                     } else if (result.control == '♣：将一名角色的一张牌置于牌堆顶'){
                     	player.chooseTarget('选择一名角色，将其一张牌置于牌堆顶',function(card,player,target){
 							return target.countCards('he');
@@ -1953,7 +1925,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     	ui.cardPile.insertBefore(card,ui.cardPile.firstChild);
                     }
                     'step 8'
-                	if (player.hasSkill('mojing1')){
+                	if (player.hasSkill('mojing0')){
                 		event.list.remove(event.control);
                 		if (event.list.length) event.goto(4);
                 	}
@@ -1974,8 +1946,14 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 content:function(){
                     player.loselili(lib.skill.mojing.cost);
                     player.useCard({name:'simen'},game.filterPlayer().remove(player));
-                    player.turnOver();
+                    player.addSkill('mojing0');
+					player.turnOver();
                 },
+			},
+			mojing0:{
+				init:function(){
+					lib.translate['ruizhi_info'] = '准备阶段，你可以判定3次，然后选择所有项：若结果中有黑桃，你获得2点灵力；若有方片，你视为使用一张【轰！】；若有梅花，你将一张角色的一张牌置于牌堆顶。';
+				},
 			},
 			mojing1:{
 				forced:true,
@@ -2904,8 +2882,17 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 					return _status.currentPhase != player;
 				},
 				content:function(){
-					_status.currentPhase.damage('thunder');
-				},
+					'step 0'
+                    player.chooseTarget('翔翼：可以对一名角色造成1点灵击伤害').set('ai',function(target){
+                        if (_status.currentPhase == target && get.attitude(player, _status.currentPhase) < 0 && target.lili == 1) return 100;
+                        return -get.attitude(_status.event.player,target);
+                    });
+                    'step 1'
+                    if (result.bool){
+                        player.logSkill(event.name,result.targets);
+						result.targets[0].damage('thunder');
+                    }
+                },
 			},
 			chunse:{
 				forced:true,
@@ -2955,6 +2942,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 						var skills=lib.character[name][3].slice(0);
 						for(var i=0;i<skills.length;i++){
 							var info=lib.skill[skills[i]];
+							if (!info) continue;
 							if(info.unique&&!info.gainable){
 								skills.splice(i--,1);
 							}
@@ -3097,12 +3085,12 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 					}
 					if(Array.isArray(add)){
 						for(var i=0;i<add.length;i++){
-							skills.remove(add[i]);
+							skills.remove(add[i]);	
 						}
 					}
 					'step 2'	//标记
 					player.storage.huanzhao.shown = [];
-					player.storage.huanzhao.shown.add(lib.character[result.links[0]]);
+					player.storage.huanzhao.shown.add(result.links[0]);
 					var mark=player.marks.huanzhao;
 						mark.hide();
 						mark.style.transition='all 0.3s';
@@ -3151,6 +3139,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 				},
 				content:function(){
 					lib.skill.huanzhao.get(player, trigger.player.name);
+					player.storage.huanzhao.shown.add(trigger.player.name);
 				}
 			},
 			wuxian:{
@@ -3328,7 +3317,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			yaowu_audio1:'对空射击！',
 			yaowu_audio2:'Caladbolg！',
 			huanrao:'环绕',
-			huanrao_info:'出牌阶段限一次，你可以将一张牌当【灵光一闪】使用；你以此法获得的牌本回合只能当【轰！】使用。',
+			huanrao_info:'一回合一次，出牌阶段，你可以将一张牌当【灵光一闪】使用；你以此法获得的牌本回合只能当【轰！】使用。',
 			huanrao_2:'环绕',
 			huanrao_3:'环绕',
 			huanrao_4:'环绕',
@@ -3349,7 +3338,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			hongxi_audio1:'首先从哪里开始打呢？',
 			hongxi_audio2:'那么，让我们举办一场华丽的派对吧！',
 			solomon:'所罗门的噩梦',
-			solomon_info:'符卡技（2）<u>若你的体力值小于3，此符卡消耗视为0；</u>符卡发动时，你获得一张【连击】技能牌；【轰袭】追加描述“辅助／宝物／道具～令该【轰！】造成的弹幕伤害＋１”。',
+			solomon_info:'符卡技（2）<u>若你的体力值不大于2，此符卡消耗视为0；</u>符卡发动时，你获得一张【连击】技能牌；【轰袭】追加描述“辅助／宝物／道具～令该【轰！】造成的弹幕伤害＋１”。',
 			solomon_audio1:'所罗门的噩梦，让你们见识一下！',
 			megumin:'惠惠',
 			megumin_die:'和真，快来背我回去啊OAQ',
@@ -3437,12 +3426,12 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			ruizhi:'魔境智慧',
 			ruizhi_audio1:'这是魔境，深渊的睿智。',
 			ruizhi_audio2:'我杀不了的人,基本上没有。',
-			ruizhi_info:'准备阶段，你可以判定3次，然后选择一项：若结果中有黑桃，你获得1点灵力；若有方片，你视为使用一张【轰！】；若有梅花，你将一张角色的一张牌置于牌堆顶。',
+			ruizhi_info:'准备阶段，你可以判定3次，然后选择一项：若结果中有黑桃，你获得2点灵力；若有方片，你视为使用一张【轰！】；若有梅花，你将一张角色的一张牌置于牌堆顶。',
 			mojing:'满溢死亡的魔境之门',
 			mojing_audio1:'以我之名连接的力量，回应我的呼唤开启大门。',
 			mojing_audio2:'来尝试将我杀死吧！',
 			mojing1:'魔境之门（掉血）',
-			mojing_info:'符卡技（4）<永续>符卡发动时，你视为使用了一张【死境之门】；【魔境智慧】中的“选择一项”视为“选择所有项”;一名角色因弃置而失去红桃牌后，令所有其他角色各失去1点体力。',
+			mojing_info:'符卡技（4）<永续>符卡发动时，你视为使用了一张【死境之门】；【魔境智慧】中的“选择一项”改为“选择所有项”;一名角色因弃置而失去红桃牌后，令所有其他角色各失去1点体力。',
 			niuzhanshi:'？',
 			mordred:'莫德雷德',
 			ng_wenhao:'？',
@@ -3516,7 +3505,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			aoshu_info:'一回合一次，出牌阶段，你可将灵力消耗到0，并为任意名角色分配等量灵力；然后，直到你的准备阶段，一名角色发动符卡时，你获得1点灵力。',
 			jack:'开膛手杰克',
 			wulin:'雾临',
-			wulin_info:'限定技，一名角色的回合开始时，你可以令你攻击范围内的一名角色获得以下效果，直到回合结束：其不能以此技能以外的方式使用牌；其需要使用牌时，可以洗混其手牌；其不能查看其中暗置牌；其展示其中一张：若可以使用，本次结算中其可以使用该牌；否则，其弃置之，并可以重复此流程；其首次成为【轰！】的目标后，令之不计次数。',
+			wulin_info:'限定技，一名角色的回合开始时，你可以令你攻击范围内的一名角色获得以下效果，直到回合结束：其不能以此法以外的方式使用牌；其需要使用牌时，可以随机展示一张手牌：若可以使用，本次结算中其可以使用该牌；否则，其弃置之，并可以重复此流程；其首次成为【轰！】的目标后，令之不计次数。',
 			yejiang:'夜降',
 			yejiang_info:'限定技，一名角色的回合开始时，你可以令你攻击范围内的一名角色获得以下效果，直到回合结束：其攻击范围视为0，不能获得灵力，且装备效果无效。',
 			maria:'解体圣母',
@@ -3535,7 +3524,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			xiangyi_3_audio1:'这是我的领域',
 			xiangyi_3_audio2:'折翼陨落，涅槃苏生',
 			xiangyi_3_audio3:'毕竟，你就是我的翅膀啊',
-			xiangyi_info:'你可以将与装备区内牌颜色相同的牌当作【轰！】或【躲～】使用/打出；你于回合外使用牌后，可以对当前回合角色造成1点灵击伤害。',
+			xiangyi_info:'你可以将与装备区内牌颜色相同的牌当作【轰！】或【躲～】使用/打出；你于回合外使用牌后，可以对一名角色造成1点灵击伤害。',
 			chunse:'椿色恋歌',
 			chunse_2:'椿色恋歌（灵击→弹幕）',
 			chunse_info:'其他角色回合结束时，若其手牌数或体力值大于你，你获得1点灵力；你造成灵击伤害时，若你灵力等于上限，可以改为造成等量弹幕伤害。',

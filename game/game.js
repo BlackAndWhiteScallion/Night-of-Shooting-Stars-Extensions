@@ -133,23 +133,6 @@
                         init:false,
                         intro:'一局游戏开始时，玩家自动托管',
                     },
-                    keep_awake:{
-                        name:'屏幕常亮',
-                        init:false,
-                        unfrequent:true,
-                        intro:'防止屏幕自动关闭',
-                        onclick:function(bool){
-                            game.saveConfig('keep_awake',bool);
-                            if(window.plugins&&window.plugins.insomnia){
-                                if(bool){
-                                    window.plugins.insomnia.keepAwake();
-                                }
-                                else{
-                                    window.plugins.insomnia.allowSleepAgain();
-                                }
-                            }
-                        }
-                    },
                     auto_confirm:{
                         name:'自动确认',
                         init:true,
@@ -174,47 +157,6 @@
                         intro:'双方阵营明确的模式中（如对决），敌方角色濒死时不询问出葱',
                         unfrequent:true,
                     },
-                    enable_drag:{
-                        name:'启用拖拽',
-                        init:true,
-                        intro:'按住卡牌后可将卡牌拖至目标',
-                        unfrequent:true,
-                    },
-                    enable_dragline:{
-                        name:'拖拽指示线',
-                        init:true,
-                        unfrequent:true,
-                        intro:'拖拽时显示虚线，可能降低游戏速度',
-                    },
-                    enable_touchdragline:{
-                        name:'拖拽指示线',
-                        init:false,
-                        unfrequent:true,
-                        intro:'拖拽时显示虚线，可能降低游戏速度',
-                    },
-                    enable_pressure:{
-                        name:'启用压感',
-                        init:false,
-                        intro:'开启后可通过按压执行操作',
-                        unfrequent:true,
-                    },
-                    pressure_taptic:{
-                        name:'触觉反馈',
-                        init:false,
-                        intro:'开启后按压操作执行时将产生震动',
-                        unfrequent:true,
-                    },
-                    pressure_click:{
-                        name:'按压操作',
-                        init:'pause',
-                        intro:'在空白区域按压时的操作',
-                        unfrequent:true,
-                        item:{
-                            pause:'暂停',
-                            config:'选项',
-                            auto:'托管',
-                        }
-                    },
                     touchscreen:{
                         name:'触屏模式',
                         init:false,
@@ -225,100 +167,6 @@
                             if(get.is.nomenu('touchscreen',bool)) return false;
                             game.saveConfig('touchscreen',bool);
                         }
-                    },
-                    swipe:{
-                        name:'滑动手势',
-                        init:true,
-                        unfrequent:true,
-                        intro:'在非滚动区域向四个方向滑动可执行对应操作',
-                    },
-                    swipe_down:{
-                        name:'下划操作',
-                        init:'menu',
-                        unfrequent:true,
-                        intro:'向下滑动时执行的操作',
-                        item:{
-                            system:'显示按钮',
-                            menu:'打开菜单',
-                            pause:'切换暂停',
-                            auto:'切换托管',
-                            chat:'显示聊天',
-                            off:'关闭',
-                        },
-                        onclick:function(item){
-                            if(get.is.nomenu('swipe_down',item)) return false;
-                            game.saveConfig('swipe_down',item);
-                        }
-                    },
-                    swipe_up:{
-                        name:'上划操作',
-                        intro:'向上滑动时执行的操作',
-                        init:'chat',
-                        unfrequent:true,
-                        item:{
-                            system:'显示按钮',
-                            menu:'打开菜单',
-                            pause:'切换暂停',
-                            auto:'切换托管',
-                            chat:'显示聊天',
-                            off:'关闭',
-                        },
-                        onclick:function(item){
-                            if(get.is.nomenu('swipe_up',item)) return false;
-                            game.saveConfig('swipe_up',item);
-                        }
-                    },
-                    swipe_left:{
-                        name:'左划操作',
-                        intro:'向左滑动时执行的操作',
-                        init:'system',
-                        unfrequent:true,
-                        item:{
-                            system:'显示按钮',
-                            menu:'打开菜单',
-                            pause:'切换暂停',
-                            auto:'切换托管',
-                            chat:'显示聊天',
-                            off:'关闭',
-                        },
-                        onclick:function(item){
-                            if(get.is.nomenu('swipe_left',item)) return false;
-                            game.saveConfig('swipe_left',item);
-                        }
-                    },
-                    swipe_right:{
-                        name:'右划操作',
-                        intro:'向右滑动时执行的操作',
-                        init:'system',
-                        unfrequent:true,
-                        item:{
-                            system:'显示按钮',
-                            menu:'打开菜单',
-                            pause:'切换暂停',
-                            auto:'切换托管',
-                            chat:'显示聊天',
-                            off:'关闭',
-                        },
-                        onclick:function(item){
-                            if(get.is.nomenu('swipe_right',item)) return false;
-                            game.saveConfig('swipe_right',item);
-                        }
-                    },
-                    round_menu_func:{
-                        name:'触屏按钮操作',
-                        intro:'点击屏幕中圆形按钮时执行的操作',
-                        init:'system',
-                        unfrequent:true,
-                        item:{
-                            system:'显示按钮',
-                            menu:'打开菜单',
-                            pause:'切换暂停',
-                            auto:'切换托管'
-                        },
-                        onclick:function(item){
-                            if(get.is.nomenu('round_menu_func',item)) return false;
-                            game.saveConfig('round_menu_func',item);
-                        },
                     },
                     game_speed:{
                         name:'游戏速度',
@@ -338,72 +186,6 @@
                         name:'限制结算速度',
                         intro:'在动画结算完成前不执行下一步操作，开启后游戏操作的间隔更长但画面更浏畅，在游戏较卡时建议开启',
                         init:true
-                    },
-                    enable_vibrate:{
-                        name:'开启震动',
-                        intro:'回合开始时使手机震动',
-                        init:false
-                    },
-                    right_click:{
-                        name:'右键操作',
-                        init:'pause',
-                        intro:'在空白区域点击右键时的操作',
-                        unfrequent:true,
-                        item:{
-                            pause:'暂停',
-                            config:'选项',
-                            auto:'托管',
-                        },
-                        onclick:function(item){
-                            if(get.is.nomenu('right_click',item)) return false;
-                            game.saveConfig('right_click',item);
-                        }
-                    },
-                    longpress_info:{
-                        name:'长按显示信息',
-                        init:true,
-                        unfrequent:true,
-                        restart:true,
-                        intro:'长按后弹出菜单',
-                    },
-                    right_info:{
-                        name:'右键显示信息',
-                        init:true,
-                        unfrequent:true,
-                        restart:true,
-                        intro:'右键点击后弹出菜单',
-                    },
-                    hover_all:{
-                        name:'悬停显示信息',
-                        init:true,
-                        unfrequent:true,
-                        restart:true,
-                        intro:'悬停后弹出菜单',
-                    },
-                    hover_handcard:{
-                        name:'悬停手牌显示信息',
-                        init:true,
-                        unfrequent:true,
-                        intro:'悬停手牌后弹出菜单',
-                    },
-                    hoveration:{
-                        name:'悬停菜单弹出时间',
-                        unfrequent:true,
-                        intro:'鼠标移至目标到弹出菜单的时间间隔',
-                        init:'700',
-                        item:{
-                            '500':'0.5秒',
-                            '700':'0.7秒',
-                            '1000':'1秒',
-                            '1500':'1.5秒',
-                            '2500':'2.5秒',
-                        }
-                    },
-                    doubleclick_intro:{
-                        name:'双击显示角色资料',
-                        init:true,
-                        unfrequent:true,
-                        intro:'双击角色头像后显示其资料卡',
                     },
                     video:{
                         name:'保存录像',
@@ -440,24 +222,6 @@
                             }
                         }
                     },
-                    mousewheel:{
-                        name:'滚轮控制手牌',
-                        init:true,
-                        unfrequent:true,
-                        intro:'开启后滚轮可使手牌横向滚动，在mac等可横向滚动的设备上建议关闭',
-                        onclick:function(bool){
-                            game.saveConfig('mousewheel',bool);
-                            if(lib.config.touchscreen) return;
-                            if(lib.config.mousewheel){
-                                ui.handcards1Container.onmousewheel=ui.click.mousewheel;
-                                ui.handcards2Container.onmousewheel=ui.click.mousewheel;
-                            }
-                            else{
-                                ui.handcards1Container.onmousewheel=null;
-                                ui.handcards2Container.onmousewheel=null;
-                            }
-                        }
-                    },
                     auto_check_update:{
                         name:'自动检查游戏更新',
                         intro:'进入游戏时检查更新',
@@ -470,95 +234,6 @@
                         }
                         else{
                             map.touchscreen.hide();
-                        }
-                        if(lib.device||lib.node){
-                            map.auto_check_update.show();
-                        }
-                        else{
-                            map.auto_check_update.hide();
-                        }
-                        if(lib.device){
-                            map.enable_vibrate.show();
-                            map.keep_awake.show();
-                        }
-                        else{
-                            map.enable_vibrate.hide();
-                            map.keep_awake.hide();
-                        }
-                        if(config.enable_pressure){
-                            map.pressure_click.show();
-                            if(lib.device){
-                                map.pressure_taptic.show();
-                            }
-                            else{
-                                map.pressure_taptic.hide();
-                            }
-                        }
-                        else{
-                            map.pressure_click.hide();
-                            map.pressure_taptic.hide();
-                        }
-                        if(lib.config.touchscreen){
-                            map.mousewheel.hide();
-                            map.hover_all.hide();
-                            map.hover_handcard.hide();
-                            map.hoveration.hide();
-                            map.right_info.hide();
-                            map.right_click.hide();
-                            map.longpress_info.show();
-                            map.swipe.show();
-                            if(lib.config.swipe){
-                                map.swipe_up.show();
-                                map.swipe_down.show();
-                                map.swipe_left.show();
-                                map.swipe_right.show();
-                            }
-                            else{
-                                map.swipe_up.hide();
-                                map.swipe_down.hide();
-                                map.swipe_left.hide();
-                                map.swipe_right.hide();
-                            }
-                        }
-                        else{
-                            map.mousewheel.show();
-                            map.hover_all.show();
-                            map.right_info.show();
-                            map.right_click.show();
-                            map.longpress_info.hide();
-                            if(!config.hover_all){
-                                map.hover_handcard.hide();
-                                map.hoveration.hide();
-                            }
-                            else{
-                                map.hover_handcard.show();
-                                map.hoveration.show();
-                            }
-                            map.swipe.hide();
-                            map.swipe_up.hide();
-                            map.swipe_down.hide();
-                            map.swipe_left.hide();
-                            map.swipe_right.hide();
-                        }
-                        if(lib.config.enable_drag){
-                            if(lib.config.touchscreen){
-                                map.enable_dragline.hide();
-                                map.enable_touchdragline.show();
-                            }
-                            else{
-                                map.enable_dragline.show();
-                                map.enable_touchdragline.hide();
-                            }
-                        }
-                        else{
-                            map.enable_dragline.hide();
-                            map.enable_touchdragline.hide();
-                        }
-                        if(!get.is.phoneLayout()){
-                            map.round_menu_func.hide();
-                        }
-                        else{
-                            map.round_menu_func.show();
                         }
                         if(!lib.node&&lib.device!='ios'){
                             map.confirm_exit.show();
@@ -2509,6 +2184,25 @@
                             }
                         }
                     },
+                    global_font:{
+                        name:'界面字体',
+                        init:'default',
+                        unfrequent:true,
+                        item:{},
+                        textMenu:function(node,link){
+                            if(link!='default'){
+                                node.style.fontFamily=link;
+                            }
+                            else{
+                                node.style.fontFamily="'STHeiti','SimHei','Microsoft JhengHei','Microsoft YaHei','WenQuanYi Micro Hei',Helvetica,Arial,sans-serif";
+                            }
+                            node.style.fontSize='20px';
+                        },
+                        onclick:function(font){
+                            game.saveConfig('global_font',font);
+                            lib.init.cssstyles();
+                        }
+                    },
                     name_font:{
                         name:'人名字体',
                         init:'xinwei',
@@ -2665,6 +2359,8 @@
                             map.pop_logv.show();
                         }
                         if(lib.device){
+                            map.enable_vibrate.show();
+                            map.keep_awake.show();
                             if(lib.device=='android'){
                                 map.show_statusbar_android.show();
                                 map.show_statusbar_ios.hide();
@@ -2682,6 +2378,8 @@
                             }
                         }
                         else{
+                            map.enable_vibrate.hide();
+                            map.keep_awake.hide();
                             map.show_statusbar_ios.hide();
                             map.show_statusbar_android.hide();
                         }
@@ -2702,6 +2400,81 @@
                             map.remember_round_button.hide();
                             map.popequip.hide();
                             map.filternode_button.hide();
+                        }
+                        if(config.enable_pressure){
+                            map.pressure_click.show();
+                            if(lib.device){
+                                map.pressure_taptic.show();
+                            }
+                            else{
+                                map.pressure_taptic.hide();
+                            }
+                        }
+                        else{
+                            map.pressure_click.hide();
+                            map.pressure_taptic.hide();
+                        }
+                        if(lib.config.touchscreen){
+                            map.mousewheel.hide();
+                            map.hover_all.hide();
+                            map.hover_handcard.hide();
+                            map.hoveration.hide();
+                            map.right_info.hide();
+                            map.right_click.hide();
+                            map.longpress_info.show();
+                            map.swipe.show();
+                            if(lib.config.swipe){
+                                map.swipe_up.show();
+                                map.swipe_down.show();
+                                map.swipe_left.show();
+                                map.swipe_right.show();
+                            }
+                            else{
+                                map.swipe_up.hide();
+                                map.swipe_down.hide();
+                                map.swipe_left.hide();
+                                map.swipe_right.hide();
+                            }
+                        }
+                        else{
+                            map.mousewheel.show();
+                            map.hover_all.show();
+                            map.right_info.show();
+                            map.right_click.show();
+                            map.longpress_info.hide();
+                            if(!config.hover_all){
+                                map.hover_handcard.hide();
+                                map.hoveration.hide();
+                            }
+                            else{
+                                map.hover_handcard.show();
+                                map.hoveration.show();
+                            }
+                            map.swipe.hide();
+                            map.swipe_up.hide();
+                            map.swipe_down.hide();
+                            map.swipe_left.hide();
+                            map.swipe_right.hide();
+                        }
+                        if(lib.config.enable_drag){
+                            if(lib.config.touchscreen){
+                                map.enable_dragline.hide();
+                                map.enable_touchdragline.show();
+                            }
+                            else{
+                                map.enable_dragline.show();
+                                map.enable_touchdragline.hide();
+                            }
+                        }
+                        else{
+                            map.enable_dragline.hide();
+                            map.enable_touchdragline.hide();
+                        }
+                        if(!get.is.phoneLayout()){
+                            map.round_menu_func.hide();
+                        }
+                        else{
+                            map.round_menu_func.show();
                         }
                         if(lib.config.show_card_prompt){
                             map.hide_card_prompt_basic.show();
@@ -2749,32 +2522,13 @@
                             always:'保持开启',
                         }
                     },
-                    global_font:{
-                        name:'界面字体',
-                        init:'default',
-                        unfrequent:true,
-                        item:{},
-                        textMenu:function(node,link){
-                            if(link!='default'){
-                                node.style.fontFamily=link;
-                            }
-                            else{
-                                node.style.fontFamily="'STHeiti','SimHei','Microsoft JhengHei','Microsoft YaHei','WenQuanYi Micro Hei',Helvetica,Arial,sans-serif";
-                            }
-                            node.style.fontSize='20px';
-                        },
-                        onclick:function(font){
-                            game.saveConfig('global_font',font);
-                            lib.init.cssstyles();
-                        }
-                    },
                     show_discardpile:{
                         name:'暂停时弃牌堆',
                         init:true,
                         unfrequent:true,
                     },
                     show_history:{
-                        name:'出牌记录栏',
+                        name:'<u>出牌记录栏</u>',
                         init:'off',
                         intro:'在屏幕左侧或右侧出牌记录',
                         unfrequent:true,
@@ -2842,8 +2596,8 @@
                         intro:'开启后历史记录不同类别的信息将以不同颜色',
                     },
                     show_time:{
-                        name:'当前时间',
-                        intro:'在屏幕顶部当前时间',
+                        name:'<u>当前时间</u>',
+                        intro:'在屏幕顶部显示当前时间',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -2888,6 +2642,28 @@
                         name:'游戏时间',
                         init:false,
                         unfrequent:true
+                    },
+                    keep_awake:{
+                        name:'<u>屏幕常亮</u>',
+                        init:false,
+                        unfrequent:true,
+                        intro:'防止屏幕自动关闭',
+                        onclick:function(bool){
+                            game.saveConfig('keep_awake',bool);
+                            if(window.plugins&&window.plugins.insomnia){
+                                if(bool){
+                                    window.plugins.insomnia.keepAwake();
+                                }
+                                else{
+                                    window.plugins.insomnia.allowSleepAgain();
+                                }
+                            }
+                        }
+                    },
+                    enable_vibrate:{
+                        name:'开启震动',
+                        intro:'回合开始时使手机震动',
+                        init:false
                     },
                     show_statusbar_android:{
                         name:'手机状态栏',
@@ -2939,23 +2715,236 @@
                             }
                         }
                     },
-                    show_phaseuse_prompt:{
-                        name:'出牌阶段提示',
-                        intro:'在你出牌时提示文字',
+                     enable_drag:{
+                        name:'<u>启用拖拽</u>',
+                        init:true,
+                        intro:'按住卡牌后可将卡牌拖至目标',
+                        unfrequent:true,
+                    },
+                    enable_dragline:{
+                        name:'拖拽指示线',
                         init:true,
                         unfrequent:true,
+                        intro:'拖拽时显示虚线，可能降低游戏速度',
                     },
-                    auto_popped_config:{
-                        name:'自动弹出选项',
-                        intro:'鼠标移至选项按钮时弹出模式选择菜单',
+                    enable_touchdragline:{
+                        name:'拖拽指示线',
                         init:false,
                         unfrequent:true,
+                        intro:'拖拽时显示虚线，可能降低游戏速度',
                     },
-                    auto_popped_history:{
-                        name:'自动弹出历史',
-                        intro:'鼠标移至暂停按钮时弹出历史记录菜单',
-                        init:false,
+                    
+                    mousewheel:{
+                        name:'滚轮控制手牌',
+                        init:true,
                         unfrequent:true,
+                        intro:'开启后滚轮可使手牌横向滚动，在mac等可横向滚动的设备上建议关闭',
+                        onclick:function(bool){
+                            game.saveConfig('mousewheel',bool);
+                            if(lib.config.touchscreen) return;
+                            if(lib.config.mousewheel){
+                                ui.handcards1Container.onmousewheel=ui.click.mousewheel;
+                                ui.handcards2Container.onmousewheel=ui.click.mousewheel;
+                            }
+                            else{
+                                ui.handcards1Container.onmousewheel=null;
+                                ui.handcards2Container.onmousewheel=null;
+                            }
+                        }
+                    },
+                    enable_pressure:{
+                        name:'<u>启用压感</u>',
+                        init:false,
+                        intro:'开启后可通过按压执行操作',
+                        unfrequent:true,
+                    },
+                    pressure_taptic:{
+                        name:'触觉反馈',
+                        init:false,
+                        intro:'开启后按压操作执行时将产生震动',
+                        unfrequent:true,
+                    },
+                    pressure_click:{
+                        name:'按压操作',
+                        init:'pause',
+                        intro:'在空白区域按压时的操作',
+                        unfrequent:true,
+                        item:{
+                            pause:'暂停',
+                            config:'选项',
+                            auto:'托管',
+                        }
+                    },
+                    right_click:{
+                        name:'<u>右键操作</u>',
+                        init:'pause',
+                        intro:'在空白区域点击右键时的操作',
+                        unfrequent:true,
+                        item:{
+                            pause:'暂停',
+                            config:'选项',
+                            auto:'托管',
+                        },
+                        onclick:function(item){
+                            if(get.is.nomenu('right_click',item)) return false;
+                            game.saveConfig('right_click',item);
+                        }
+                    },
+                    longpress_info:{
+                        name:'长按显示信息',
+                        init:true,
+                        unfrequent:true,
+                        restart:true,
+                        intro:'长按后弹出菜单',
+                    },
+                    right_info:{
+                        name:'右键显示信息',
+                        init:true,
+                        unfrequent:true,
+                        restart:true,
+                        intro:'右键点击后弹出菜单',
+                    },
+                    hover_all:{
+                        name:'悬停显示信息',
+                        init:true,
+                        unfrequent:true,
+                        restart:true,
+                        intro:'悬停后弹出菜单',
+                    },
+                    hover_handcard:{
+                        name:'悬停手牌显示信息',
+                        init:true,
+                        unfrequent:true,
+                        intro:'悬停手牌后弹出菜单',
+                    },
+                    hoveration:{
+                        name:'悬停菜单弹出时间',
+                        unfrequent:true,
+                        intro:'鼠标移至目标到弹出菜单的时间间隔',
+                        init:'700',
+                        item:{
+                            '500':'0.5秒',
+                            '700':'0.7秒',
+                            '1000':'1秒',
+                            '1500':'1.5秒',
+                            '2500':'2.5秒',
+                        }
+                    },
+                    doubleclick_intro:{
+                        name:'双击显示角色资料',
+                        init:true,
+                        unfrequent:true,
+                        intro:'双击角色头像后显示其资料卡',
+                    },
+                    swipe:{
+                        name:'<u>滑动手势</u>',
+                        init:true,
+                        unfrequent:true,
+                        intro:'在非滚动区域向四个方向滑动可执行对应操作',
+                    },
+                    swipe_down:{
+                        name:'下划操作',
+                        init:'menu',
+                        unfrequent:true,
+                        intro:'向下滑动时执行的操作',
+                        item:{
+                            system:'显示按钮',
+                            menu:'打开菜单',
+                            pause:'切换暂停',
+                            auto:'切换托管',
+                            chat:'显示聊天',
+                            off:'关闭',
+                        },
+                        onclick:function(item){
+                            if(get.is.nomenu('swipe_down',item)) return false;
+                            game.saveConfig('swipe_down',item);
+                        }
+                    },
+                    swipe_up:{
+                        name:'上划操作',
+                        intro:'向上滑动时执行的操作',
+                        init:'chat',
+                        unfrequent:true,
+                        item:{
+                            system:'显示按钮',
+                            menu:'打开菜单',
+                            pause:'切换暂停',
+                            auto:'切换托管',
+                            chat:'显示聊天',
+                            off:'关闭',
+                        },
+                        onclick:function(item){
+                            if(get.is.nomenu('swipe_up',item)) return false;
+                            game.saveConfig('swipe_up',item);
+                        }
+                    },
+                    swipe_left:{
+                        name:'左划操作',
+                        intro:'向左滑动时执行的操作',
+                        init:'system',
+                        unfrequent:true,
+                        item:{
+                            system:'显示按钮',
+                            menu:'打开菜单',
+                            pause:'切换暂停',
+                            auto:'切换托管',
+                            chat:'显示聊天',
+                            off:'关闭',
+                        },
+                        onclick:function(item){
+                            if(get.is.nomenu('swipe_left',item)) return false;
+                            game.saveConfig('swipe_left',item);
+                        }
+                    },
+                    swipe_right:{
+                        name:'右划操作',
+                        intro:'向右滑动时执行的操作',
+                        init:'system',
+                        unfrequent:true,
+                        item:{
+                            system:'显示按钮',
+                            menu:'打开菜单',
+                            pause:'切换暂停',
+                            auto:'切换托管',
+                            chat:'显示聊天',
+                            off:'关闭',
+                        },
+                        onclick:function(item){
+                            if(get.is.nomenu('swipe_right',item)) return false;
+                            game.saveConfig('swipe_right',item);
+                        }
+                    },
+                    show_round_menu:{
+                        name:'<u>触屏按钮</u>',
+                        init:true,
+                        unfrequent:true,
+                        onclick:function(bool){
+                            if(get.is.nomenu('show_round_menu',bool)) return false;
+                            game.saveConfig('show_round_menu',bool);
+                            if(bool&&ui.roundmenu){
+                                ui.roundmenu.style.display='';
+                            }
+                            else{
+                                ui.roundmenu.style.display='none';
+								alert('关闭触屏按钮后可通过手势打开菜单（默认为下划）')
+                            }
+                        }
+                    },
+                    round_menu_func:{
+                        name:'触屏按钮操作',
+                        intro:'点击屏幕中圆形按钮时执行的操作',
+                        init:'system',
+                        unfrequent:true,
+                        item:{
+                            system:'显示按钮',
+                            menu:'打开菜单',
+                            pause:'切换暂停',
+                            auto:'切换托管'
+                        },
+                        onclick:function(item){
+                            if(get.is.nomenu('round_menu_func',item)) return false;
+                            game.saveConfig('round_menu_func',item);
+                        },
                     },
                     remember_round_button:{
                         name:'记住按钮位置',
@@ -2968,6 +2957,18 @@
                                 ui.click.resetround();
                             }
                         }
+                    },
+                    popequip:{
+						name:'触屏装备弹出',
+						intro:'触屏布局中，选择装备时会弹出大装备栏',
+						init:false,
+						unfrequent:false,
+					},
+                    filternode_button:{
+                        name:'触屏筛选按钮',
+                        intro:'设置自由选将对话框中筛选按钮的样式',
+                        init:true,
+                        unfrequent:true,
                     },
                     remember_dialog:{
                         name:'记住对话框位置',
@@ -3026,33 +3027,23 @@
                         },
                         unfrequent:true,
                     },
-					popequip:{
-						name:'触屏装备弹出',
-						intro:'触屏布局中，选择装备时会弹出大装备栏',
-						init:false,
-						unfrequent:false,
-					},
-                    filternode_button:{
-                        name:'触屏筛选按钮',
-                        intro:'设置自由选将对话框中筛选按钮的样式',
+                    show_phaseuse_prompt:{
+                        name:'<u>出牌阶段提示</u>',
+                        intro:'在你出牌时提示文字',
                         init:true,
                         unfrequent:true,
                     },
-                    show_round_menu:{
-                        name:'触屏按钮',
-                        init:true,
+                    auto_popped_config:{
+                        name:'自动弹出选项',
+                        intro:'鼠标移至选项按钮时弹出模式选择菜单',
+                        init:false,
                         unfrequent:true,
-                        onclick:function(bool){
-                            if(get.is.nomenu('show_round_menu',bool)) return false;
-                            game.saveConfig('show_round_menu',bool);
-                            if(bool&&ui.roundmenu){
-                                ui.roundmenu.style.display='';
-                            }
-                            else{
-                                ui.roundmenu.style.display='none';
-								alert('关闭触屏按钮后可通过手势打开菜单（默认为下划）')
-                            }
-                        }
+                    },
+                    auto_popped_history:{
+                        name:'自动弹出历史',
+                        intro:'鼠标移至暂停按钮时弹出历史记录菜单',
+                        init:false,
+                        unfrequent:true,
                     },
                     show_card_prompt:{
                         name:'出牌信息',
@@ -3123,7 +3114,7 @@
                         }
                     },
                     show_replay:{
-                        name:'重来按钮',
+                        name:'<u>重来按钮</u>',
                         init:true,
                         unfrequent:true,
                         onclick:function(bool){
@@ -5871,6 +5862,7 @@
                     }
                     this.setBackgroundImage(src);
                     this.style.backgroundSize="cover";
+                    if (lib.card[name] && lib.card[name].type == 'delay' && !lib.config.skin[name]) this.style.backgroundSize = "115%";
                     return this;
                 };
                 HTMLDivElement.prototype.setBackgroundDB=function(img){
@@ -6320,11 +6312,11 @@
                             lib.configMenu.appearence.config.name_font.item[i]=pack.font[i];
                             lib.configMenu.appearence.config.identity_font.item[i]=pack.font[i];
                             lib.configMenu.appearence.config.cardtext_font.item[i]=pack.font[i];
-                            lib.configMenu.view.config.global_font.item[i]=pack.font[i];
+                            lib.configMenu.appearence.config.global_font.item[i]=pack.font[i];
                             ui.css.fontsheet.sheet.insertRule("@font-face {font-family: '"+i+"';src: url('"+lib.assetURL+"font/"+i+".ttf');}",0);
                         }
                         lib.configMenu.appearence.config.cardtext_font.item.default='默认';
-                        lib.configMenu.view.config.global_font.item.default='默认';
+                        lib.configMenu.appearence.config.global_font.item.default='默认';
                     }
 
                     var ua=navigator.userAgent.toLowerCase();
@@ -9128,7 +9120,6 @@
                     next.setContent(info.content);
                     next.skillHidden=event.skillHidden;
                     next.skill=event.skill;
-                    console.log(next);
                     if(info.popup!=false&&!info.direct){
                         if(info.popup){
                             player.popup(info.popup);
@@ -12039,9 +12030,6 @@
                     else{
                         cards=[];
                     }
-                    if(event.drawDeck){
-                        cards=cards.concat(player.getDeckCards(event.drawDeck));
-                    }
                     if(event.animate!=false){
                         if(event.visible){
                             player.gain(cards,'gain2');
@@ -12063,29 +12051,40 @@
                     if(typeof event.minnum=='number'&&num<event.minnum){
 						num=event.minnum;
 					}
+                    var cardname = event.cardname;
+                    var message = event.message;
+                    if (!ui.skillPile.childNodes || ui.skillPile.childNodes.length == 0){
+                        game.log('没有技能牌了！');
+                        num = 0;
+                        event.finish();
+                    } else if (ui.skillPile.childNodes.length < num){
+                        game.log('技能牌不够了！');
+                        num = ui.skillPile.childNodes.length;
+                    }
+                    var cards = [];
                     if(event.log!=false){
                         if(num>0){
-                            game.log(player,'摸了'+get.cnNumber(num)+'张牌');
+                            game.log(player,'摸了'+get.cnNumber(num)+'张技能牌');
                         }
                     }
-                    var cards;
-                    if(num>0){
-                        cards=get.cards(num);
-                    }
-                    else{
-                        cards=[];
-                    }
-                    if(event.drawDeck){
-                        cards=cards.concat(player.getDeckCards(event.drawDeck));
+                    for(var i=0;i<num;i++){
+                        if (cardname){
+                            if (!message) message = '没找到'+get.translation(cardname);
+                            for(var j=0;j<ui.skillPile.childNodes.length;j++){
+                                if (ui.skillPile.childNodes[j].name == cardname){
+                                    cards.push(ui.skillPile.childNodes[j]);
+                                    break;
+                                } else if (j == ui.skillPile.childNodes.length -1){
+                                    player.say(message);
+                                    i = 10000; 
+                                }
+                            }
+                        } else {
+    					    cards.push(ui.skillPile.childNodes[i]);
+                        }
                     }
                     if(event.animate!=false){
-                        if(event.visible){
-                            player.gain(cards,'gain2');
-                            game.log(player,'摸了'+get.cnNumber(num)+'张牌（',cards,'）');
-                        }
-                        else{
-                            player.gain(cards,'draw');
-                        }
+                        player.gain(cards);
                     }
                     else{
                         player.gain(cards);
@@ -12393,6 +12392,7 @@
                         if (get.info(cards[i]).type == 'delay'){
                             player.addJudge(cards[i]);
                             cards.remove(cards[i]);
+                            i--;
                         }
                     }
                     if (cards.length == 0){
@@ -13308,7 +13308,7 @@
                             cards[0].clone.moveDelete(player);
                             game.addVideo('gain2',player,get.cardsInfo(cards));
                         }
-                        // player.$gain2(cards);
+                        player.$gain2(cards);
                         if(get.itemtype(card)!='card'){
                             if(typeof card=='string') cards[0].viewAs=card;
                             else cards[0].viewAs=card.name;
@@ -13422,7 +13422,6 @@
                         player.node.turnedover.setBackgroundImage('');
                         player.node.turnedover.style.opacity=0;
                         ui.refresh(player);
-                        game.log(player,'符卡结束');
                     }
                     // 到这里结束
                     game.broadcast(function(player){
@@ -16039,6 +16038,10 @@
                         }
                         else if(typeof arguments[i]=='boolean'){
                             next.animate=arguments[i];
+                        } 
+                        else if (typeof arguments[i]=='string'){
+                            if (!next.cardname) next.cardname=arguments[i];
+                            else next.message = arguments[i];
                         }
                     }
                     if(next.num==undefined) next.num=1;
@@ -21623,6 +21626,19 @@
 				trigger:{global:"gameStart"},
 				direct:true,
 				content:function(){
+                    if (get.mode() != 'identity' && get.mode() != 'old_identity'){
+                        game.loadModeAsync('identity',function(mode){
+                            for(var i in mode.translate){
+                                lib.translate[i]=lib.translate[i]||mode.translate[i];
+                                //lib.translate[i]=mode.translate[i];
+                            }
+                            for(var i in mode.skill){
+                                if(lib.skill[i]) console.log(i);
+                                else lib.skill[i]=mode.skill[i];
+                                game.finishSkill(i);
+                            }
+                        });
+                    }
                     if (player.identity != 'nei'){
                         var newz = game.findPlayer(function(current){
                             return current.identity == 'nei';
@@ -21870,12 +21886,14 @@
                 priority:-20,
                 popup:false,
                 content:function(){
+                    'step 0'
                     while(ui.dialogs.length){
                         ui.dialogs[0].close();
                     }
                     if(!player.noPhaseDelay&&lib.config.show_phase_prompt){
                         player.popup('回合结束');
                     }
+                    'step 1'
                     // 结束阶段，如果有角色是背面朝上的，就翻过去。
                     var players = game.filterPlayer();
                     for (var j = 0; j < players.length; j ++) {
@@ -21890,6 +21908,7 @@
                         }
                     }
                     game.syncState();
+                    'step 2'
                     game.addVideo('phaseChange',player);
                     game.log(player,'的回合结束');
                     game.log('————————————————————');
@@ -21921,15 +21940,30 @@
                 },
                 content:function(){
                     if (player.isTurnedOver()){
-                        var skillname = trigger.parent.skill;
-                        var info = lib.skill[skillname];
-                        if (info.spell){
-                            for (var i = 0; i < info.spell.length; i ++){
-                                player.addSkill(info.spell[i]);
+                        var skillname = null;
+                        var r = trigger.getParent();
+                        while (r){
+                            if (!r.skill || !lib.skill[r.skill].spell){
+                            } else {
+                                skillname = r.skill;
+                                break;
                             }
-                            player.removeSkillTrigger(skillname);
+                            if (r.parent) r = r.getParent();
+                            else break;
                         }
-                        player.storage.spell = skillname;
+                        if (!skillname){
+                            event.finish();
+                            trigger.cancel();
+                        } else {
+                            var info = lib.skill[skillname];
+                            if (info.spell){
+                                for (var i = 0; i < info.spell.length; i ++){
+                                    player.addSkill(info.spell[i]);
+                                }
+                                player.removeSkillTrigger(skillname);
+                            }
+                            player.storage.spell = skillname;
+                        }
                     } else {
                         if (player.storage.spell){
                             var info = lib.skill[player.storage.spell];
@@ -26666,7 +26700,6 @@
 				game.saveConfig('show_splash','always');
                 game.saveConfig('player_number','5','old_identity');
             } else {
-                
                 var i,j,k,num,table,tr,td,dialog;
                 _status.over=true;
                 ui.control.show();
@@ -27218,6 +27251,7 @@
                     delete ui.giveup;
                 }
                 if (lib.config.auto_restart){
+                    game.pause();
                     setTimeout(game.reload(), 10000);
 			    }
                 if(lib.config.test_game&&!_status.connectMode){
@@ -27230,7 +27264,7 @@
                             case 'chess':game.saveConfig('mode','identity');break;
                         }
                     }
-                    setTimeout(game.reload,500);
+                    setTimeout(game.reload(), 10000);
                 }
                 if(game.controlOver){
                     game.controlOver();return;
@@ -36998,13 +37032,6 @@
                         pre.style.position='relative';
                         lib.setScroll(pre);
                         page.appendChild(text);
-
-                        // var caption=ui.create.div('','输入命令',page);
-                        // caption.style.margin='6px';
-                        // caption.style.position='absolute';
-                        // caption.style.width='120px';
-                        // caption.style.top='129px';
-                        // caption.style.left='64px';
                         var text2=document.createElement('input');
                         text2.style.width='200px';
                         text2.style.height='20px';
