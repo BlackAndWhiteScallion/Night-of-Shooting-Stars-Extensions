@@ -9124,8 +9124,7 @@
                         if(info.popup){
                             player.popup(info.popup);
                             game.log(player,'发动了','【'+get.skillTranslation(event.skill,player)+'】');
-                        }
-                        else{
+                        } else {
                             if(info.logTarget&&info.logLine!==false){
                                 if(typeof info.logTarget=='string'){
                                     player.logSkill(event.skill,trigger[info.logTarget],info.line);
@@ -9136,6 +9135,25 @@
                             }
                             else{
                                 player.logSkill(event.skill,false,info.line);
+                            }
+                        }
+                        if(lib.config.skill_animation_type!='off'&&lib.skill[event.skill]){
+                            var skill = event.skill;
+    				        var checkShow=player.checkShow(event.skill);
+                            if (info.logv!==false) game.logv(player,skill,targets);
+                            if (lib.skill[skill].skillAnimation){
+                                if(lib.config.skill_animation_type=='default'){
+                                    checkShow=checkShow||'main';
+                                }
+                                else{
+                                    checkShow=false;
+                                }
+                                if(lib.skill[skill].textAnimation){
+                                    checkShow=false;
+                                }
+                                player.$skill(lib.skill[skill].animationStr||lib.translate[skill],lib.skill[skill].skillAnimation,lib.skill[skill].animationColor,checkShow);
+                            } else if (lib.skill[skill].cardAnimation){
+                                player.$effect(skill, lib.skill[skill].cardAnimation);
                             }
                         }
                     }
@@ -11845,18 +11863,22 @@
                     if(!info.direct){
                         game.log(player,str,'【'+get.skillTranslation(skill,player)+'】');
                         if(info.logv!==false) game.logv(player,skill,targets);
-                       if(lib.config.skill_animation_type!='off'&&lib.skill[skill]&&lib.skill[skill].skillAnimation){
-							if(lib.config.skill_animation_type=='default'){
-								checkShow=checkShow||'main';
-							}
-							else{
-								checkShow=false;
-							}
-							if(lib.skill[skill].textAnimation){
-								checkShow=false;
-							}
-							player.$skill(lib.skill[skill].animationStr||lib.translate[skill],lib.skill[skill].skillAnimation,lib.skill[skill].animationColor,checkShow);
-						}
+                        if(lib.config.skill_animation_type!='off'&&lib.skill[skill]){
+                            if (lib.skill[skill].skillAnimation){
+                                if(lib.config.skill_animation_type=='default'){
+                                    checkShow=checkShow||'main';
+                                }
+                                else{
+                                    checkShow=false;
+                                }
+                                if(lib.skill[skill].textAnimation){
+                                    checkShow=false;
+                                }
+                                player.$skill(lib.skill[skill].animationStr||lib.translate[skill],lib.skill[skill].skillAnimation,lib.skill[skill].animationColor,checkShow);
+                            } else if (lib.skill[skill].cardAnimation){
+                                player.$effect(skill, lib.skill[skill].cardAnimation);
+                            }
+                        }
                         else{
                             player.popup(get.skillTranslation(skill,player));
                         }
@@ -12828,7 +12850,8 @@
                     if(num>0){
                         player.changelili(num,false);
                         if(lib.config.animation&&!lib.config.low_performance){
-                            player.$recover();
+                            //player.$recover();
+                            player.$effect('gainlili', 4);
                         }
                         player.$damagepop(num,'wood');
                         game.log(player,'获得了'+get.cnNumber(num)+'点灵力');
@@ -19430,6 +19453,50 @@
 						},that,type,name,color,avatar);
                     },avatar?0:300);
                 },
+                $effect:function(name, frame, left, top){
+                    if(lib.config.animation&&!lib.config.low_performance){
+                        var Animation = ui.create.div();
+                        Animation.style["z-index"] = 20;
+                        
+                        Animation.style.width = (140/715)*document.body.clientHeight + "px";
+                        Animation.style.height= (140/715)*document.body.clientHeight + "px";
+                        
+                        if (left || top){
+                            if (left) Animation.style.left = left;
+                            if (top) Animation.style.top = top;
+                            ui.window.appendChild(Animation);
+                        } else if(this==game.me){
+                            Animation.style.left= (document.body.clientWidth-120)/2+"px";
+                            Animation.style.top = "60%";
+                            ui.window.appendChild(Animation);
+                        }
+                        else {
+                            Animation.style.left= "5%";
+                            Animation.style.top = "50%";
+                            this.appendChild(Animation);
+                        }
+                        Animation.style.backgroundSize="cover";
+                        var zhen = 0;
+                        var ID = setInterval(function(){
+                            var img = new Image();
+                            img.onload=function(){
+                                //delete img;
+                            };
+                            img.onerror=function(){
+                                zhen = frame + 1;
+                            };
+                            img.src = lib.assetURL + "image/effect/" + name +"/"+ zhen + ".png";
+                            var SRC = lib.assetURL + "image/effect/" + name +"/"+ zhen + ".png";
+                            if(zhen>frame){
+                                clearInterval(ID);
+                                Animation.delete(); 
+                                return ;
+                            }
+                            Animation.setBackgroundImage(SRC);
+                            zhen ++;
+                        },200);
+                    }
+                },
                 $thunder:function(){
                     game.addVideo('flame',this,'thunder');
                     var left,top;
@@ -19495,6 +19562,7 @@
                     }
                     game.animate.flame(left+this.offsetWidth/2,
                         top+this.offsetHeight-30,700,'recover');
+                    this.$effect('recover', 11);
                 },
                 $fullscreenpop:function(str,nature,avatar){
                     game.broadcast(function(player,str,nature,avatar){
@@ -19581,11 +19649,6 @@
                         }
                         node.innerHTML=num;
                         node.dataset.nature=nature||'soil';
-                        if (node.dataset.nature == 'soil'){
-                            node.setBackgroundImage('theme/effect/damage.gif');
-                            node.style.backgroundRepeat = 'no-repeat';
-                            node.style.backgroundPosition = "center";
-                        }
                         this.damagepopups.push(node);
                         if(this.damagepopups.length==1){
                             this.$damagepop();
@@ -21957,6 +22020,7 @@
                         } else {
                             var info = lib.skill[skillname];
                             if (info.spell){
+                                player.$skill(get.translation(skillname), null, null, true);
                                 for (var i = 0; i < info.spell.length; i ++){
                                     player.addSkill(info.spell[i]);
                                 }
@@ -36148,6 +36212,8 @@
                                     delete window.noname_asset_list;
                                     var skins=window.noname_skin_list;
                                     delete window.noname_skin_list;
+                                    var animes=window.noname_animate_list;
+                                    delete window.noname_animate_list;
                                     var asset_version=updates.shift();
 
                                     var skipcharacter=[],skipcard=['tiesuo_mark'];
@@ -36207,6 +36273,11 @@
                                         for(var i in skins){
                                             for(var j=1;j<=skins[i];j++){
                                                 updates.push('image/skin/'+i+'/'+j+'.jpg');
+                                            }
+                                        }
+                                        for(var i in animes){
+                                            for(var j=0;j<=animes[i];j++){
+                                                updates.push('image/effect/'+i+'/'+j+'.png');
                                             }
                                         }
                                     }
@@ -36461,7 +36532,7 @@
                         var span4_br=ui.create.node('br');
                         li2.lastChild.appendChild(span4_br);
 
-                        var span2=ui.create.div('','皮肤素材（24MB）');
+                        var span2=ui.create.div('','皮肤+动画素材（30MB）');
                         span2.style.fontSize='small';
                         span2.style.lineHeight='16px';
                         li2.lastChild.appendChild(span2);

@@ -226,6 +226,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
     			},
 			},
 			ziheng_skill:{
+				cardAnimation:11,
     			trigger:{player:'phaseDrawEnd'},
     			content:function(){
     				"step 0"
@@ -264,6 +265,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
     				return false;
     			},
     			trigger:{target:'useCardToBefore'},
+				cardAnimation:17,
     			content:function(){
     				"step 0"
     				player.chooseToCompare(trigger.player);
@@ -334,6 +336,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			},
 			shenyou_skill_1:{
 				audio:2,
+				skillAnimation:11,
     			trigger:{player:'damageBefore'},
     			forced:true,
     			filter:function(event,player){
@@ -374,6 +377,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			},
 			jinu_skill:{
     			audio:2,
+				cardAnimation:11,
     			trigger:{player:'damageEnd'},
     			filter:function(event,player){
     				return event.source && event.source.countCards('ej') && event.nature != 'thunder';
@@ -411,6 +415,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				mark:true,
 				intro:{
 					content:'不能成为攻击牌的目标',
+				},
+				init:function(player){
+					player.$effect('qianxing_skill', 6);
 				},
 				mod:{
 					targetEnabled:function(card,player,target,now){
