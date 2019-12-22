@@ -5465,6 +5465,12 @@
                     }
                 }
             },
+            puzzle:{
+                name:'残局',
+                config:{
+
+                },
+            },
             library:{
                 name:'图鉴',
                 config:{
@@ -7808,6 +7814,8 @@
                             setDialog('据说这个战棋模式里面有些很神奇的东西，你可以陪我一起去吗？');
                         } else if (mode.includes('brawl')){
                             setDialog('打牌打累了，就搞点好玩的小场景休闲一下吧，打子规可是最最最减压的事情啦！而且，还可以自己创建场景玩哟。我就做了一个呢，是不是很棒⭐。');
+                        } else if (mode.includes('puzzle')){
+                            setDialog('必须在一回合内胜利的残局谜题——好玩挺好玩，对水平也有不小的提升……就是难的题真的好难啊！无论是制作起来还是解起来都太费脑子了！');
                         }
                     }
                     var upNode=function(){
@@ -8466,6 +8474,7 @@
             _enhance:'强化',
             qianxing:'潜行',
             mianyi:'免疫',
+            mianyi_info:'锁定技，你受到伤害时，防止该伤害。',
             fengyin:'沉默',
             unequip:'封印',
 
@@ -12225,7 +12234,7 @@
                     var num  = 0;
                     for(var i=0;i<cards.length;i++){
                         if(get.type(cards[i]) == 'delay'){
-                            player.gain(ui.skillPile.childNodes[i],'draw2');
+                            player.drawSkill();
                         } else {
                             num ++;
                         }
@@ -23812,6 +23821,15 @@
             ui.window.appendChild(audio);
         },
         playBackgroundMusic:function(music, temp, marisa){
+            if (!ui.backgroundMusic){
+                ui.backgroundMusic=document.createElement('audio');
+                ui.backgroundMusic.volume=lib.config.volumn_background/8;
+                ui.backgroundMusic.autoplay=true;
+                ui.backgroundMusic.loop=true;
+                //ui.backgroundMusic.addEventListener('ended',game.playBackgroundMusic);
+                if (ui.window) ui.window.appendChild(ui.backgroundMusic);
+                else document.body.appendChild(ui.backgroundMusic);
+            }
             if (!marisa && lib.config.background_music == 'marisa') return ;
             if (!lib.config.background_music) lib.config.background_music = 'music_default';
             if(lib.config.background_music=='music_off'){
@@ -26742,7 +26760,7 @@
                 }
                 var step4=function(){
                     clear();
-                    ui.create.dialog('<div><div style="width:280px;margin-left:120px;font-size:18px">如果还不太懂，或者想练习角色，欢迎来【场景】→【对战练习】！如果哪个模式不熟的话，可以在那模式用自由选将召唤我！');
+                    ui.create.dialog('<div><div style="width:280px;margin-left:120px;font-size:18px">如果还不太懂，欢迎来【残局】→【新手】！如果想练习角色，欢迎来【场景】→【对战练习】！如果哪个模式不熟的话，可以在那模式用自由选将召唤我！');
                     ui.create.div('.avatar',ui.dialog).setBackground('zigui','character');
                     ui.create.control('谢谢，再见！',step5);
                 }
@@ -28410,16 +28428,6 @@
                         }
                     }
                     for(i=0;i<lib.card.list.length;i++){
-                        if(lib.card.list[i][2]=='huosha'){
-                            lib.card.list[i]=lib.card.list[i].slice(0);
-                            lib.card.list[i][2]='sha';
-                            lib.card.list[i][3]='fire';
-                        }
-                        else if(lib.card.list[i][2]=='leisha'){
-                            lib.card.list[i]=lib.card.list[i].slice(0);
-                            lib.card.list[i][2]='sha';
-                            lib.card.list[i][3]='thunder';
-                        }
                         if(!lib.card[lib.card.list[i][2]]){
                             lib.card.list.splice(i,1);i--;
                         }
@@ -36271,8 +36279,14 @@
                                     }
                                     if(lib.config.asset_skin){
                                         for(var i in skins){
-                                            for(var j=1;j<=skins[i];j++){
-                                                updates.push('image/skin/'+i+'/'+j+'.jpg');
+                                            if (lib.card[i]){
+                                                for(var j=1;j<=skins[i];j++){
+                                                    updates.push('image/skin/'+i+'/'+j+'.png');
+                                                }
+                                            } else {
+                                                for(var j=1;j<=skins[i];j++){
+                                                    updates.push('image/skin/'+i+'/'+j+'.jpg');
+                                                }
                                             }
                                         }
                                         for(var i in animes){
@@ -44514,7 +44528,7 @@
                                 game.over(_status.maxShuffleCheck());
                             }
                             else{
-                                game.over('平局');
+                                game.over('平局——无法摸牌');
                             }
                             return [];
                         }
