@@ -362,14 +362,14 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'disrupt',
 			enable:true,
 			selectTarget:1,
-			range:{attack:1},
+			//range:{attack:1},
 			/*
 			postAi:function(targets){
 				return targets.length==1&&targets[0].num('j');
 			},
 			*/
 			filterTarget:function(card,player,target){
-				return (target.num('hej') != 0);
+				return (target.num('hej') != 0) && (get.distance(player, target,'attack')<=1 || target.storage._mubiao);
 			},
 			content:function(){
 				if (player.name == 'marisa'){
@@ -384,7 +384,6 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				if(target.num('hej')){
 					player.gainPlayerCard('hej',target,true);
 				}
-				if (!target.storage._mubiao || target.storage._mubiao == 0) player.loselili();
 			},
 			ai:{
 				wuxie:function(target,card,player,viewer){
@@ -441,7 +440,6 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 					filterTarget:function(card,player,target){
 						return player != target;
 					},
-					forced:true,	// 强制给出
 					ai1:function(card){
 						/*
 						var player=_status.event.player;
@@ -1664,6 +1662,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				return 8-ai.get.value(card);
 			},
 			position:'h',
+			prompt:'弃置一张攻击牌，获得1点灵力',
 			content:function(){
 				player.gainlili();
 				if (player.name == 'suika') player.say('好酒，好酒~');
@@ -2120,10 +2119,21 @@ game.import('card',function(lib,game,ui,get,ai,_status){
     		usable:1,
 			chooseButton:{
   				dialog:function(event,player){
+					  	var packs = lib.config.all.cards.diff(lib.config.cards);
     					var list = [];
     					for (var i in lib.card){
     						if(lib.card[i].mode&&lib.card[i].mode.contains(lib.config.mode)==false) continue;
 							if(lib.card[i].forbid&&lib.card[i].forbid.contains(lib.config.mode)) continue;
+							if (packs){
+								var f = false;
+								for (var j = 0; j < packs.length; j ++){
+									if (lib.cardPack[packs[j]].contains(i)){
+										f = true;
+										break;
+									}
+								}
+								if (f) continue;
+							}
 							if(lib.card[i].type == 'trick' && event.filterCard({name:i},player,event)){
 								list.add(i);
 							}
@@ -2821,10 +2831,21 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			content:function(){
 				'step 0'
 				var list = [];
+				var packs = lib.config.all.cards.diff(lib.config.cards);
     			for (var i in lib.card){
     				if(lib.card[i].mode&&lib.card[i].mode.contains(lib.config.mode)==false) continue;
 					if(lib.card[i].forbid&&lib.card[i].forbid.contains(lib.config.mode)) continue;
  					//if(lib.card[i].type == 'trick' || lib.card[i].type == 'basic' || lib.card[i].type == "jinji" || lib.card[i].type == "equip"){
+					if (packs){
+						var f = false;
+						for (var j = 0; j < packs.length; j ++){
+							if (lib.cardPack[packs[j]].contains(i)){
+								f = true;
+								break;
+							}
+						}
+						if (f) continue;
+					}
 					if (lib.translate[i] && lib.card[i].type != 'delay' && lib.card[i].type != 'zhenfa'){
 						list.add(i);
 					}
@@ -2910,7 +2931,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		tao:'葱',
 		tao_info:'出牌阶段，对你使用；或角色处于决死状态时，对其使用；目标回复1点体力。',
 		reidaisai:'例大祭',
-		reidaisai_info:'出牌阶段，对所有角色使用：目标各摸一张牌，然后各交给一名角色一张牌。',
+		reidaisai_info:'出牌阶段，对所有角色使用：目标各摸一张牌，然后各可以交给一名角色一张牌。',
 		danmakucraze:'弹幕狂欢',
 		danmakucraze_info:'出牌阶段，对你使用：目标使用的下两张【轰！】不计次数，直到结束阶段。</br><u>强化（-1）：摸一张牌。</u>',
 		wuzhong:'灵光一闪',
@@ -2920,7 +2941,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		juedou_info:'出牌阶段，对一名角色使用。由其开始，其与你轮流打出一张【轰！】，直到其中一方未打出【轰！】为止。未打出【轰！】的一方受到另一方对其造成的1点弹幕伤害。',
 		juedou_bg:'斗',
 		shunshou:'顺手牵羊',
-		shunshou_info:'出牌阶段，对攻击范围内的一名角色使用：获得其区域内的一张牌，然后若你本回合没有对其使用过牌，你消耗1点灵力。',
+		shunshou_info:'出牌阶段，对攻击范围内的一名角色，或本回合成为过牌的目标的一名角色使用：获得其区域内的一张牌。',
 		guohe:'疾风骤雨',
 		guohe_bg:'拆',
 		guohe_info:'出牌阶段，对攻击范围内的一名角色使用；弃置其区域内的一张牌。</br><u>强化(-1)：再弃置其一张装备或技能牌。</u>',

@@ -52,7 +52,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 				trigger:{global:'gameStart'},
 				global:'shijianliushi_silence',
 				filter:function(event,player){
-					return !_status.connectMode;
+					return !_status.connectMode && get.mode() != 'tutorial';
 				},
 				content:function(){
 					var clear=function(){
@@ -98,11 +98,13 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 						} else if (get.mode() == 'old_identity'){
 							ui.dialog.add('<div><div style="width:280px;margin-left:120px;font-size:18px">身份模式是三国杀同名模式复刻。</div></div>');
 						} else if (get.mode() == 'stg'){
-							ui.dialog.add('<div><div style="width:280px;margin-left:120px;font-size:18px">你为什么选我闯关啊！闯关模式中，玩家单人连续击坠多名角色来试图突破关卡。</div></div>');
+							ui.dialog.add('<div><div style="width:280px;margin-left:120px;font-size:18px">闯关模式中，玩家单人连续击坠多名角色来试图突破关卡。所以说，你为什么选我闯关啊！</div></div>');
 						} else if (get.mode() == 'boss'){
 							ui.dialog.add('<div><div style="width:280px;margin-left:120px;font-size:18px">挑战模式中，三名玩家合作挑战一名BOSS角色。</div></div>');
 						} else if (get.mode() == 'chess'){
 							ui.dialog.add('<div><div style="width:280px;margin-left:120px;font-size:18px">其实……我也不知道战棋模式是什么……</div></div>');
+						} else if (get.mode() == 'tutorial'){
+							ui.dialog.add('<div><div style="width:280px;margin-left:120px;font-size:18px">在这里，由我来教你怎么玩流星夜哟！</div></div>');	
 						}
 						ui.create.div('.avatar',ui.dialog).setBackground('zigui','character');
 						ui.create.control('这模式要怎么玩？',step3);
@@ -148,6 +150,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 							ui.dialog.add('<div><div style="width:280px;margin-left:120px;font-size:18px">盟军角色坠机后会重整：重整完毕后满血复活重整时间在右上可以查看。</div></div>');
 						} else if (get.mode() == 'chess'){
 							ui.dialog.add('<div><div style="width:280px;margin-left:120px;font-size:18px">额……你自己探索吧！加油！</div></div>');
+						} else if (get.mode() == 'tutorial'){
+							ui.dialog.add('<div><div style="width:280px;margin-left:120px;font-size:18px">放心吧，流星夜的东西只有看起来复杂。<br>没有任何东西，是试一次试不出来的。加油！</div></div>');
 						}
 						ui.create.control('知道了',step4);
 					};
@@ -186,8 +190,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 						game.me.storage.jieshuo = ['牌和技能的描述可以在卡牌/角色身上右键单击或悬空1秒查看双击角色还可以看到角色简介，能换皮肤！','牌在需要用的时候，点一下，如果有目标就选目标，然后点确定就行了。',
 						'技能也类似：需要使用的时候是会跳选择的。','出牌阶段使用的技能，会出现一个触发用按钮就像这个问答的按钮！'];
 					} else if (result.index == 1){
-						game.me.storage.jieshuo = ['每个人身上的绿色的星星就是<b>灵力值</b>啦！','灵力值是流星夜的核心体系！ 就是每个人身上那条绿色的星星。','灵力值的作用很多：你的攻击范围等于你的灵力强化牌时需要消耗灵力发动符卡时需要消耗灵力',
-						'加灵力的方式也不少：牌堆里所有在下方有“灵力：+1”的牌都是会加灵力的','如果你的灵力降到0的话你不能造成任何伤害！','但是没关系如果你准备和结束阶段都没灵力回合结束后，你会获得1点！(这个设置可以关闭)'];
+						game.me.storage.jieshuo = ['每个人身上的绿色的星星就是<b>灵力值</b>啦！','灵力值是流星夜的核心体系！ 就是每个人身上那条绿色的星星。','灵力值的作用很多：你的攻击范围等于你的灵力<br>强化牌时需要消耗灵力<br>发动符卡时需要消耗灵力',
+						'加灵力的方式也不少：牌堆里所有在下方有“灵力：+1”的牌都是会加灵力的','如果你的灵力降到0的话，你不能造成任何伤害！','但是没关系，如果你准备和结束阶段都没灵力，回合结束后，你会获得1点！(这个设置可以关闭)'];
 					} else if (result.index == 2){
 						game.me.storage.jieshuo = ['符卡技！在准备阶段消耗标注量的灵力，然后获得描述里的技能直到回合结束！','要发动符卡必须要灵力<b>大于</b>描述中的点数。（3）就要4点灵力才能发动。',
 						'符卡技发动还有一些注意事项：符卡发动中，防止角色获得灵力。角色灵力变成0时，符卡结束。','符卡技中的标签也是有效果的：永续：到自己回合开始才结束瞬发：可以在要用的时候再发动限定：一局游戏只能发动一次终语：可以在决死状态使用极意：无限时间，但是一旦结束就立即坠机'];
@@ -472,10 +476,21 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 				audio:2,
 				trigger:{player:'chooseToRespondBegin'},
 				filter:function(event,player){
+					var packs = lib.config.all.cards.diff(lib.config.cards);
 					var list = [];
                     for (var i in lib.card){
                         if(lib.card[i].mode&&lib.card[i].mode.contains(lib.config.mode)==false) continue;
                         if(lib.card[i].forbid&&lib.card[i].forbid.contains(lib.config.mode)) continue;
+						if (packs){
+							var f = false;
+							for (var j = 0; j < packs.length; j ++){
+								if (lib.cardPack[packs[j]].contains(i)){
+									f = true;
+									break;
+								}
+							}
+							if (f) continue;
+						}
                         if(lib.card[i].type == 'basic'){
                             list.add(i);
                         }
@@ -575,9 +590,20 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 				chooseButton:{
 					dialog:function(event,player){
 						var list = [];
+						var packs = lib.config.all.cards.diff(lib.config.cards);
                         for (var i in lib.card){
                             if(lib.card[i].mode&&lib.card[i].mode.contains(lib.config.mode)==false) continue;
                             if(lib.card[i].forbid&&lib.card[i].forbid.contains(lib.config.mode)) continue;
+							if (packs){
+								var f = false;
+								for (var j = 0; j < packs.length; j ++){
+									if (lib.cardPack[packs[j]].contains(i)){
+										f = true;
+										break;
+									}
+								}
+								if (f) continue;
+							}
                             if(lib.card[i].type == 'basic'){
                                 list.add(i);
                             }

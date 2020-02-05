@@ -476,7 +476,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         group:['yinyang2'],
                         audio:2,
                         trigger:{global:'phaseEnd'},
-                        frequent:true,
+                        //frequent:true,
                         filter:function(event,player){
                               return player.storage.yinyang;
                         },
@@ -515,6 +515,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                                     trigger.player.update();
                                     result.links[0].fix();
                                     event.card = result.links[0];
+                                    event.card.fix();
                               }
                               'step 3'
                               if (event.card){
@@ -653,7 +654,6 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                   },
                   liuxing_shun:{
                     audio:0,
-                    group:'liuxing_unlili',
                     trigger:{player:'phaseEnd'},
                     forced:true,
                     filter:function(event,player){
@@ -670,16 +670,6 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                          if (result.bool && result.targets){
                             player.useCard({name:'shunshou'},result.targets[0],false);
                          }
-                    },
-                  },
-                  liuxing_unlili:{
-                    direct:true,
-                    trigger:{player:'loseliliBefore'},
-                    filter:function(event,player){
-                      return event.getParent().getParent().getParent().name == 'liuxing_shun';
-                    },
-                    content:function(){
-                      trigger.cancel();
                     },
                   },
                   xingchen:{
@@ -996,10 +986,21 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     },
                     content:function(){
                       'step 0'
+                      var packs = lib.config.all.cards.diff(lib.config.cards);
                       var list = [];
                       for (var i in lib.card){
                           if(lib.card[i].mode&&lib.card[i].mode.contains(lib.config.mode)==false) continue;
                           if(lib.card[i].forbid&&lib.card[i].forbid.contains(lib.config.mode)) continue;
+                          if (packs){
+                            var f = false;
+                            for (var j = 0; j < packs.length; j ++){
+                              if (lib.cardPack[packs[j]].contains(i)){
+                                f = true;
+                                break;
+                              }
+                            }
+                            if (f) continue;
+                          }
                           if(lib.card[i].subtype == 'attack' || lib.card[i].subtype == 'disrupt'){
                               list.add(i);
                           }
@@ -1073,10 +1074,21 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         event.finish();
                       } else {
                         event.card = result.cards[0];
+                        var packs = lib.config.all.cards.diff(lib.config.cards);
                         var list = [];
                         for (var i in lib.card){
                             if(lib.card[i].mode&&lib.card[i].mode.contains(lib.config.mode)==false) continue;
                             if(lib.card[i].forbid&&lib.card[i].forbid.contains(lib.config.mode)) continue;
+                            if (packs){
+                              var f = false;
+                              for (var j = 0; j < packs.length; j ++){
+                                if (lib.cardPack[packs[j]].contains(i)){
+                                  f = true;
+                                  break;
+                                }
+                              }
+                              if (f) continue;
+                            }
                             if(lib.card[i].subtype == 'defense'){
                                 list.add(i);
                             }
@@ -2013,7 +2025,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                   shiming_2:'失明',
                   shiming_audio1:'我来让你获得夜盲症吧！',
                   shiming_audio2:'我来教教你暗夜的恐怖吧！',
-                  shiming_info:'一回合一次，出牌阶段，或你受到伤害后，你可以令一名角色直到当前回合结束：其不能以此法以外的方式使用牌；其需要使用牌时，可以随机展示一张手牌：若可以使用，本次结算中其可以使用该牌；否则，其弃置之，并可以重复此流程。',
+                  shiming_info:'一回合一次，出牌阶段，或你受到伤害后，你可以令一名角色直到当前回合结束：<details><summary>其只能以随机选择手牌的方式使用/打出牌；弃置选择的不合理的牌。</summary><p>其不能以此法以外的方式使用牌；其需要使用牌时，可以扣置并洗混其手牌，然后展示其中一张：若可以使用，本次结算中其可以使用该牌；否则，其弃置之，并可以重复此流程。</details>',
                   zangsong:'葬颂',
                   zangsong_info:'一回合一次，你因弃置牌失去牌后，可以弃置一名角色一张牌。',
                   zangsong_audio1:'永别了！',
@@ -2056,7 +2068,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                   reimu_die:'啊啊，肚子饿了，回去了回去了。',
                   marisa:'魔理沙',
                   liuxing:'流星',
-                  liuxing_info:'摸牌阶段，你可以少摸至少一张牌，令你的攻击范围+X（X为以此法少摸的牌数），直到结束阶段；若如此做，结束阶段，你视为使用一张不消耗灵力的【顺手牵羊】。',
+                  liuxing_info:'摸牌阶段，你可以少摸至少一张牌，令你的攻击范围+X（X为以此法少摸的牌数），直到结束阶段；若如此做，结束阶段，你视为使用一张【顺手牵羊】。',
                   liuxing_audio1:'无论你有没有准备好！',
                   liuxing_audio2:'让开，流星雨要来了！',
                   liuxing_shun:'流星（顺手牵羊）',
@@ -2100,7 +2112,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                   huanshi_audio4:'公、公主大人……？！我、我只是开个玩笑而已啦……',
                   zhenshi:'真实之月（隐形满月）',
                   zhenshi_1:'真实之月（隐形满月）',
-                  zhenshi_info:'符卡技（1）<永续>你攻击范围内角色成为攻击牌的唯一目标时，你可以弃置一张牌，将包括其的至多3名角色牌扣置并洗混；来源明置一张：将目标转移给明置的角色；然后将这些牌调整为原状态。',
+                  zhenshi_info:'符卡技（1）<永续>你攻击范围内角色成为攻击牌的唯一目标时，你可以弃置一张牌，<details><summary>指定包括其的至多3名角色，将目标转移给其中随机一名。</summary><p>将包括其的至多3名角色牌扣置并洗混；来源明置一张：将目标转移给明置的角色；然后将这些牌调整为原状态。</details>',
                   zhenshi_audio1:'散符「真实之月(Invisible Full Moon)」！',
                   zhenshi_audio2:'真实和虚假的区别，你分的出来吗？',
                   reisen_die:'啊啊，要被师匠骂了',

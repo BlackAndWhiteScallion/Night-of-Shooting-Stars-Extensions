@@ -12,10 +12,10 @@ window.config={
 		sgscharacters:['scarlet','sakura','imperishable','phantasmagoria','immaterial','sb','baka','secret'],
 		sgscards:['standard','incident','skill'],
 		sgsmodes:['identity','versus','brawl','connect','library', 'puzzle'],
-		stockmode:['old_identity','identity','versus','boss','stg','chess','connect','brawl','library','puzzle'],
-		stockextension:['boss','cardpile','coin','wuxing'],
+		stockmode:['old_identity','identity','versus','boss','stg','chess','connect','brawl','library','tutorial','puzzle'],
+		stockextension:['boss','boss1','coin'],
 		layout:['default','newlayout'],
-		theme:['woodden','music','simple'],
+		theme:['woodden','music','simple','inverse', 'monika'],
 		card_font:['xiaozhuan','huangcao','caoshu','xingshu'],
 		double_hp:['hejiansan','pingjun','zuidazhi','zuixiaozhi','zonghe'],
 		image_background_filter:['default','blur','gray','sepia','invert','saturate','contrast','hue','brightness'],
@@ -94,7 +94,7 @@ window.config={
 	hiddenBackgroundPack:[],
 	customBackgroundPack:[],
 	favouriteCharacter:['marisa'],
-	recentIP:['318sgs.6655.la', '47.100.162.52'],
+	recentIP:['318sgs.6655.la', '47.100.162.52', '123.56.166.105'],
 	vintageSkills:[],
 	alteredSkills:[],
 	brokenFile:[],
@@ -170,7 +170,7 @@ window.config={
 	customcardpile:{},
 	addedpile:{},
 
-	mode:'old_identity',
+	mode:'tutorial',
 	mode_config:{
 		global:{
 			player_number:2,

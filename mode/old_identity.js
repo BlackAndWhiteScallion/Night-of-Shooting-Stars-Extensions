@@ -180,7 +180,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 								text = ui.create.dialog('在角色或卡牌一栏中，单击角色/卡牌可以将其禁用，在角色/卡牌上悬空或右键可以查看描述，双击角色可以查看角色简介，和切换角色皮肤。');
 								ui.controls[0].replace('这选项可真多',function(){
 										ui.click.configMenu();
-										ui.click.menuTab('其他');
+										ui.click.menuTab('其它');
 										text = ui.create.dialog('在[其他]中可以检查更新，下载素材，查看你的战绩，和观看游戏录像。');
 										ui.controls[0].replace('好了能玩了没',function(){
 											//ui.click.configMenu();
@@ -631,6 +631,8 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					else{
 						if(get.config('double_character')){
 							player.init(list[0],list[1]);
+						} else if (_status.connectMode){
+							player.init(list.randomGet());
 						}
 						else{
 							player.init(list[0]);
@@ -967,6 +969,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						//event.list = ['koakuma','lilywhite','cirno','keine','chen','yuuka','hetate','wriggle'];
 						//event.list.remove(game.zhu.name);
 						//event.list.randomSort();
+						lib.character['zigui'] = ['female','5',3,["shijianliushi"]];
 						event.list = ['zigui'];
 					}
 					list3.randomSort();
@@ -981,7 +984,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						}
 					}
 					if(game.zhu!=game.me){
-						event.ai(game.zhu,event.list,list2)
+						event.ai(game.zhu,event.list,list2);
 						event.list.remove(game.zhu.name);
 						event.list.remove(game.zhu.name2);
 						if(_status.brawl&&_status.brawl.chooseCharacter){
@@ -1022,6 +1025,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					var dialog;
 					if (!lib.config.new_tutorial){
 						list = ["reimu","marisa","sakuya","youmu"];
+
 					}
 					if(event.swapnodialog){
 						dialog=ui.dialog;
@@ -1363,7 +1367,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						list=event.list.randomGets(8);
 					}
 					else{
-						list=list2.concat(list3.randomGets(3));
+						list=list2.concat(list3.randomGets(8));
 					}
 					if(lib.configOL.free_choose){
 						list = event.list;
@@ -1439,7 +1443,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 							//if(game.players[i].special_identity){
 								str+='（'+get.translation(game.players[i].identity+'2')+'）';
 							//}
-							if(lib.configOL.free_choose){
+							if(lib.configOL.free_choose && game.players[i]){
 								list.push([game.players[i],[str,[event.list,'character']],selectButton,true]);
 							} else {
 								list.push([game.players[i],[str,[event.list.randomRemove(num+num3),'character']],selectButton,true]);
@@ -1458,11 +1462,14 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						}
 					}
 					for(var i in result){
+						if (!lib.playerOL[i].nickname){
+							result[i] = 'ai';
+						}
 						if(result[i]=='ai'){
 							result[i]=event.list2.randomRemove(lib.configOL.double_character?2:1);
 						}
 						else{
-							result[i]=result[i].links
+							result[i]=result[i].links;
 						}
 						if(!lib.playerOL[i].name){
 							lib.playerOL[i].init(result[i][0],result[i][1]);

@@ -403,6 +403,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				game.addRecentCharacter(game.me.name);
 			}
 			event.trigger('gameStart');
+			_status.roundStart=game.boss;
 			game.gameDraw(game.boss,game.bossinfo.gameDraw||4);
 			game.bossPhaseLoop();
 			setTimeout(function(){
@@ -777,7 +778,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					}
 					if (boss.hasSkill('boss_damagecount') && _status.damageCount > data[name][0]){
 						data[name][0] = _status.damageCount;
-					} else if (boss.hasSkill('boss_turncount') && game.roundNumber) {
+					} else if (boss.hasSkill('boss_turncount') && game.roundNumber > data[name][0]) {
 						data[name][0] = game.roundNumber;
 					} else {
 						if(bool){
@@ -857,9 +858,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				boss.directgain(get.cards(4));
 			},
 			checkResult:function(){
-				if (game.boss.hasSkill('boss_turncount')){
-					game.over();
-				} else if(game.boss==game.me){
+				if(game.boss==game.me){
 					game.over(game.boss.isAlive());
 				}
 				else{
@@ -984,7 +983,10 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 							// 如果当前玩家已死亡（BOSS死亡会自动游戏结束，所以只检测盟军方），改为进入下一个盟军的回合。
 							if (player.isDead()){
 								event.player = player.nextSeat;
-								if (player.nextSeat == game.boss) event.player = game.boss.nextSeat;
+								if (player.nextSeat == game.boss){
+									event.player = game.boss.nextSeat;
+									delete _status.roundStart;
+								}
 							} else {
 								_status.last=player;
 								event.player=game.boss;
@@ -2332,14 +2334,18 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 				},
 				content:function(){
 					'step 0'
-					var control = ['获得【潜行】并暗置', '获得【雨至】一次', '使用攻击牌指定目标后，对目标造成1点灵击伤害，直到其回合结束'];
+					var control = [ '获得【雨至】一次', '获得【潜行】并暗置', '使用攻击牌指定目标后，对目标造成1点灵击伤害，直到其回合结束'];
 					if (player.storage.chongzou.contains(1)) control.remove('获得【潜行】并暗置');
 					if (player.storage.chongzou.contains(2)) control.remove('获得【雨至】一次');
 					if (player.storage.chongzou.contains(3)) control.remove('使用攻击牌指定目标后，对目标造成1点灵击伤害，直到其回合结束');
 					if (control.length == 0) event.finish();
 					event.controlList = control;
 					player.chooseControlList(control, function(event, player){
-						return '获得【雨至】一次';
+						if (target.hp <= 1 && control.contains('获得【潜行】并暗置')) return control.indexOf('获得【潜行】并暗置');
+						if (target.countCards('h', {name:'sha'}) && control.contains('使用攻击牌指定目标后，对目标造成1点灵击伤害，直到其回合结束')) 
+							return control.indexOf('使用攻击牌指定目标后，对目标造成1点灵击伤害，直到其回合结束');
+						if (!target.hasSkill('kc_yuzhi')) return 0;
+						return control.length - 1;
 					}).set('prompt','重奏：为'+get.translation(target)+'选择一项效果：');
 					'step 1'
 					if (result.control){
@@ -2363,7 +2369,20 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 							target.addTempSkill('chongzou_3',{player:'phaseAfter'});
 							player.storage.chongzou.push(3);
 						}
+						game.log(player, '令', target, '获得了以下效果：'+event.controlList[result.index]);
 					}
+				},
+				ai:{
+					order:4,
+					result:{
+						target:function(player,target){
+							if(get.attitude(player,target)>0){
+								if (player.lili <= 2) return 0; 
+								return 2;
+							}
+							return 0;
+						}
+					},
 				},
 			},
 			chongzou_1:{
@@ -2411,7 +2430,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					}
 					list.push('摸一张牌，交给'+get.translation(trigger.player)+'一张牌');
 					player.chooseControl(list,function(event,player){
-						if (!_status.currentPhase.isTurnedOver() && _status.currentPhase.lili < 3) return get.translation(trigger.player)+'恢复灵力';
+						if (!_status.currentPhase.isTurnedOver() && _status.currentPhase.lili < 3) return get.translation(trigger.player)+'获得灵力';
 						return '摸一张牌，交给'+get.translation(trigger.player)+'一张牌';
 					});
 					'step 1'
@@ -2518,7 +2537,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 			longjuan_info:'结束阶段，你可以令一名角色于回合结束后进行一个额外的出牌阶段；若你在本回合前的6回合内没有进行过回合，改为令其进行一个额外的回合。',
 			yuri:'由理',
 			chongzou:'重奏',
-			chongzou_info:'一回合每项限一次，出牌阶段，你可以消耗1点灵力，令一名角色：获得一张【潜行】并暗置之；获得【雨至】，该技能发动后失去；直到其回合结束，其使用攻击牌指定目标时，对目标造成1点灵击伤害。',
+			chongzou_info:'一回合每项各一次，出牌阶段，你可以消耗1点灵力，令一名角色：获得一张【潜行】并暗置之；获得【雨至】，该技能发动后失去；直到其回合结束，其使用攻击牌指定目标时，对目标造成1点灵击伤害。',
 			moxin1:'齐心',
 			moxin1_info:'一名角色的结束阶段，若其本回合造成过伤害，你可以令其获得一点灵力，或摸一张牌然后交给其一张牌。',
 		},

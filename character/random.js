@@ -876,10 +876,21 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 				content:function(){
 					'step 0'
 					trigger.cancel();
-                    var list = [];
+                    var packs = lib.config.all.cards.diff(lib.config.cards);
+					var list = [];
                     for (var i in lib.card){
                         if(lib.card[i].mode&&lib.card[i].mode.contains(lib.config.mode)==false) continue;
                         if(lib.card[i].forbid&&lib.card[i].forbid.contains(lib.config.mode)) continue;
+						if (packs){
+							var f = false;
+							for (var j = 0; j < packs.length; j ++){
+								if (lib.cardPack[packs[j]].contains(i)){
+									f = true;
+									break;
+								}
+							}
+							if (f) continue;
+						}
                         if(lib.card[i].type == 'trick' && lib.card[i].subtype == get.subtype(trigger.card)){
                             list.add(i);
                         }
@@ -973,9 +984,20 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 chooseButton:{
                     dialog:function(){
                         var list = [];
+						var packs = lib.config.all.cards.diff(lib.config.cards);
                         for (var i in lib.card){
                             if(lib.card[i].mode&&lib.card[i].mode.contains(lib.config.mode)==false) continue;
                             if(lib.card[i].forbid&&lib.card[i].forbid.contains(lib.config.mode)) continue;
+							if (packs){
+								var f = false;
+								for (var j = 0; j < packs.length; j ++){
+									if (lib.cardPack[packs[j]].contains(i)){
+										f = true;
+										break;
+									}
+								}
+								if (f) continue;
+							}
                             if(lib.card[i].type == 'trick' || lib.card[i].type == 'basic'){
                                 list.add(i);
                             }
@@ -1096,11 +1118,22 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 },
                 chooseButton:{
                     dialog:function(){
+						var packs = lib.config.all.cards.diff(lib.config.cards);
                         var list = [];
                         for (var i in lib.card){
                             if(lib.card[i].mode&&lib.card[i].mode.contains(lib.config.mode)==false) continue;
                             if(lib.card[i].forbid&&lib.card[i].forbid.contains(lib.config.mode)) continue;
-                            if(lib.card[i].type == 'delay'){
+                            if (packs){
+								var f = false;
+								for (var j = 0; j < packs.length; j ++){
+									if (lib.cardPack[packs[j]].contains(i)){
+										f = true;
+										break;
+									}
+								}
+								if (f) continue;
+							}
+							if(lib.card[i].type == 'delay'){
                                 list.add(i);
                             }
                         }
@@ -1178,10 +1211,21 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 chooseButton:{
                     dialog:function(){
                         var list = [];
+						var packs = lib.config.all.cards.diff(lib.config.cards);
                         for (var i in lib.card){
                             if(lib.card[i].mode&&lib.card[i].mode.contains(lib.config.mode)==false) continue;
                             if(lib.card[i].forbid&&lib.card[i].forbid.contains(lib.config.mode)) continue;
-                            if(lib.card[i].type == 'jinji'){
+                            if (packs){
+								var f = false;
+								for (var j = 0; j < packs.length; j ++){
+									if (lib.cardPack[packs[j]].contains(i)){
+										f = true;
+										break;
+									}
+								}
+								if (f) continue;
+							}
+							if(lib.card[i].type == 'jinji'){
                                 list.add(i);
                             }
                         }
@@ -2050,6 +2094,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			},
 			ng_wenhao2:{
 				audio:1,
+				derivation:'ClarentBloodArthur',
 				init:function(player){
 					player.storage.ng_wenhao2=false;
 				},
@@ -2213,11 +2258,22 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 chooseButton:{
                     dialog:function(){
                         var list = [];
+						var packs = lib.config.all.cards.diff(lib.config.cards);
                         for (var i in lib.card){
 							if (!lib.translate[i]) continue;
                             if(lib.card[i].mode&&lib.card[i].mode.contains(lib.config.mode)==false) continue;
                             if(lib.card[i].forbid&&lib.card[i].forbid.contains(lib.config.mode)) continue;
-                            if(lib.card[i].type == 'equip'){
+                            if (packs){
+								var f = false;
+								for (var j = 0; j < packs.length; j ++){
+									if (lib.cardPack[packs[j]].contains(i)){
+										f = true;
+										break;
+									}
+								}
+								if (f) continue;
+							}
+							if(lib.card[i].type == 'equip'){
                                 list.add(i);
                             }
                         }
@@ -3238,6 +3294,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 					return event.card&&event.card.name=='sha';
 				},
 				content:function(){
+					player.line(target.player,'green');
 					trigger.player.damage('thunder');
 				}
 			},
@@ -3250,6 +3307,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 				content:function(){
 					'step 0'
 					player.loselili();
+					player.line(target.player,'green');
 					trigger.player.chooseControl(['摸一张牌','多出一张轰','获得1点灵力'], true).set('ai',function(){
 						if (trigger.player.countCards('h', {name:'sha'}) > 1) return '多出一张轰';
 						if (trigger.player.lili < 2) return '获得1点灵力';
@@ -3573,7 +3631,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			aoshu_info:'一回合一次，出牌阶段，你可将灵力消耗到0，并为任意名角色分配等量灵力；然后，直到你的准备阶段，一名角色发动符卡时，你获得1点灵力。',
 			jack:'开膛手杰克',
 			wulin:'雾临',
-			wulin_info:'限定技，一名角色的回合开始时，你可以令你攻击范围内的一名角色获得以下效果，直到回合结束：其不能以此法以外的方式使用牌；其需要使用牌时，可以随机展示一张手牌：若可以使用，本次结算中其可以使用该牌；否则，其弃置之，并可以重复此流程；其首次成为【轰！】的目标后，令之不计次数。',
+			wulin_info:'限定技，一名角色的回合开始时，你可以令你攻击范围内的一名角色获得以下效果，直到回合结束：<details><summary>其只能以随机选择手牌的方式使用/打出牌；弃置选择的不合理的牌。</summary><p>其不能以此法以外的方式使用牌；其需要使用牌时，可以扣置并洗混其手牌，然后展示其中一张：若可以使用，本次结算中其可以使用该牌；否则，其弃置之，并可以重复此流程。</details>其首次成为【轰！】的目标后，令之不计次数。',
 			yejiang:'夜降',
 			yejiang_info:'限定技，一名角色的回合开始时，你可以令你攻击范围内的一名角色获得以下效果，直到回合结束：其攻击范围视为0，不能获得灵力，且装备效果无效。',
 			maria:'解体圣母',

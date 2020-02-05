@@ -657,6 +657,8 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						// 总之，这里是武将创建的地方
 						if(get.config('double_character')){
 							player.init(choice,choice2);
+						} else if (_status.connectMode){
+							player.init(list.randomGet());
 						}
 						else{
 							player.init(choice);
@@ -670,6 +672,8 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					else{
 						if(get.config('double_character')){
 							player.init(list[0],list[1]);
+						} else if (_status.connectMode){
+							player.init(list.randomGet());
 						}
 						else{
 							player.init(list[0]);
@@ -1248,7 +1252,10 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 					event.list.remove(game.me.name2);
 					/* 主公加血 */
 					event.list.randomSort();
-					if (!lib.config.new_tutorial) event.list[0] = 'zigui';
+					if (!lib.config.new_tutorial){
+						lib.character['zigui'][2] = 3;
+						event.list[0] = 'zigui';
+					}
 					for(var i=0;i<game.players.length;i++){
 						// 主公和玩家不选将（已经选过了）
 						//if(game.players[i]!=game.zhu&&game.players[i]!=game.me){
@@ -1415,7 +1422,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						list=event.list.randomGets(8);
 					}
 					else{
-						list=list2.concat(list3.randomGets(3));
+						list=list2.concat(list3.randomGets(8));
 					}
 					"step 1"
 					var list=[];
@@ -1469,6 +1476,9 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 						}
 					}
 					for(var i in result){
+						if (!lib.playerOL[i].nickname){
+							result[i] = 'ai';
+						}
 						if(result[i]=='ai'){
 							result[i]=event.list2.randomRemove(lib.configOL.double_character?2:1);
 						}
@@ -1514,8 +1524,8 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 			mingzhong2:"明忠",
 			nei2:"路人",
 			fan2:"自机",
-			zhu_win:'<u>胜利条件：</u>所有自机坠机',
 			zhu_lose:'<u>失败条件：</u>黑幕坠机',
+			zhu_win:'<u>胜利条件：</u>所有自机坠机',
 			zhu_flip:'<u>摊牌效果：</u>获得一张异变牌，并明置之。',
 			zhong_win:'<u>胜利条件：</u>黑幕胜利',
 			zhong_lose:'<u>失败条件：</u>黑幕坠机',
