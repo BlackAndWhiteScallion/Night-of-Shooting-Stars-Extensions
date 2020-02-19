@@ -301,7 +301,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	                    lib.characterIntro['akyuu']='全名稗田阿求，将毕生奉献于记载幻想乡的历史的稗田家的现任家主。持有过目不忘的记忆能力。<br><b>画师：渡瀬　玲<br></b><br>现因一些原因，被赋予了幻想乡的管理员权限。不过依然是和平常一样做着记录屋的工作。';
 				        lib.skill['mengji'] = {};
 				        lib.translate['mengji'] = '隐藏';
-				        lib.translate['mengji_info'] = '达成多次异变胜利的话，可以解锁这个角色哟？';
+				        lib.translate['mengji_info'] = '达成多次异变牌胜利的话，可以解锁这个角色哟？';
 	                    player.init('akyuu');
 	                    player.node.avatar.show();
 	                    //player.style.left='calc(50% - 75px)';
@@ -365,7 +365,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 										list.push(i);
 			                        }
 								}
-								dialog.addText('<div><div style="display:block;top:500px;text-align:left;font-size:16px">距离阿求下一次出场还有'+num+'次异变胜利。');
+								dialog.addText('<div><div style="display:block;top:500px;text-align:left;font-size:16px">距离阿求下一次出场还有'+num+'次异变牌胜利。');
 								list.push('library');
 								for (var i = 0; i < list.length; i ++){
 									if (!lib.config.gameRecord.incident.data[list[i]]) continue;
@@ -443,14 +443,14 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 							'1. 使用刷新键（f5）可以重置游戏。',
 							'2.左上的[选项]可以更改很多游戏相关的设置，包括并不限于：',
 							'<t>游戏模式的人数和身份分配（[选项-开始-异变]）',
-							'牌局的布局，卡牌的样式 ([选项-选项-外观-布局]和[选项-选项-外观-卡牌样式/卡背样式])，',
+							'牌局的布局，界面的样式 ([选项-选项-外观-布局]和[选项-选项-外观-主题])，',
 							'和游戏录像。([选项-其他-录像])',
 							'记得多多探索一下，没准有奇怪的东西！',
+							'<b>2.1 如果觉得界面太小或者太挤的话，在[选项-选项-外观-界面缩放]可以调整整个游戏的大小！</b>',
 							'3. 在牌局中双击角色可以查看角色简介，也可以换皮肤和听配音（如果有配音的话）。',
 							'3.1 在左上的[选项-角色]里双击角色牌也可以看到简介。',
-							'4. 快捷键：按A托管，按space可以暂停，按W可以切换“不询问【请你住口！】”按钮',
-							'5. 如果你在游戏过程中，看到让你选择发动个什么字母+数字的技能，随便点一个就行了，这些是后台计数技能，人畜无害的。',
-							'<b>6. 其实，点击我是可以跟我说话的啦。就上方那个。</b>',
+							'4. 如果你在游戏过程中，看到让你选择发动个什么拼音+数字的技能，随便点一个就行了，这些是后台计数技能，人畜无害的。',
+							'<b>5. 其实，点击我是可以跟我说话的啦。就上方那个。</b>',
 	    				]; 
 						if (!game.layout=='nova'){
 							dialog.addText('<div><div style="display:block;left:180px;text-align:left;font-size:16px">'+i.join('<br>'));
@@ -492,9 +492,9 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        			var incident=ui.create.node('button','电脑端下载',line2,function(){
 	        			var i = ['下载链接：',
 								'国外镜像：<a href = "https://github.com/BlackAndWhiteScallion/Night-of-Shooting-Stars/archive/master.zip">https://github.com/BlackAndWhiteScallion/Night-of-Shooting-Stars/archive/master.zip</a>',
-								'国内镜像：<a href = https://dev.tencent.com/u/BWS/p/Night-of-Shooting-Stars/git/archive/master>https://dev.tencent.com/u/BWS/p/Night-of-Shooting-Stars/git/archive/master</a>',
-								'',
-								'国内镜像因神奇腾讯有可能炸了，还请大家注意。',
+								'国内镜像1：<a href = https://bws.coding.net/api/share/download/bcf9e902-4fd3-4919-9fc9-f681388b0523>https://bws.coding.net/api/share/download/bcf9e902-4fd3-4919-9fc9-f681388b0523</a>',
+								'国内镜像2：<a href = https://gitee.com/b_2/noss/repository/archive/master.zip>https://gitee.com/b_2/noss/repository/archive/master.zip</a>',
+								'国内镜像2因神奇腾讯有可能炸了，还请大家注意。',
 	    					];
 	        			dialog.setCaption('<div><div style="text-align:left;font-size:16px">'+i.join('<br>'));
 	                    },{marginLeft:'6px'});
@@ -502,8 +502,8 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        				var i = [
 								'手机端目前只支持安卓系统。为您带来的不便表达万分歉意。',
 								'',
-								'百度网盘链接：<a href = "https://pan.baidu.com/s/1oZRuEzNt2TYx2-8aDVs58Q">https://pan.baidu.com/s/1oZRuEzNt2TYx2-8aDVs58Q</a>',
-								'直接下载链接：<a href = "https://dev.tencent.com/api/project/4566234/files/5506886/download">https://dev.tencent.com/api/project/4566234/files/5506886/download</a>',
+								'百度网盘链接：<a href = "https://pan.baidu.com/s/14ogm9-RAdDuuXUGTZYC_qA">链接: https://pan.baidu.com/s/14ogm9-RAdDuuXUGTZYC_qA 提取码: e6nf</a>',
+								'直接下载链接：<a href = "https://BWS.coding.net/s/19055702-1f41-42d3-8aa0-e1d7f4066d76">https://BWS.coding.net/s/19055702-1f41-42d3-8aa0-e1d7f4066d76</a>',
 				        		];
 	        				dialog.setCaption('<div><div style="text-align:left;font-size:16px">'+i.join('<br>'));
 	                    },{marginLeft:'6px'});
@@ -541,8 +541,9 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        			var incident=ui.create.node('button','更新方式',line2,function(){
 	        			var i = ['更新方式有三种:',
 	    				'1: 下载更新程序包',
-	    				'更新下载链接→<a href = "https://github.com/BlackAndWhiteScallion/Night-of-Shooting-Stars-Extensions/archive/master.zip">国外镜像下载</a> <a href = "https://dev.tencent.com/u/BWS/p/NOSS-Extensions/git/archive/master">国内镜像下载</a>',
+	    				'更新下载链接→<a href = "https://github.com/BlackAndWhiteScallion/Night-of-Shooting-Stars-Extensions/archive/master.zip">国外镜像下载</a> <a href = "https://dev.tencent.com/u/BWS/p/NOSS-Extensions/git/archive/master">国内镜像1下载</a <a href = "https://gitee.com/b_2/Night-of-Shooting-Stars-Extensions/repository/archive/master.zip">国内镜像2下载</a>>',
 	    				'下载完毕后，在浏览器的默认下载文件夹里可以找到，然后解压到流星夜所在的文件夹里，并全部覆盖就OK啦。',
+						'国内镜像1下载到的文件如果大小只以kb计的话就是炸了，需要改用国内镜像2，注意一下。',
 	    				'手机端也可以使用这个更新方式，安卓手机所需要拖到的文件夹在：<b>(默认SD卡)/android/data/com.widget.noname1</b>',
 	    				'覆盖完毕后，需要重启流星夜程序！',
 	    				'',
@@ -552,7 +553,8 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	    				'检查素材更新在电脑和手机端都可以进行。',
 	    				'',
 	    				'3. 手机端更新，可以在<b>[选项—选项—文件—重新下载游戏]</b>来进行更新。',
-	    				'这样会保留所有的设置，但是并不会更新素材。素材需要另外进行更新。'];
+	    				'这样会保留所有的设置，但是并不会更新素材。',
+						'如果缺了图片的话，通过<b>[选项-其他-更新-检查素材更新]</b>来进行素材更新。',];
 	        			dialog.setCaption('<div><div style="text-align:left;font-size:16px">'+i.join('<br>'));
 	                    },{marginLeft:'6px'});
 	                    var identity=ui.create.node('button','更新注释',line2,function(){
