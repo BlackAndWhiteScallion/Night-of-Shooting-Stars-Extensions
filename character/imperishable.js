@@ -292,7 +292,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                           content:function(){
                             "step 0"
                             player.chooseTarget('午夜中的合唱指挥：你可以将'+get.translation(trigger.card)+'转移给一名其他角色',function(card, player, target){
-                              return trigger.player.canUse(trigger.card, target);
+                                var trigger =_status.event.getTrigger();
+                                return trigger.player.canUse(trigger.card, target);
                             }).ai=function(target){
                                 return -get.attitude(player, target);
                             };
@@ -481,7 +482,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                               return player.storage.yinyang;
                         },
                         check:function(event,player){
-                              if (player.getCards('h').length <= (player.maxHp - player.hp) && event.player.getCards('hej').length) return get.attitude(_status.event.player,trigger.target)<0;
+                              if (player.getCards('h').length <= (player.maxHp - player.hp) && event.player.getCards('hej').length) return get.attitude(player, event.player)<0;
                               return true;
                         },
                         content:function(){
@@ -1020,7 +1021,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                           var card = {name:result.links[0][2]};
                           event.fakecard=card;
                           player.chooseTarget(function(card,player,target){
-                              return player.canUse(event.fakecard,target,true) && !target.hasSkill('huanshi_3');
+                             // var event = _status.event;
+                              return player.canUse(card,target,true) && !target.hasSkill('huanshi_3');
                           },true,'选择'+get.translation(card.name)+'的目标').set('ai',function(target){
                               return get.effect(target,event.fakecard,_status.event.player);
                           });
@@ -2042,7 +2044,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                   jiehuo_audio2:'这是下次考试的知识点，一定要记住。',
                   jiehuo_audio3:'慧音辛苦了，不要忘记休息啊。',
                   richuguo:'日出国的天子',
-                  richuguo_info:'符卡技（3）<限定><永续>你可以弃置三张不同的类型的牌来代替符卡消耗；准备阶段，你可以指定一名角色，重置其体力值，灵力值，和手牌数；你进入决死状态时，重置此符卡技。',
+                  richuguo_info:'符卡技（3）<限定><永续><u>你可以弃置三张不同的类型的牌来代替符卡消耗；</u>准备阶段，你可以指定一名角色，重置其体力值，灵力值，和手牌数；你进入决死状态时，重置此符卡技。',
                   richuguo_audio1:'「日出国之天子」！',
                   richuguo_audio2:'我不允许这种事情的存在！',
                   keine_die:'要是是满月，怎么会输给你们呢……',

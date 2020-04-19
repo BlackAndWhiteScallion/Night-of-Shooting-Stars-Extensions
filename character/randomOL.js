@@ -6,11 +6,13 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			homura:['female', '2', 3, ['time3', 'time', 'homuraworld']],
 			diva:['female', '3', 3, ['duzou', 'lunwu', 'tiaoxian'], ['forbidai']],
 			monika:['female', '2', 3, ['miaohui', 'kehua'], ['forbidai']],
+			aliceWLD:['female', '0', 3, ['WLD2', 'WLD1'], []],
 		},
 		characterIntro:{
 			homura:'问题：如果你目睹你最喜欢的人死亡，要她死多少次你才会疯掉？<br><b>出自：魔法少女小圆 画师：Capura.L</b>',
-			diva:'<br><b>出自：Date-A-Live! 画师：干物A太</b>',
-			monika:'问题：如果其他人已经不再是人了，那对她们做多残忍的事情都是没问题的，对吧？<br><b>出自：心跳文学部 画师：はっく',
+			diva:'1. 进入男主的一群萌妹的后宫<br>2. 亮出自己百合的身份<br>3. ???<br>4. 发了发了！<br><b>出自：Date-A-Live! 画师：干物A太</b>',
+			monika:'问题：如果其他人已经不再是人了，那对她们做多残忍的事情都是没问题的，对吧？<br><b>出自：心跳文学部 画师：はっく</b>',
+			aliceWLD:'<br><b>出自：爱丽丝漫游仙境 画师：夕凪セシナ</b>',
 		},	   
 		perfectPair:{
 		},
@@ -91,7 +93,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 					player.markSkill('time');
 				},
 				ai:{
-					order:10,
+					order:5,
 					result:{
 						player:1,
 					}
@@ -149,8 +151,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 						return true;
 					},
                     check:function(button){
-                        var player=_status.event.player;
-                        return get.value({name:button.link[2]}) >= 6;
+                       // var player=_status.event.player;
+                        return true;
                     },
                     backup:function(links,player){
                         return {
@@ -179,9 +181,12 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 				hiddenCard:function(player,name){
                     return name == 'shan' || name == 'wuxie';
                 },
+				check:function(){
+					return true;
+				},
                 ai:{
                 	save:true,
-                    order:2,
+                    order:5,
                     result:{
                         player:function(player){
                             return 1;
@@ -735,6 +740,59 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 					}
 				},
 			},
+			WLD1:{
+				enable:'phaseUse',
+				usable:1,
+				position:'hej',
+				filterCard:true,
+				selectCard:[0,Infinity],
+				content:function(){
+					'step 0'
+					var list = [];
+					for (var i = 0; i <= player.lili; i ++){
+							list.push(i);
+					}
+					player.chooseControl(list,function(){
+						return '2';
+				  	}).set('prompt','消耗任意点灵力');
+					'step 1'
+					for (var i = 0; i < cards.length; i ++){
+						player.gain(game.createCard(lib.cardPack['random'].randomGet()));
+					}
+				},
+				prompt:'弃置任意张牌，摸等量其他游戏的牌',
+			},
+			WLD2:{
+				forced:true,
+				trigger:{player:'phaseBeginStart'},
+				derivation:['WLD3', 'mengjin'],
+				content:function(){
+					'step 0'
+					player.useCard({name:'huanxiang'}, player);
+					'step 1'
+					player.chooseControl('奇缘', '梦镜').set('prompt', '世外：选择一个技能获得。<br>技能可以通过双击角色查看');
+					'step 2'
+					if (result.control){
+						if (result.control == '奇缘'){
+							player.addSkill('WLD3');
+						} else if (result.control == '梦镜'){
+							player.addSkill('mengjin');
+						}
+					}
+				},
+			},
+			WLD3:{
+				forced:true,
+				trigger:{player:'phaseBegin'},
+				content:function(){
+					var list = [];
+					for(var i in lib.card){
+						if (!lib.translate[i]) continue;
+						list.push(i);
+					}
+					player.gain(game.createCard(list.randomGets(1)));
+				},
+			},
 		},
 		translate:{
             randomOL:'乱入OL',
@@ -778,6 +836,14 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			kehua_audio2:'对角色的刻画手法低劣，再精妙绝伦的剧情也无法让读者翻下一页。',
 			kehua_info:'出牌阶段，你可以指定一名角色（包括不在场上的角色），然后选择一项：为该角色：增加技能；删除技能；更改起始灵力值；更改灵力上限；更改体力上限；或删除该角色；此改动在以后所有非联机模式的游戏中有效。',
 			monika_die:'啊哈哈……这局有点玩过火了。下一局我会注意点的！',
+			aliceWLD:'爱丽丝',
+			WLD1:'追梦',
+			WLD1_info:'一回合一次，出牌阶段，你可以弃置任意张牌，消耗任意点灵力，随机创建并获得等量张其他游戏的牌。',
+			WLD2:'世外',
+			WLD2_info:'你的第一个准备阶段，视为对自己使用了一张【幻想之扉】，并获得【奇缘】或【梦镜】。',
+			WLD3:'奇缘',
+			WLD_info:'锁定技，准备阶段，你随机创建并获得一张牌（包括其他模式，其他游戏，技能牌，和异变牌）。',
+			haruhi:'春日',
 		},
 	};
 });

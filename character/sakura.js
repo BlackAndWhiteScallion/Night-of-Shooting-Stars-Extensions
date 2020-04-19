@@ -239,6 +239,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         player.markSkill('mingdong');
                         lib.skill.mingdong2.viewAs = {name:name};
                         game.log(player,'选择了',lib.translate[name]);
+                        game.notify(get.translation(player)+'选择了'+lib.translate[name]);
                     }
                 },
             },
@@ -623,30 +624,27 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 enable:'phaseUse',
                 usable:1,
                 audio:2,
+                filterCard:function(card, player){
+                    return !player.storage.mingzhi || !player.storage.mingzhi.contains(card);
+                },
+                selectCard:1,
+                discard:false,
+                lose:false,
                 filter:function(event,player){
                     return player.getCards('h');
                 },
                 content:function(event,player){
                     'step 0'
-                    player.chooseCard('选择今天的乐谱明置吧？','h',function(card){
-                        if (player.storage.mingzhi) return !player.storage.mingzhi.contains(card);
-                        else return true;
-                    }).set('ai',function(card){
-                        return get.value(card);
-                    });
-                    'step 1'
-                    if (result.bool){
-                        player.mingzhiCard(result.cards[0]); 
-                    }
+                    player.mingzhiCard(cards[0]);
                 },
                 ai:{
-                    order:5,
+                    order:1,
                     result:{
                         player:function(player,target){
-                            return 1;
+                            return 0.5;
                         }
                     }
-                },
+                }
             },
             shenxuan_viewAs:{
                 enable:'chooseToUse',
@@ -923,6 +921,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                             event.finish();
                         } else if (result.control == '追加目标'){
                             player.chooseTarget('棱镜把【轰！】反射给一到两名角色',[1,2],function(card,player,target){
+                                var trigger=_status.event.getTrigger();
                                 return trigger.player.canUse('sha',target);
                             }).set('ai',function(target){
                                 var att=get.attitude(_status.event.player,target);
@@ -948,21 +947,18 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 enable:'phaseUse',
                 audio:2,
                 usable:1,
+                filterCard:function(card, player){
+                    return !player.storage.mingzhi || !player.storage.mingzhi.contains(card);
+                },
+                selectCard:1,
+                discard:false,
+                lose:false,
                 filter:function(event,player){
                     return player.getCards('h');
                 },
                 content:function(event,player){
                     'step 0'
-                    player.chooseCard('把演奏的曲目明置出来吧？','h',function(card){
-                        if (player.storage.mingzhi) return !player.storage.mingzhi.contains(card);
-                        else return true;
-                    }).set('ai',function(card){
-                        return get.value(card);
-                    });
-                    'step 1'
-                    if (result.bool){
-                        player.mingzhiCard(result.cards[0]);
-                    }
+                    player.mingzhiCard(cards[0]);
                 },
                 ai:{
                     order:1,
@@ -1066,6 +1062,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                         player.logSkill(event.name,result.targets);
                         if (!trigger.targets.contains(player)){
                             game.log('对',trigger.target,'使用的',trigger.card,'转移给了',player);
+                            game.notify('对'+get.translation(trigger.target)+'使用的'+get.translation(trigger.card)+'转移给了'+get.translation(player));
                             trigger.targets.remove(trigger.target);
                             trigger.target=player;
                             trigger.targets.push(player);
@@ -1083,7 +1080,9 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 group:'mingjian2',
                 enable:'phaseUse',
                 usable:1,
-                filterCard:true,
+                filterCard:function(card, player){
+                    return !player.storage.mingzhi || !player.storage.mingzhi.contains(card);
+                },
                 selectCard:1,
                 discard:false,
                 lose:false,
@@ -1829,7 +1828,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 },
                 trigger:{player:'loseliliBefore'},
                 filter:function(event,player){
-                    if (event.getParent().name == 'shiqu2') return false;
+                    if (event.getParent('useSkill') && event.getParent('useSkill').skill == 'shiqu2') return false;
                     var players = game.filterPlayer();
                     for (var i = 0; i < players.length; i ++){
                         if (players[i].hasSkill('shiqu2') && players[i] != player) return true;
@@ -1838,13 +1837,14 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                 },
                 content:function(){
                     'step 0'
-                    player.chooseTarget('让蓝帮你支付灵力？',1,function(card,player,target){
+                    player.chooseTarget('让一名“式取”的角色帮你支付灵力',1,function(card,player,target){
                             return target != player && target.hasSkill('shiqu2');
                         }).set('ai',function(target){
                             return get.attitude(_status.event.player,target) && target.lili > _status.event.player.lili;
                         });
                     'step 1'
                     if (result.bool && result.targets.length){
+                        player.line(result.targets[0], 'green');
                         result.targets[0].removeSkill('shiqu2');
                         result.targets[0].loselili(trigger.num);
                         result.targets[0].addTempSkill('shiqu2',{player:'phaseBegin'});
@@ -1918,7 +1918,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     if (get.type(card) == 'equip' || get.subtype(card) == 'support') return get.attitude(player,event.player) > 0;
                     */
                     if (!card) return false;
-                    if (player.canUse(card,event.player)) return get.effect(event.player,{name:card.name}, player, player) > 0;
+                    if (player.canUse(card,event.player)) return get.effect(event.player,{name:card.name}, player);
                     return false;
                 },
                 content:function(){

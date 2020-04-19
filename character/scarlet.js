@@ -293,6 +293,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                     }
                     "step 2"
                     game.log(trigger.card,'转移给了',player);
+                    game.notify(get.translation(trigger.card)+'转移给了'+get.translation(player));
                     trigger.untrigger();
                     trigger.trigger('useCardToBefore');
                     trigger.trigger('shaBefore');
@@ -469,8 +470,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                             for(var i=0;i<players.length;i++){
                                 if(!players[i].isOut()){
                                     if (get.attitude(player, players[i]) >= 0) recover ++;
-                                    if (get.attitude(player, players[i]) < 0 ){
-                                        if (players[i].hp == 1 && get.effect(players[i],{name:'juedou'},player,player)) return (button.link[2] == 'juedou')?2:-1;
+                                    if (get.attitude(player, players[i]) < 0){
+                                        if (players[i].hp == 1 && get.effect(players[i],{name:'juedou'},player,player) && player.canUse('juedou', players[i])) return (button.link[2] == 'juedou')?2:-1;
                                         lose ++;
                                     }
                                 }
@@ -558,7 +559,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
                             if(!players[i].isOut()){
                                 if (get.attitude(player, players[i]) >= 0) recover ++;
                                 if (get.attitude(player, players[i]) < 0 ){
-                                    if (players[i].hp == 1 && get.effect(players[i],{name:'juedou'},player,player)) return (button.link[2] == 'juedou')?2:-1;
+                                    if (players[i].hp == 1 && get.effect(players[i],{name:'juedou'},player,player) && player.canUse('juedou', players[i])) return (button.link[2] == 'juedou')?2:-1;
                                     lose ++;
                                 }
                             }

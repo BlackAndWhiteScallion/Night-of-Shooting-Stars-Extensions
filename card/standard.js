@@ -516,11 +516,6 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				target.draw(2);
 			},
 			ai:{
-				/*
-				wuxie:function(){
-					return 1;
-				},
-				*/
 				basic:{
 					order:7.2,
 					useful:4,
@@ -656,7 +651,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				}
 				target.chooseControl(controls,function(event,player){
 					if (controls.contains('展示手牌并明置身份')) return '展示手牌并明置身份';
-					if(controls.contains('明置身份')) return '明置身份';
+					if (controls.contains('明置身份')) return '明置身份';
 					return '展示手牌';
 				});
 				"step 1"
@@ -746,6 +741,10 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			subtype:'defense',
 			//enhance:1,
 			ai:{
+				wuxie:function(target,card,player,viewer){
+					if(get.attitude(viewer,player)>0) return 0;
+					return 1;
+				},
 				basic:{
 					useful:[6,4],
 					value:[6,4],
@@ -758,7 +757,12 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				if (player.name == 'patchouli'){
 					game.trySkillAudio('riyin2',player,true,Math.ceil(2*Math.random()));
 				}
-				event.result='wuxied';	// 效果无效（抵消）
+				var evt=event.getParent();
+					event.result={
+						wuxied:true,
+						directHit:evt.directHit||[],
+						nowuxie:evt.nowuxie,
+					};
 				if(player.isOnline()){
 					player.send(function(player){
 						if(ui.tempnowuxie&&!player.hasWuxie()){
@@ -1925,8 +1929,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				if(result.color){
 					if(result.color==get.color(trigger.card)){
 						trigger.cancel();
-						player.$effect('shengdun_skill', 17);
 						game.log('八咫镜：'+get.translation(trigger.card)+'对'+get.translation(player)+'无效。');
+						event.str=get.translation(player.name)+'的【八咫镜】取消了'+get.translation(trigger.card);
+						game.notify(event.str);
 					}
 				}
 			},
@@ -2080,8 +2085,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				"step 1"
 				if(result.bool){
 					game.log('人魂灯：',trigger.card, '对',player,'无效');
-					player.$effect('shengdun_skill', 17);
 					trigger.cancel();
+					event.str=get.translation(player.name)+'的【人魂灯】无效了'+get.translation(trigger.card);
+					game.notify(event.str);
 				}
 			},
 		},
@@ -2103,9 +2109,10 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				if (player.name == 'alice'){
 					game.trySkillAudio('hourai_skill',player,true,Math.ceil(2*Math.random()));
 				}
-				player.$effect('shengdun_skill', 17);
 				trigger.untrigger();
 				trigger.finish();
+				event.str=get.translation(player.name)+'的【替身人形】无效了'+get.translation(trigger.card);
+				game.notify(event.str);
 			},
 			check:function(){
 				return true;
@@ -2263,6 +2270,8 @@ game.import('card',function(lib,game,ui,get,ai,_status){
     		content:function(){
     			trigger.untrigger();
     			trigger.finish();
+				event.str='【冰域之宴】防止所有伤害';
+				game.notify(event.str);
     		},
     		ai:{
     			nofire:true,
@@ -2318,6 +2327,8 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			popup:false,
 			forced:true,
 			filter:function(event,player){
+				if(event.card.storage&&event.card.storage.nowuxie) return false;
+				if(event.getParent().nowuxie) return false;
 				var info=get.info(event.card);
 				if(!event.target){
 					if(info.wuxieable) return true;
@@ -2420,6 +2431,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				event.list=list;
 				event.id=get.id();
 				for(var i=0;i<game.players.length;i++){
+					if(event.nowuxie) return false;
 					if(game.players[i].hasWuxie()){
 						list.push(game.players[i]);
 					}
@@ -2525,7 +2537,16 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				}
 				'step 9'
 				if(event.wuxieresult){
-					if(result=='wuxied'){
+					if(result.wuxied){
+						event.nowuxie=result.nowuxie;
+						event.directHit=result.directHit;
+						if(!event.stateplayer&&event.wuxieresult)event.stateplayer=event.wuxieresult;
+						if(event.wuxieresult2&&event.wuxieresult2.used){
+							event.statecard=event.wuxieresult2.used;
+						}
+						else{
+							event.statecard=true;
+						}
 						event.state=!event.state;
 					}
 					event.goto(1);
@@ -2984,7 +3005,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		yinyangyu_skill:'阴阳玉',
 		yinyangyu_skill_1:'阴阳玉（躲～）',
 		yinyangyu_skill_2:'阴阳玉（轰！）',
-		yinyangyu_info:'你可以将一张红色牌当做【躲～】使用/打出; 你可以将一张黑色牌当做【轰！】使用/打出',
+		yinyangyu_info:'你可以将一张红色牌当做【躲～】使用/打出; 你可以将一张黑色牌当做【轰！】使用/打出。',
 		zhiyuu:'净颇梨之镜',
 		zhiyuu_skill:'亮胖次！',
 		zhiyuu_info:'一回合一次，出牌阶段，你可以令一名角色展示一张手牌；然后你可以弃置一张与展示的牌相同花色的手牌，对其造成1点灵击伤害。',

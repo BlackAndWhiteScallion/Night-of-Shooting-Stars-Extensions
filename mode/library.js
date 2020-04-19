@@ -541,9 +541,8 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        			var incident=ui.create.node('button','更新方式',line2,function(){
 	        			var i = ['更新方式有三种:',
 	    				'1: 下载更新程序包',
-	    				'更新下载链接→<a href = "https://github.com/BlackAndWhiteScallion/Night-of-Shooting-Stars-Extensions/archive/master.zip">国外镜像下载</a> <a href = "https://dev.tencent.com/u/BWS/p/NOSS-Extensions/git/archive/master">国内镜像1下载</a <a href = "https://gitee.com/b_2/Night-of-Shooting-Stars-Extensions/repository/archive/master.zip">国内镜像2下载</a>>',
+	    				'更新下载链接→<a href = "https://github.com/BlackAndWhiteScallion/Night-of-Shooting-Stars-Extensions/archive/master.zip">国外镜像下载</a> <a href = "https://bws.coding.net/p/NOSS-Extensions/d/NOSS-Extensions/git/raw/master/%E4%B8%9C%E6%96%B9%E6%B5%81%E6%98%9F%E5%A4%9C%E6%9B%B4%E6%96%B0.exe">国内镜像下载</a>',
 	    				'下载完毕后，在浏览器的默认下载文件夹里可以找到，然后解压到流星夜所在的文件夹里，并全部覆盖就OK啦。',
-						'国内镜像1下载到的文件如果大小只以kb计的话就是炸了，需要改用国内镜像2，注意一下。',
 	    				'手机端也可以使用这个更新方式，安卓手机所需要拖到的文件夹在：<b>(默认SD卡)/android/data/com.widget.noname1</b>',
 	    				'覆盖完毕后，需要重启流星夜程序！',
 	    				'',
@@ -571,6 +570,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 								'4. 观看录像时，技能牌的图标不显示，且技能牌弃置有错误。',
 								'5. 联机模式下异变胜利后的战果显示有错误',
 								'6. [挑战角色]和[闯关角色]扩展同时打开会导致其中一个不能使用。',
+								'6.1. [挑战角色]火[闯关角色]扩展打开，会导致[残局]模式使用[下一关]会卡死。',
 								'7. 观看录像时，无法查看自己的手牌。',
 				        		];
 	        				dialog.setCaption('<div><div style="text-align:left;font-size:16px">'+i.join('<br>'));
@@ -583,8 +583,7 @@ game.import('mode',function(lib,game,ui,get,ai,_status){
 	        	mode:'',
 	        	intro:[
 	        		'虽然新规则看起来有点太复杂，很麻烦，但是不用担心，规则比看起来的要容易理解多了！',
-	        		'无论是我，还是子规老师，还是主人，都是会全力帮助你的，所以一定不要泄气！加油！',
-	        		'',      		
+	        		'无论是我，还是子规老师，还是主人，都是会全力帮助你的，所以一定不要泄气！加油！',	
 	        		],
 	        	showcase:function(init){
 	        		if (init){

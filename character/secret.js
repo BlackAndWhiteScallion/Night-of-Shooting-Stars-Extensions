@@ -64,7 +64,10 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             	filterCard:function(){
             		return true;
             	},
-                position:'hej',
+				position:'hej',
+				check:function(card){
+					return card.name != 'lingyong';
+				},
             	prompt:'选择一张牌发动【似幻】？',
             	discard:false,
                 lose:false,
@@ -244,14 +247,17 @@ game.import('character',function(lib,game,ui,get,ai,_status){
             		return player.maxlili > 4;
             	},
             	content:function(){
-                    lib.skill['mengjing'].cost = 0;
+					'step 0'
+                    lib.skill.mengjing.cost = 0;
                     player.addSkill('mengjing');
             		player.useSkill('mengjing');
             		player.maxlili -= 4;
-					game.log(player,'减少了'+get.cnNumber(num)+'点灵力上限');
+					game.log(player,'减少了4点灵力上限');
                     player.update();
             		player.removeSkill('rumeng');
-            	},
+					'step 1'
+					lib.skill.mengjing.cost = 4;
+				},
                 check:function(event,player){
                     return player.hp < 2;
                 },
