@@ -345,7 +345,6 @@ game.import('card',function(lib,game,ui,get,ai,_status){
                     event.cancel();
                     evt.cancel();
                     evt.player.discard(evt.player.getCards('h'));
-                    
                 },
                 ai:{
                     basic:{
@@ -564,10 +563,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
             _yugioh_mirror:{
                 direct:true,
                 trigger:{target:'shaBegin'},
-                /*
                 filter:function(event, player){
                     return player.countCards('h', {name:'yugioh_mirror'});
-                },*/
+                },
                 content:function(){
                     var next = player.chooseToUse({
 						filterCard:function(card,player){
@@ -627,7 +625,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 					}
 				}
             },
-            yugioh_goldsarc:{
+            gold_sarc:{
                 trigger:{player:'phaseBegin',player:'dieBegin'},
 				forced:true,
 				audio:false,
