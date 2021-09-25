@@ -27,7 +27,7 @@
         mirrorURL:'https://raw.githubusercontent.com/BlackAndWhiteScallion/Night-of-Shooting-Stars',
         //mirrorURL:'https://dev.tencent.com/u/BWS/p/Night-of-Shooting-Stars/git/raw',
         //hallURL:'47.100.162.52',
-        hallURL:'noname.pub',
+        hallURL:'47.99.105.222',
         assetURL:'',
         backgroundmusicURL:'',
         changeLog:[],
@@ -3519,7 +3519,7 @@
 					}
 				},
                 intro:{
-                    name:'将已通关的闯关模式的一些角色追加到其他模式中。<br>追加卡牌：灵击，命运之光，拔雾开天，封印解除，破坏之果，等等。<br><br>关卡与解锁角色：<br>红魔乡：魔导书塔，蕾米莉亚（神枪装备）<br>红魔乡EX：帕秋莉（皇家烈焰）',
+                    name:'将已通关的闯关模式的一些角色追加到其他模式中。<br>追加卡牌：灵击，命运之光，拔雾开天，封印解除，破坏之果，等等。<br><br>关卡与解锁角色：<br>红魔乡：魔导书塔，蕾米莉亚（神枪装备）<br>红魔乡EX：帕秋莉（皇家烈焰）<br>妖妖梦：妖梦（六道剑）',
                     clear:true,
                     nopointer:true,
                 },
@@ -5077,6 +5077,12 @@
                             game.saveConfig('connect_avatar',item,'connect');
                         }
                     },
+                    version_number:{
+                        name:'版本号',
+                        init:'1.9.110.8.2',
+                        input:true,
+                        frequent:true,
+                    },
                     hall_ip:{
                         name:'联机大厅',
                         input:true,
@@ -5223,6 +5229,14 @@
                                 ui.cheat2.close();
                                 delete ui.cheat2;
                             }
+                        }
+                    },
+                    practice_mode:{
+                        name:'练习模式',
+                        init:false,
+                        intro:'起始残机数为10，但通关不计数',
+                        onclick:function(bool){
+                            game.saveConfig('practice_mode',bool,this._link.config.mode);
                         }
                     },
                     die_lili:{
@@ -5419,6 +5433,12 @@
             brawl:{
                 name:'场景',
                 config:{
+                    zigui:{
+                        name:'子规安静！',
+                        intro:'对战练习中关闭子规的开场对话',
+                        init:false,
+                        frequent:false
+                    },
                     /*
                     practise:{
                         name:'对战练习',
@@ -7391,6 +7411,9 @@
                         var ia=connect_avatar_list[i];
                         lib.mode.connect.config.connect_avatar.item[ia]=lib.translate[ia];
                     }
+                    // 不是联机的话，检测独立牌堆
+                    // 牌堆是config里的，或者是“当前牌堆”
+                    // bannedpile在这里设置（不在lib.config里保存），是“当前牌堆”的前半, addedpile是后半
                     if(lib.config.mode!='connect'){
                         var pilecfg=lib.config.customcardpile[get.config('cardpilename')||'当前牌堆'];
                         if(pilecfg){
@@ -9684,6 +9707,7 @@
                                 }
                                 else{
                                     str='请选择要使用的牌';
+                                    event.main = true;
                                 }
                                 if (!lib.config.new_tutorial || get.mode() == 'tutorial'){
                                     str += '<br><br><div><div style="width:100%;text-align:center;font-size:14px">在牌上浮空或右键可以查看效果<br>在角色上浮空，右键，或双击可以查看技能';
@@ -9695,6 +9719,7 @@
                                 }
                                 else if(typeof event.skillDialog!='string'){
                                     event.dialog=ui.create.dialog(str);
+                                    event.dialog.classList.add('main');
                                 }
                                 else{
                                     event.dialog=str;
@@ -12128,6 +12153,7 @@
                     else{
                         cards=[];
                     }
+                    event.result=cards;
                     if(event.animate!=false){
                         if(event.visible){
                             player.gain(cards,'gain2');
@@ -12143,7 +12169,6 @@
                             player.$draw(cards.length);
                         }
                     }
-                    event.result=cards;
                 },
                 drawSkill:function(){
                     if(typeof event.minnum=='number'&&num<event.minnum){
@@ -13278,14 +13303,13 @@
                         // 然后插入技能牌node里去
                         cards[0].style.transform='';
                         cards[0].classList.add('drawinghidden');
-                        player.node.judges.insertBefore(cards[0],player.node.judges.firstChild);
-                        // 在这里追加效果就OK了吧
                         var info=get.info(cards[0]);
                         if(info.skills){
                             for(var i=0;i<info.skills.length;i++){
                                 player.addSkill(info.skills[i]);
                             }
                         }
+                        player.node.judges.insertBefore(cards[0],player.node.judges.firstChild);
                         // 多了就扔掉
                         if (player.num('j',{type:'delay'})>player.maxjudge){
                             var num = player.num('j',{type:'delay'}) - player.maxjudge;
@@ -13314,7 +13338,7 @@
                             ui.updatej(player);
                             if(card.clone&&(card.clone.parentNode==player.parentNode||card.clone.parentNode==ui.arena)){
                                 card.clone.moveDelete(player);
-                                game.addVideo('gain2',player,get.cardsInfo([card]));
+                                game.addVideo('gains2',player,get.cardsInfo([card]));
                             }
                         },player,cards[0],viewAs);
                         //如果这张卡是复制的？鉴于后面跳过了，似乎是无意义？
@@ -13977,6 +14001,8 @@
                     else{
                         dialog.content.firstChild.style.textAlign='left';
                     }
+                    // 可以透过对话框点击
+                    dialog.style.pointerEvents = "none";
                     // 下限宽度，原数值：+16
                     dialog.style.width=(width+40)+'px';
                     var refnode;
@@ -20815,7 +20841,10 @@
                             return this;
                         }
                         if(ui.dialogs[i].static) ui.dialogs[i].unfocus();
-                        else ui.dialogs[i].hide();
+                        else if (ui.dialogs[i].classList.contains('main')){
+                            ui.dialogs[i].hide();
+                        }
+                        //else ui.dialogs[i].hide();
                     }
                     ui.dialog=this;
                     var translate;
@@ -21642,7 +21671,7 @@
             },
             // 免疫：防止所有伤害
             mianyi:{
-                trigger:{player:'damageBefore'},
+                trigger:{player:['damageBefore', 'loseHpBefore']},
                 mark:true,
                 forced:true,
                 content:function(){
@@ -22069,6 +22098,9 @@
                     } else {
                         if (player.storage.spell){
                             var info = lib.skill[player.storage.spell];
+                            if (info.init){
+                                info.init = null;
+                            }
                             if (info.spell){
                                 game.log(player,'的【'+get.translation(player.storage.spell)+'】符卡结束。');
                                 for (var i = 0; i < info.spell.length; i ++){
@@ -22079,7 +22111,6 @@
                                     player.die();
                                 }
                             }
-
                             delete player.storage.spell;
                         }
                     }
@@ -22561,7 +22592,9 @@
 					ui.create.connecting(true);
 				},
 				roomlist:function(list,events,clients,wsid){
-					game.send('server','key',game.onlineKey);
+                    //game.send('server','key',[game.onlineKey,lib.version]);
+                    game.send('server','key',[594676110, lib.config.version_number]);
+					//game.send('server','key', game.onlineKey);
 					game.online=true;
 					game.onlinehall=true;
 					lib.config.recentIP.remove(_status.ip);
@@ -23337,6 +23370,55 @@
             for(var i=0;i<list.length;i++){
                 list[i].remove();
             }
+            if(ui.cardPileNumber) ui.cardPileNumber.innerHTML=game.roundNumber+'轮 剩余牌: '+ui.cardPile.childNodes.length;
+        },
+        // 按照div移除卡牌
+        removeCardByObject:function(cards){
+            if (Array.isArray(cards)){
+                for (var i = 0; i < cards.length; i++){
+                    game.removeCardByObject(cards[i]);
+                }
+            } else {
+                cards.remove();
+                if(ui.cardPileNumber) ui.cardPileNumber.innerHTML=game.roundNumber+'轮 剩余牌: '+ui.cardPile.childNodes.length;
+                /*
+                for(var i=0;i<ui.cardPile.childElementCount;i++){
+                    if(ui.cardPile.childNodes[i] == cards){
+                        list.push(ui.cardPile.childNodes[i]);
+                    }
+                }
+                for(var i=0;i<list.length;i++){
+                    list[i].remove();
+                }
+                if(ui.cardPileNumber) ui.cardPileNumber.innerHTML=game.roundNumber+'轮 剩余牌: '+ui.cardPile.childNodes.length;
+                */
+            }
+            /*
+            for(var i=0;i<lib.card.list.length;i++){
+                if(lib.card.list[i][2]==card){
+                    if (replace){
+                        var c = lib.card.list[i];
+                        c[2] = replace;
+                        lib.card.list.push(c);
+                    }
+                    lib.card.list.splice(i--,1);
+                }
+            }
+            
+            var list=[];
+            for(var i=0;i<ui.cardPile.childElementCount;i++){
+                if(ui.cardPile.childNodes[i] == ){
+                    if (replace){
+                        ui.cardPile.replaceChild(game.createCard(replace, ui.cardPile.childNodes[i].suit, ui.cardPile.childNodes[i].number), ui.cardPile.childNodes[i]);
+                    } else {
+                        list.push(ui.cardPile.childNodes[i]);
+                    }
+                }
+            }
+            for(var i=0;i<list.length;i++){
+                list[i].remove();
+            }
+          */  
         },
         // 这是联机时使用的座位分配
         // 还包括了启动选将
@@ -29099,7 +29181,7 @@
                 }
                 if(!lib.card[info.viewAs.name]){
                     lib.skill[i]={};
-                    lib.translate[i+'_info']='技能不可用';
+                    lib.translate[i+'_info']='技能不可用（转化的牌不存在）';
                     return;
                 }
                 if(info.ai==undefined) info.ai={};
@@ -29428,7 +29510,9 @@
         notify:function(str){
             var dialog=ui.create.dialog(str);
             dialog.videoId=lib.status.videoId++;
-        
+            dialog.style.top = '150px';
+            dialog.style.zIndex = 10;
+
             game.broadcast(function(str,id){
                 var dialog=ui.create.dialog(str);
                 dialog.videoId=id;
@@ -29436,7 +29520,7 @@
             setTimeout(function(){
                 game.broadcast('closeDialog',dialog.videoId);
                 dialog.close();
-            },get.delayx(1000,2000));
+            }, 1500);
         },
         log:function(){
             var str='',logvid=null;
@@ -30981,6 +31065,17 @@
                                 }
                                 game.saveConfig('connect_nickname',input.innerHTML);
                                 game.saveConfig('connect_nickname',input.innerHTML,'connect');
+                            }
+                        }
+                        else if(config.name=='版本号'){
+                            input.innerHTML=config.init;
+                            input.onblur=function(){
+                                input.innerHTML=input.innerHTML.replace(/<br>/g,'');
+                                if(!input.innerHTML){
+                                    input.innerHTML=config.init;
+                                }
+                                game.saveConfig('version_number',input.innerHTML);
+                                game.saveConfig('version_number',input.innerHTML,'connect');
                             }
                         }
                         else if(config.name=='联机大厅'){
@@ -42661,6 +42756,8 @@
                 ui.arena.classList.add('paused');
                 ui.window.classList.add('touchinfohidden');
                 ui.time.hide();
+                ui.backgroundMusic.pause();
+                game.playAudio('effect', 'pause');
                 if(game.onpause){
                     game.onpause();
                 }
@@ -42672,6 +42769,7 @@
                 this.delete();
                 ui.system.show();
                 ui.time.show();
+                ui.backgroundMusic.play();
                 ui.historybar.classList.remove('paused');
                 ui.arena.classList.remove('paused');
                 ui.window.classList.remove('touchinfohidden');
@@ -43420,12 +43518,13 @@
             pos:function(str){
                 return (str=='h'||str=='e'||str=='j'||str=='he'||str=='hj'||str=='ej'||str=='hej');
             },
+            //检测技能是否为非锁定技
             locked:function(skill){
                 var info=lib.skill[skill];
-                if(info.fixed) return true;
+                if(info.fixed) return true;   
                 if(info.locked==false) return false;
-                //if(info.trigger&&info.forced) return true;
-                if(info.mod) return true;
+                //if(info.trigger&&info.forced) return true;  //技能为锁定技
+                //if(info.mod) return true;                     // 技能是更改状态的
                 if(info.locked) return true;
                 return false;
             },
@@ -44415,66 +44514,65 @@
         // 这里是怎么拿牌/获得牌堆顶的牌
         cards:function(num){
             if(_status.waitingForCards){
-                ui.create.cards.apply(ui.create,_status.waitingForCards);
-                delete _status.waitingForCards;
-            }
-            var list=[];
-            var card=false;
-            if(typeof num!='number') num=1;
-            if(num==0) {card=true;num=1;}
-            if(num<0) num=1;
-            while(num--){
-                if(ui.cardPile.hasChildNodes()==false){
-                    if(_status.maxShuffle!=undefined){
-                        if(_status.maxShuffle==0){
-                            if(_status.maxShuffleCheck){
-                                game.over(_status.maxShuffleCheck());
-                            }
-                            else{
-                                game.over('平局——无法摸牌');
-                            }
-                            return [];
-                        }
-                        _status.maxShuffle--;
-                    }
-                    game.shuffleNumber++;
-                    game.broadcast(function(num){
-                        _status.shuffleNumber = num;
-                    }, game.shuffleNumber);
-                    var cards=[],i;
-                    for(var i=0;i<lib.onwash.length;i++){
-                        if(lib.onwash[i]()=='remove'){
+				ui.create.cards.apply(ui.create,_status.waitingForCards);
+				delete _status.waitingForCards;
+			}
+			var list=[];
+			var card=false;
+			if(typeof num!='number') num=1;
+			if(num==0) {card=true;num=1;}
+			if(num<0) num=1;
+			while(num--){
+				if(ui.cardPile.hasChildNodes()==false){
+					if(_status.maxShuffle!=undefined){
+						if(_status.maxShuffle==0){
+							if(_status.maxShuffleCheck){
+								game.over(_status.maxShuffleCheck());
+							}
+							else{
+								game.over('平局');
+							}
+							return [];
+						}
+						_status.maxShuffle--;
+					}
+					game.shuffleNumber++;
+					var cards=[],i;
+					for(var i=0;i<lib.onwash.length;i++){
+						if(lib.onwash[i]()=='remove'){
 							lib.onwash.splice(i--,1);
 						}
 					}
 					if(_status.discarded){
 						_status.discarded.length=0;
-                    }
-                    for(i=0;i<ui.discardPile.childNodes.length;i++){
-                        var currentcard=ui.discardPile.childNodes[i];
-                        currentcard.vanishtag.length=0;
-                        if(get.info(currentcard).vanish||currentcard.storage.vanish){
-                            console.log(get.info(currentcard));
-                            currentcard.remove();
-                            continue;
-                        }
-                        cards.push(currentcard);
-                    }
-                    cards.randomSort();
-                    for(var i=0;i<cards.length;i++){
-                        ui.cardPile.appendChild(cards[i]);
-                    }
-                    _status.event.trigger('onWash');
-                }
-                if(ui.cardPile.hasChildNodes()==false){
-                    game.over('平局');
-                    return [];
-                }
-                list.push(ui.cardPile.removeChild(ui.cardPile.firstChild));
-            }
-            if(ui.cardPileNumber) ui.cardPileNumber.innerHTML=game.roundNumber+'轮 剩余牌: '+ui.cardPile.childNodes.length;
-            if(card) return list[0];
-            return list;
+					}
+					for(i=0;i<ui.discardPile.childNodes.length;i++){
+						var currentcard=ui.discardPile.childNodes[i];
+						currentcard.vanishtag.length=0;
+						if(get.info(currentcard).vanish||currentcard.storage.vanish){
+							currentcard.remove();
+							continue;
+						}
+						cards.push(currentcard);
+					}
+					cards.randomSort();
+					for(var i=0;i<cards.length;i++){
+						ui.cardPile.appendChild(cards[i]);
+					}
+				}
+				if(ui.cardPile.hasChildNodes()==false){
+					game.over('平局');
+					return [];
+				}
+				var cardx=ui.cardPile.removeChild(ui.cardPile.firstChild);
+				cardx.original='c';
+				list.push(cardx);
+			}
+			game.broadcastAll(function(num1,num2){
+				if(ui.cardPileNumber) ui.cardPileNumber.innerHTML=num1+'轮 剩余牌: '+num2;
+			},game.roundNumber,ui.cardPile.childNodes.length);
+			if(card) return list[0];
+			return list;
         },
         judge:function(card){
             if(card.viewAs) return lib.card[card.viewAs].judge;
